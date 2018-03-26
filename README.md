@@ -46,7 +46,7 @@ azkaban COMMAND [ARGS]
 
 ### Funções
 
-* #### upload
+* upload
 
 Recebe como argumento o path para o projeto. Se encarrega de gerar um arquivo ```.zip``` e de fazer o upload. Caso não seja especificado o nome do projeto, será usado o nome do diretório passado. 
 
@@ -72,7 +72,7 @@ Options:
 
 Após o desenvolvimento, a geração de pacote deve ser feita atualizando a versão no ```setup.py``` e no módulo principal. Logo após, pode ser usado o comando do Makefile.
 
-* #### make dist
+* make dist
 
 Gera o pacote no diretório dist, permitindo a instalação local
 
@@ -84,9 +84,9 @@ make dist
 pip install dist/<module-name>-<version>.tar.gz
 ```
 
-* #### make release
+* make release
 
-Envia o pacote para o artifactory. Necessário alterar a versão em ```setup.py```. Se nunca tiver feito deploy para o artifactory, verificar a seção [Configurações para artifactory](#configuracoes-para-artifactory)
+Envia o pacote para o artifactory. Necessário alterar a versão em ```setup.py```. Se nunca tiver feito deploy para o artifactory, verificar a seção [Configurações para artifactory](#configurações-para-artifactory)
 
 ```sh
 # Gera a dist e envia para o artifactory
