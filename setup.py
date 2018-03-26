@@ -5,11 +5,11 @@ Created on 2018-03-22
 '''
 from setuptools import setup, find_packages
 
-__version__=u'0.0.1'
+version = u'0.0.1'
 
 setup(
     name='azkaban_cli',
-    version=__version__,
+    version=version,
     author = "Gustavo Alves",
     author_email = "gustavo.alves@corp.globo.com",
     description = ("Azkaban CLI"),
@@ -28,6 +28,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        azkaban=azkaban_cli:cli
+        azkaban=azkaban_cli.azkaban_cli:cli
     ''',
 )
