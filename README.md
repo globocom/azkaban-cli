@@ -67,6 +67,22 @@ Options:
   --help           Show this message and exit.
 ```
 
+* schedule
+
+Recebe como argumento o nome do projeto, nome do flow e o cron do agendamento. 
+
+Outras opções, descritas pelo ```--help```:
+
+```sh
+$ azkaban schedule --help
+Usage: azkaban schedule [OPTIONS] PROJECT FLOW CRON
+
+Options:
+  --host TEXT      Azkaban hostname with protocol.
+  --user TEXT      Login user.
+  --password TEXT  Login password.
+  --help           Show this message and exit.
+```
 
 ## Desenvolvendo
 
