@@ -5,7 +5,7 @@ import sys
 import zipfile
 import os
 
-__version__ = u'0.0.1'
+__version__ = u'0.1.0'
 
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
@@ -21,7 +21,7 @@ def __validate_host(host):
         valid_host = valid_host[:-1]
 
     return valid_host
-        
+
 
 def __login(ctx, host, user, password):
     s = ctx.obj[u'session']    
@@ -91,8 +91,8 @@ def __upload(ctx, path, project, zip_name):
     session_id = ctx.obj[u'azkaban_session_id']
 
     if not project:
-        # define project name as dir name
-        project = os.path.abspath(path).split('/')[-1]
+        # define project name as basename
+        project = os.path.basename(os.path.abspath(path))
 
     if not zip_name:
         # define zip name as project name
@@ -125,9 +125,42 @@ def __upload(ctx, path, project, zip_name):
     else:
         click.echo('Success uploading! Project %s updated to version %s' % (project, response_json[u'version']))
 
+def __schedule(ctx, project, flow, cron):
+    if not ctx.obj[u'logged']:
+        logging.error(u'You are not logged')
+        exit(1)
+
+    s = ctx.obj[u'session']
+    host = ctx.obj[u'host']
+    session_id = ctx.obj[u'azkaban_session_id']
+
+    response = s.post(
+        host + '/schedule',
+        data = {
+            u'session.id': session_id,
+            u'ajax': u'scheduleCronFlow',
+            u'projectName': project,
+            u'flow': flow,
+            u'cronExpression': cron
+        }
+    )
+
+    response_json = response.json()
+
+    if u'error' in response_json.keys():
+        error_msg = response_json[u'error']
+        click.echo('Error scheduling: %s' % error_msg)
+    else:
+        click.echo('Success! %s' % (response_json[u'message']))
+        click.echo('scheduleId: %s' % (response_json[u'scheduleId']))
+
 def _upload(ctx, path, host, user, password, project, zip_name):
     __login(ctx, host, user, password)
     __upload(ctx, path, project, zip_name)
+
+def _schedule(ctx, host, user, password, project, flow, cron):
+    __login(ctx, host, user, password)
+    __schedule(ctx, project, flow, cron)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
@@ -169,9 +202,19 @@ def cli(ca_root):
 def upload(ctx, path, host, user, password, project, zip_name):
     _upload(ctx, path, host, user, password, project, zip_name)
 
+@click.command(u'schedule')
+@click.pass_context
+@click.option(u'--host', prompt=True, help=u'Azkaban hostname with protocol.')
+@click.option(u'--user', prompt=True, help=u'Login user.')
+@click.option(u'--password', prompt=True, hide_input=True, help=u'Login password.')
+@click.argument(u'project', type=click.STRING)
+@click.argument(u'flow', type=click.STRING)
+@click.argument(u'cron', type=click.STRING)
+def schedule(ctx, host, user, password, project, flow, cron):
+    _schedule(ctx, host, user, password, project, flow, cron)
 
 cli.add_command(upload)
-
+cli.add_command(schedule)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
