@@ -28,22 +28,6 @@ source azkaban_cli/bin/activate
 azkaban [OPTIONS] COMMAND [ARGS]
 ```
 
-Para fazer requests para o Azkaban, deve-se fornecer o AC raiz da globo.com. Ele está disponível no projeto, em [glb_ca_root/ca_root.pem](glb_ca_root/ca_root.pem). Existem duas formas de usar:
-
-* Passando como uma option
-
-```sh
-azkaban --ca-root /path/to/ca_root.pem COMMAND [ARGS]
-```
-
-* Exportando como a variável de ambiente ```AZKABAN_CA_ROOT```
-
-```sh
-export AZKABAN_CA_ROOT=/path/to/ca_root.pem
-
-azkaban COMMAND [ARGS]
-```
-
 ### Funções
 
 * upload

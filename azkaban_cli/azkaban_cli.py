@@ -4,6 +4,7 @@ import requests
 import sys
 import zipfile
 import os
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 __version__ = u'0.1.0'
 
@@ -84,7 +85,7 @@ def __zip_project(path, zip_name):
 def __upload(ctx, path, project, zip_name):
     if not ctx.obj[u'logged']:
         logging.error(u'You are not logged')
-        exit(1)
+        ctx.exit(1)
 
     s = ctx.obj[u'session']
     host = ctx.obj[u'host']
@@ -128,7 +129,7 @@ def __upload(ctx, path, project, zip_name):
 def __schedule(ctx, project, flow, cron):
     if not ctx.obj[u'logged']:
         logging.error(u'You are not logged')
-        exit(1)
+        ctx.exit(1)
 
     s = ctx.obj[u'session']
     host = ctx.obj[u'host']
@@ -167,9 +168,8 @@ def _schedule(ctx, host, user, password, project, flow, cron):
 # ----------------------------------------------------------------------------------------------------------------------
 
 @click.group()
-@click.option(u'--ca-root', type=click.Path(), default=os.getenv('AZKABAN_CA_ROOT'), help=u'Path to CA root for SSL requests.')
 @click.option(u'--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True)
-def cli(ca_root):
+def cli():
     log_level = logging.INFO
 
     # log record format string
@@ -182,10 +182,10 @@ def cli(ca_root):
 
     ctx.obj = {}
 
-    # Session adding ca_root for SSL requests
+    # Session ignoring SSL verify requests
     session = requests.Session()
-    if ca_root:
-        session.verify = ca_root
+    session.verify = False
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
     ctx.obj[u'logged'] = False
     ctx.obj[u'session'] = session
