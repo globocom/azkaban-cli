@@ -6,7 +6,7 @@ import zipfile
 import os
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
-__version__ = u'0.1.0'
+__version__ = u'0.1.1'
 
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
