@@ -4,7 +4,7 @@ import requests
 import sys
 import zipfile
 import os
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from azkaban import Azkaban
 
 __version__ = u'0.1.1'
 
@@ -15,145 +15,22 @@ def print_version(ctx, param, value):
     click.echo(u'Azkaban CLI v%s' % (__version__))
     ctx.exit()
 
-def __validate_host(host):
-    valid_host = host
-
-    while valid_host.endswith(u'/'):
-        valid_host = valid_host[:-1]
-
-    return valid_host
-
-
 def __login(ctx, host, user, password):
-    s = ctx.obj[u'session']    
+    azkaban = Azkaban(host)
 
-    response = s.post(
-        host, 
-        data = {
-            u'action': u'login',
-            u'username': user,
-            u'password': password
-        }
-    )
+    azkaban.login(user, password)
 
-    response_json = response.json()
-
-    valid_host = __validate_host(host)
-
-    if u'error' in response_json.keys():
-        error_msg = response_json[u'error']
-        click.echo(error_msg)
-    else:
-        ctx.obj[u'azkaban_session_id'] = response_json['session.id']
-        ctx.obj[u'logged'] = True
-        ctx.obj[u'host'] = valid_host
-
-        click.echo('Successfully logged in!')
-
-
-def __zip_project(path, zip_name):
-    absolute_project_path = os.path.abspath(path)
-
-    # Where .zip will be created
-    zip_path = absolute_project_path + '/' + zip_name
-
-    # Create .zip
-    zf = zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED)
-
-    for root, dirs, files in os.walk(path):
-        # ensure .zip root dir will be the path basename
-        zip_root = root[len(path):]
-
-        for file in files:
-            # local file path
-            file_path = os.path.join(root, file)
-
-            # .zip file path
-            zip_file_path = os.path.join(zip_root, file)
-
-            # skip adding .zip files to our zip
-            if zip_file_path.endswith('.zip'):
-                continue
-
-            # add local file to zip
-            zf.write(file_path, zip_file_path)
-
-    zf.close()
-
-    return zip_path
+    ctx.obj[u'azkaban'] = azkaban
 
 def __upload(ctx, path, project, zip_name):
-    if not ctx.obj[u'logged']:
-        logging.error(u'You are not logged')
-        ctx.exit(1)
+    azkaban = ctx.obj[u'azkaban']
 
-    s = ctx.obj[u'session']
-    host = ctx.obj[u'host']
-    session_id = ctx.obj[u'azkaban_session_id']
-
-    if not project:
-        # define project name as basename
-        project = os.path.basename(os.path.abspath(path))
-
-    if not zip_name:
-        # define zip name as project name
-        zip_name = project
-    
-    if not zip_name.endswith('.zip'):
-        zip_name = zip_name + '.zip'
-
-    zip_path = __zip_project(path, zip_name)    
-
-    zip_file = open(zip_path, 'rb')
-
-    response = s.post(
-        host + '/manager', 
-        data = {
-            u'session.id': session_id, 
-            u'ajax': u'upload', 
-            u'project': project
-        }, 
-        files = {
-            u'file': (zip_name, zip_file, 'application/zip'),
-        }
-    )
-
-    response_json = response.json()
-
-    if u'error' in response_json.keys():
-        error_msg = response_json[u'error']
-        click.echo(error_msg)
-    else:
-        click.echo('Success uploading! Project %s updated to version %s' % (project, response_json[u'version']))
+    azkaban.upload(path, project, zip_name)
 
 def __schedule(ctx, project, flow, cron):
-    if not ctx.obj[u'logged']:
-        logging.error(u'You are not logged')
-        ctx.exit(1)
+    azkaban = ctx.obj[u'azkaban']
 
-    s = ctx.obj[u'session']
-    host = ctx.obj[u'host']
-    session_id = ctx.obj[u'azkaban_session_id']
-
-    response = s.post(
-        host + '/schedule',
-        data = {
-            u'session.id': session_id,
-            u'ajax': u'scheduleCronFlow',
-            u'projectName': project,
-            u'flow': flow,
-            u'cronExpression': cron
-        }
-    )
-
-    response_json = response.json()
-
-    if u'error' in response_json.keys():
-        error_msg = response_json[u'error']
-        click.echo('Error scheduling: %s' % error_msg)
-    else:
-        click.echo('Success! %s' % (response_json[u'message']))
-        click.echo('scheduleId: %s' % (response_json[u'scheduleId']))
+    azkaban.schedule(project, flow, cron)
 
 def _upload(ctx, path, host, user, password, project, zip_name):
     __login(ctx, host, user, password)
@@ -181,15 +58,6 @@ def cli():
     ctx = click.get_current_context()
 
     ctx.obj = {}
-
-    # Session ignoring SSL verify requests
-    session = requests.Session()
-    session.verify = False
-    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
-    ctx.obj[u'logged'] = False
-    ctx.obj[u'session'] = session
-
 
 @click.command(u'upload')
 @click.pass_context
