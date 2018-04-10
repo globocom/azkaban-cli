@@ -7,13 +7,7 @@ import os
 from azkaban import Azkaban
 
 __version__ = u'0.1.1'
-
-def print_version(ctx, param, value):
-    if not value or ctx.resilient_parsing:
-        return
-
-    click.echo(u'Azkaban CLI v%s' % (__version__))
-    ctx.exit()
+APP_NAME = 'Azkaban CLI'
 
 # TODO: implement login cache
 def __get_azkaban_api(ctx):
@@ -46,7 +40,7 @@ def __call_for_login(ctx, host):
 # ----------------------------------------------------------------------------------------------------------------------
 
 @click.group(chain=True)
-@click.option(u'--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True)
+@click.version_option(version=__version__, prog_name=APP_NAME)
 def cli():
     log_level = logging.INFO
 
