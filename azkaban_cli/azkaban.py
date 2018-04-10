@@ -1,19 +1,21 @@
-import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 import logging
 import os
+import requests
 import zipfile
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 class Azkaban(object):
-    def __init__(self, host):
+    def __init__(self):
         # Session ignoring SSL verify requests
         session = requests.Session()
         session.verify = False
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
         
         self.__session = session
-        self.__host = self.__validate_host(host)
+
+        self.__host = None
         self.__session_id = None
+
         self.logger = self.__config_log()
 
     def __config_log(self):
@@ -118,18 +120,40 @@ class Azkaban(object):
     def set_logger(self, logger):
         self.logger = logger
 
-    def get_host(self):
-        return self.__host
+    def get_logged_session(self):
+        logged_session = {
+            u'host': self.__host,
+            u'session_id': self.__session_id
+        }
 
-    def login(self, user, password):
-        response_json = self.__login_request(self.__host, user, password)
+        return logged_session
+
+    def set_logged_session(self, logged_session):
+        self.__host = None
+        self.__session_id = None
+
+        if logged_session:
+            if u'host' in logged_session.keys() and u'session_id' in logged_session.keys():
+                self.__host = logged_session[u'host']
+                self.__session_id = logged_session[u'session_id']
+
+    def login(self, host, user, password):
+        valid_host = self.__validate_host(host)
+
+        response_json = self.__login_request(valid_host, user, password)
 
         if u'error' in response_json.keys():
             error_msg = response_json[u'error']
             self.logger.error(error_msg)
             return False
 
-        self.__session_id = response_json['session.id']
+        logged_session = {
+            u'host': valid_host,
+            u'session_id': response_json['session.id']
+        }
+
+        self.set_logged_session(logged_session)
+
         self.logger.info('Logged as %s' % (user))
 
         return True

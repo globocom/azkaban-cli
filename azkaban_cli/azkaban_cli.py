@@ -15,36 +15,37 @@ def print_version(ctx, param, value):
     click.echo(u'Azkaban CLI v%s' % (__version__))
     ctx.exit()
 
+# TODO: implement login cache
+def __get_azkaban_api(ctx):
+    if u'azkaban_api' in ctx.obj.keys():
+        return ctx.obj[u'azkaban_api']
+
+
 def __login(ctx, host, user, password):
-    azkaban = Azkaban(host)
+    azkaban = Azkaban()
 
-    azkaban.login(user, password)
+    azkaban.login(host, user, password)
 
-    ctx.obj[u'azkaban'] = azkaban
+    ctx.obj[u'azkaban_api'] = azkaban
 
 def __upload(ctx, path, project, zip_name):
-    azkaban = ctx.obj[u'azkaban']
+    azkaban = __get_azkaban_api(ctx)
 
     azkaban.upload(path, project, zip_name)
 
 def __schedule(ctx, project, flow, cron):
-    azkaban = ctx.obj[u'azkaban']
+    azkaban = __get_azkaban_api(ctx)
 
     azkaban.schedule(project, flow, cron)
 
-def _upload(ctx, path, host, user, password, project, zip_name):
-    __login(ctx, host, user, password)
-    __upload(ctx, path, project, zip_name)
-
-def _schedule(ctx, host, user, password, project, flow, cron):
-    __login(ctx, host, user, password)
-    __schedule(ctx, project, flow, cron)
+def __call_for_login(ctx, host):
+    ctx.invoke(login, host=host, user=click.prompt('User'), password=click.prompt('Password', hide_input=True))
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
 # ----------------------------------------------------------------------------------------------------------------------
 
-@click.group()
+@click.group(chain=True)
 @click.option(u'--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True)
 def cli():
     log_level = logging.INFO
@@ -59,27 +60,33 @@ def cli():
 
     ctx.obj = {}
 
-@click.command(u'upload')
+@click.command(u'login')
 @click.pass_context
-@click.argument(u'path', type=click.STRING)
 @click.option(u'--host', prompt=True, help=u'Azkaban hostname with protocol.')
 @click.option(u'--user', prompt=True, help=u'Login user.')
 @click.option(u'--password', prompt=True, hide_input=True, help=u'Login password.')
+def login(ctx, host, user, password):
+    __login(ctx, host, user, password)
+
+@click.command(u'upload')
+@click.pass_context
+@click.option(u'--host', prompt=True, help=u'Azkaban hostname with protocol.')
+@click.argument(u'path', type=click.STRING)
 @click.option(u'--project', type=click.STRING, help=u'Project name in Azkaban, default value is the dirname specified in path argument.')
 @click.option(u'--zip-name', type=click.STRING, help=u'Zip file name that will be uploaded to Azkaban. Default value is project name.')
-def upload(ctx, path, host, user, password, project, zip_name):
-    _upload(ctx, path, host, user, password, project, zip_name)
+def upload(ctx, host, path, project, zip_name):
+    __call_for_login(ctx, host)
+    __upload(ctx, path, project, zip_name)
 
 @click.command(u'schedule')
 @click.pass_context
 @click.option(u'--host', prompt=True, help=u'Azkaban hostname with protocol.')
-@click.option(u'--user', prompt=True, help=u'Login user.')
-@click.option(u'--password', prompt=True, hide_input=True, help=u'Login password.')
 @click.argument(u'project', type=click.STRING)
 @click.argument(u'flow', type=click.STRING)
 @click.argument(u'cron', type=click.STRING)
-def schedule(ctx, host, user, password, project, flow, cron):
-    _schedule(ctx, host, user, password, project, flow, cron)
+def schedule(ctx, host, project, flow, cron):
+    __call_for_login(ctx, host)
+    __schedule(ctx, project, flow, cron)
 
 cli.add_command(upload)
 cli.add_command(schedule)
