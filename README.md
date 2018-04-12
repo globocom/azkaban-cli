@@ -28,11 +28,26 @@ source azkaban_cli/bin/activate
 azkaban [OPTIONS] COMMAND [ARGS]
 ```
 
-### Funções
+## Exemplos
 
-* upload
+```sh
+$ azkaban --help
+Usage: azkaban [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
 
-Recebe como argumento o path para o projeto. Se encarrega de gerar um arquivo ```.zip``` e de fazer o upload. Caso não seja especificado o nome do projeto, será usado o nome do diretório passado. 
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  schedule  Schedule a flow from a project with specified...
+  upload    Generates a zip of path passed as argument...
+```
+
+### Comandos
+
+Todas os comandos e seu funcionamento podem ser obtidos usando o ```--help``` após o nome do comando
+
+* upload: Recebe como argumento o path para o projeto. Se encarrega de gerar um arquivo ```.zip``` e de fazer o upload. Caso não seja especificado o nome do projeto, será usado o nome do diretório passado. 
 
 Outras opções, descritas pelo ```--help```:
 
@@ -40,14 +55,14 @@ Outras opções, descritas pelo ```--help```:
 $ azkaban upload --help
 Usage: azkaban upload [OPTIONS] PATH
 
+  Generates a zip of path passed as argument and uploads it to Azkaban.
+
 Options:
   --host TEXT      Azkaban hostname with protocol.
-  --user TEXT      Login user.
-  --password TEXT  Login password.
   --project TEXT   Project name in Azkaban, default value is the dirname
                    specified in path argument.
-  --zip-name TEXT  Zip file name that will be uploaded to Azkaban. Default
-                   value is project name.
+  --zip-name TEXT  If you wanna specify Zip file name that will be generated
+                   and uploaded to Azkaban. Default value is project name.
   --help           Show this message and exit.
 ```
 
@@ -61,11 +76,11 @@ Outras opções, descritas pelo ```--help```:
 $ azkaban schedule --help
 Usage: azkaban schedule [OPTIONS] PROJECT FLOW CRON
 
+  Schedule a flow from a project with specified cron
+
 Options:
-  --host TEXT      Azkaban hostname with protocol.
-  --user TEXT      Login user.
-  --password TEXT  Login password.
-  --help           Show this message and exit.
+  --host TEXT  Azkaban hostname with protocol.
+  --help       Show this message and exit.
 ```
 
 ## Desenvolvendo

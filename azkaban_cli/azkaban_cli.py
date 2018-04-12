@@ -6,7 +6,7 @@ import zipfile
 import os
 from azkaban import Azkaban
 
-__version__ = u'0.1.1'
+__version__ = u'0.1.2'
 APP_NAME = 'Azkaban CLI'
 
 # TODO: implement login cache
@@ -67,8 +67,9 @@ def login(ctx, host, user, password):
 @click.option(u'--host', prompt=True, help=u'Azkaban hostname with protocol.')
 @click.argument(u'path', type=click.STRING)
 @click.option(u'--project', type=click.STRING, help=u'Project name in Azkaban, default value is the dirname specified in path argument.')
-@click.option(u'--zip-name', type=click.STRING, help=u'Zip file name that will be uploaded to Azkaban. Default value is project name.')
+@click.option(u'--zip-name', type=click.STRING, help=u'If you wanna specify Zip file name that will be generated and uploaded to Azkaban. Default value is project name.')
 def upload(ctx, host, path, project, zip_name):
+    """Generates a zip of path passed as argument and uploads it to Azkaban."""
     __call_for_login(ctx, host)
     __upload(ctx, path, project, zip_name)
 
@@ -79,6 +80,7 @@ def upload(ctx, host, path, project, zip_name):
 @click.argument(u'flow', type=click.STRING)
 @click.argument(u'cron', type=click.STRING)
 def schedule(ctx, host, project, flow, cron):
+    """Schedule a flow from a project with specified cron"""
     __call_for_login(ctx, host)
     __schedule(ctx, project, flow, cron)
 

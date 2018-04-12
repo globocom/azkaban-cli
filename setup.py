@@ -5,7 +5,7 @@ Created on 2018-03-22
 '''
 from setuptools import setup, find_packages
 
-version = u'0.1.1'
+version = u'0.1.2'
 
 setup(
     name='azkaban_cli',
