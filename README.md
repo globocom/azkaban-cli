@@ -47,9 +47,7 @@ Commands:
 
 Todas os comandos e seu funcionamento podem ser obtidos usando o ```--help``` após o nome do comando
 
-* upload: Recebe como argumento o path para o projeto. Se encarrega de gerar um arquivo ```.zip``` e de fazer o upload. Caso não seja especificado o nome do projeto, será usado o nome do diretório passado. 
-
-Outras opções, descritas pelo ```--help```:
+* **upload**: Recebe como argumento o path para o projeto. Se encarrega de gerar um arquivo ```.zip``` e de fazer o upload. Caso não seja especificado o nome do projeto, será usado o nome do diretório passado. 
 
 ```sh
 $ azkaban upload --help
@@ -66,11 +64,7 @@ Options:
   --help           Show this message and exit.
 ```
 
-* schedule
-
-Recebe como argumento o nome do projeto, nome do flow e o cron do agendamento. 
-
-Outras opções, descritas pelo ```--help```:
+* **schedule**: Recebe como argumento o nome do projeto, nome do flow e o cron do agendamento. 
 
 ```sh
 $ azkaban schedule --help
