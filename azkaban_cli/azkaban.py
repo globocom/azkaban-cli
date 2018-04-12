@@ -117,6 +117,13 @@ class Azkaban(object):
 
         return response.json()
 
+    def __execute_request(self, host, session_id, project, flow, **kwargs):
+        params = u'?session.id=%s&ajax=executeFlow&project=%s&flow=%s' % (session_id, project, flow)
+
+        response = self.__session.get(host + '/executor' + params)
+
+        return response.json()
+
     def set_logger(self, logger):
         self.logger = logger
 
@@ -210,3 +217,18 @@ class Azkaban(object):
                 self.logger.info(response_json[u'message'])
                 self.logger.info('scheduleId: %s' % (response_json[u'scheduleId']))
                 return True
+
+    def execute(self, project, flow, **kwargs):
+        if not self.__session_id:
+            self.logger.error(u'You are not logged')
+            return False
+        
+        response_json = self.__execute_request(self.__host, self.__session_id, project, flow, **kwargs)
+
+        if u'error' in response_json.keys():
+            error_msg = response_json[u'error']
+            self.logger.error(error_msg)
+            return False
+        else:
+            self.logger.info('%s' % (response_json[u'message']))
+            return True

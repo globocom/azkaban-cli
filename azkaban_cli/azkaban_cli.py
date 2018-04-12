@@ -6,10 +6,9 @@ import zipfile
 import os
 from azkaban import Azkaban
 
-__version__ = u'0.1.2'
+__version__ = u'0.2.0'
 APP_NAME = 'Azkaban CLI'
 
-# TODO: implement login cache
 def __get_azkaban_api(ctx):
     if u'azkaban_api' in ctx.obj.keys():
         return ctx.obj[u'azkaban_api']
@@ -31,6 +30,11 @@ def __schedule(ctx, project, flow, cron):
     azkaban = __get_azkaban_api(ctx)
 
     azkaban.schedule(project, flow, cron)
+
+def __execute(ctx, project, flow):
+    azkaban = __get_azkaban_api(ctx)
+
+    azkaban.execute(project, flow)
 
 def __call_for_login(ctx, host):
     ctx.invoke(login, host=host, user=click.prompt('User'), password=click.prompt('Password', hide_input=True))
@@ -84,8 +88,19 @@ def schedule(ctx, host, project, flow, cron):
     __call_for_login(ctx, host)
     __schedule(ctx, project, flow, cron)
 
+@click.command(u'execute')
+@click.pass_context
+@click.option(u'--host', prompt=True, help=u'Azkaban hostname with protocol.')
+@click.argument(u'project', type=click.STRING)
+@click.argument(u'flow', type=click.STRING)
+def execute(ctx, host, project, flow):
+    """Execute a flow from a project"""
+    __call_for_login(ctx, host)
+    __execute(ctx, project, flow)
+
 cli.add_command(upload)
 cli.add_command(schedule)
+cli.add_command(execute)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
