@@ -118,9 +118,15 @@ class Azkaban(object):
         return response.json()
 
     def __execute_request(self, host, session_id, project, flow, **kwargs):
-        params = u'?session.id=%s&ajax=executeFlow&project=%s&flow=%s' % (session_id, project, flow)
-
-        response = self.__session.get(host + '/executor' + params)
+        response = self.__session.get(
+            host + '/executor',
+            params = { 
+                u'session.id': session_id,
+                u'ajax': 'executeFlow',
+                u'project': project,
+                u'flow': flow
+            }
+        )
 
         return response.json()
 
