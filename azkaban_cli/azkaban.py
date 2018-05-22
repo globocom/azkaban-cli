@@ -1,15 +1,18 @@
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from __future__ import absolute_import
+from azkaban_cli.zip import zip_directory
+from urllib3.exceptions import InsecureRequestWarning
+import azkaban_cli.api as api
 import logging
 import os
 import requests
-import zipfile
+import urllib3
 
 class Azkaban(object):
     def __init__(self):
         # Session ignoring SSL verify requests
         session = requests.Session()
         session.verify = False
-        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+        urllib3.disable_warnings(InsecureRequestWarning)
         
         self.__session = session
 
@@ -39,97 +42,6 @@ class Azkaban(object):
 
         return valid_host
 
-    def __zip_project(self, path, zip_name):
-        absolute_project_path = os.path.abspath(path)
-
-        if not os.path.isdir(absolute_project_path):
-            self.logger.error('No such directory: %s' % absolute_project_path)
-            return None
-
-        # Where .zip will be created
-        zip_path = absolute_project_path + '/' + zip_name
-
-        # Create .zip
-        zf = zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED)
-
-        for root, dirs, files in os.walk(path):
-            # ensure .zip root dir will be the path basename
-            zip_root = root.replace(path, '', 1)
-
-            for file in files:
-                # local file path
-                file_path = os.path.join(root, file)
-
-                # .zip file path
-                zip_file_path = os.path.join(zip_root, file)
-
-                # skip adding .zip files to our zip
-                if zip_file_path.endswith('.zip'):
-                    continue
-
-                # add local file to zip
-                zf.write(file_path, zip_file_path)
-
-        zf.close()
-
-        return zip_path
-
-    def __upload_request(self, host, session_id, project, zip_name, zip_path):
-        zip_file = open(zip_path, 'rb')
-
-        response = self.__session.post(
-            host + '/manager', 
-            data = {
-                u'session.id': session_id, 
-                u'ajax': u'upload', 
-                u'project': project
-            }, 
-            files = {
-                u'file': (zip_name, zip_file, 'application/zip'),
-            }
-        )
-
-        return response.json()
-
-    def __login_request(self, host, user, password):
-        response = self.__session.post(
-            host, 
-            data = {
-                u'action': u'login',
-                u'username': user,
-                u'password': password
-            }
-        )
-
-        return response.json()
-
-    def __schedule_request(self, host, session_id, project, flow, cron):
-        response = self.__session.post(
-            host + '/schedule',
-            data = {
-                u'session.id': session_id,
-                u'ajax': u'scheduleCronFlow',
-                u'projectName': project,
-                u'flow': flow,
-                u'cronExpression': cron
-            }
-        )
-
-        return response.json()
-
-    def __execute_request(self, host, session_id, project, flow, **kwargs):
-        response = self.__session.get(
-            host + '/executor',
-            params = { 
-                u'session.id': session_id,
-                u'ajax': 'executeFlow',
-                u'project': project,
-                u'flow': flow
-            }
-        )
-
-        return response.json()
-
     def set_logger(self, logger):
         self.logger = logger
 
@@ -153,7 +65,11 @@ class Azkaban(object):
     def login(self, host, user, password):
         valid_host = self.__validate_host(host)
 
-        response_json = self.__login_request(valid_host, user, password)
+        try:
+            response_json = api.login_request(self.__session, valid_host, user, password).json()
+        except requests.exceptions.ConnectionError:
+            self.logger.error("Could not connect to host")
+            return False
 
         if u'error' in response_json.keys():
             error_msg = response_json[u'error']
@@ -187,14 +103,14 @@ class Azkaban(object):
         if not zip_name.endswith('.zip'):
             zip_name = zip_name + '.zip'
 
-        zip_path = self.__zip_project(path, zip_name)
+        zip_path = zip_directory(path, zip_name)
 
         # check if zip was created
         if not zip_path:
             self.logger.error('Could not find zip file. Aborting upload')
             return False
 
-        response_json = self.__upload_request(self.__host, self.__session_id, project, zip_name, zip_path)
+        response_json = api.upload_request(self.__session ,self.__host, self.__session_id, project, zip_name, zip_path).json()
 
         if u'error' in response_json.keys():
             error_msg = response_json[u'error']
@@ -209,7 +125,7 @@ class Azkaban(object):
             self.logger.error(u'You are not logged')
             return False
         
-        response_json = self.__schedule_request(self.__host, self.__session_id, project, flow, cron)
+        response_json = api.schedule_request(self.__session, self.__host, self.__session_id, project, flow, cron).json()
 
         if u'error' in response_json.keys():
             error_msg = response_json[u'error']
@@ -229,7 +145,7 @@ class Azkaban(object):
             self.logger.error(u'You are not logged')
             return False
         
-        response_json = self.__execute_request(self.__host, self.__session_id, project, flow, **kwargs)
+        response_json = api.execute_request(self.__session, self.__host, self.__session_id, project, flow, **kwargs).json()
 
         if u'error' in response_json.keys():
             error_msg = response_json[u'error']

@@ -1,12 +1,13 @@
+from __future__ import absolute_import
 import logging
 import click
 import requests
 import sys
 import zipfile
 import os
-from azkaban import Azkaban
+from azkaban_cli.azkaban import Azkaban
 
-__version__ = u'0.2.0'
+__version__ = u'0.2.1'
 APP_NAME = 'Azkaban CLI'
 
 def __get_azkaban_api(ctx):
@@ -84,7 +85,7 @@ def upload(ctx, host, path, project, zip_name):
 @click.argument(u'flow', type=click.STRING)
 @click.argument(u'cron', type=click.STRING)
 def schedule(ctx, host, project, flow, cron):
-    """Schedule a flow from a project with specified cron"""
+    """Schedule a flow from a project with specified cron in quartz format"""
     __call_for_login(ctx, host)
     __schedule(ctx, project, flow, cron)
 
