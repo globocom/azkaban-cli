@@ -25,7 +25,7 @@ class AzkabanLoginTest(TestCase):
         user       = 'user'
         password   = 'password'
 
-        return_value = self.azk.login(host, user, password)
+        self.azk.login(host, user, password)
 
         mock_login_request.assert_called_with(ANY, valid_host, user, password)
 
@@ -116,17 +116,11 @@ class AzkabanUploadTest(TestCase):
         self.host = 'host'
         self.session_id = 'aebe406b-d5e6-4056-add6-bf41091e42c6'
 
-        logged_session = {
-            'host': self.host,
-            'session_id': self.session_id
-        }
-
-        self.azk.set_logged_session(logged_session)
-
+        self.azk.set_logged_session(self.host, self.session_id)
 
     def tearDown(self):
         pass
-    
+
     @patch('azkaban_cli.azkaban.zip_directory')
     @patch('azkaban_cli.azkaban.api.upload_request')
     def test_upload(self, mock_upload_request, mock_zip_directory):
@@ -143,7 +137,20 @@ class AzkabanUploadTest(TestCase):
         return_value = self.azk.upload('path', 'project', 'zip_name')
 
         self.assertTrue(return_value)
-    
+
+    @patch('azkaban_cli.azkaban.api.upload_request')
+    def test_error_not_logged_upload(self, mock_upload_request):
+        """
+        Test if upload method from Azkaban class returns False and doesn't make the request if there is no logged session
+        """
+
+        self.azk.logout()
+
+        return_value = self.azk.upload('path', 'project', 'zip_name')
+
+        mock_upload_request.assert_not_called()
+        self.assertFalse(return_value)
+
     @patch('azkaban_cli.azkaban.zip_directory')
     @patch('azkaban_cli.azkaban.api.upload_request')
     def test_error_unzip_file_upload(self, mock_upload_request, mock_zip_directory):
@@ -190,6 +197,7 @@ class AzkabanUploadTest(TestCase):
 
         return_value = self.azk.upload('path', 'project', 'zip_name')
 
+        mock_upload_request.assert_not_called()
         self.assertFalse(return_value)
 
     @patch('azkaban_cli.azkaban.zip_directory')
@@ -267,3 +275,186 @@ class AzkabanUploadTest(TestCase):
         self.azk.upload(path, project=project, zip_name=zip_name)
 
         mock_upload_request.assert_called_with(ANY, self.host, self.session_id, ANY, valid_zip_name, ANY)
+
+class AzkabanScheduleTest(TestCase):
+    def setUp(self):
+        """
+        Creates an Azkaban instance and set a logged session for all upload tests
+        """
+
+        self.azk = azkaban_cli.azkaban.Azkaban()
+
+        self.host = 'host'
+        self.session_id = 'aebe406b-d5e6-4056-add6-bf41091e42c6'
+
+        self.azk.set_logged_session(self.host, self.session_id)
+
+        self.project = 'ProjectTest'
+        self.flow    = 'FlowTest'
+        self.cron    = '0 0 23 ? * *'
+
+    def tearDown(self):
+        pass
+
+    @patch('azkaban_cli.azkaban.api.schedule_request')
+    def test_schedule(self, mock_schedule_request):
+        """
+        Test if schedule method from Azkaban class returns True if request is fine
+        """
+
+        mock_response = Mock()
+        mock_schedule_request.return_value = mock_response
+        mock_response.json.return_value = {
+            'message': 'ProjectTest.FlowTest scheduled.',
+            'scheduleId': '41',
+            'status': 'success'
+        }
+
+        return_value = self.azk.schedule(self.project, self.flow, self.cron)
+
+        self.assertTrue(return_value)
+
+    @patch('azkaban_cli.azkaban.api.schedule_request')
+    def test_schedule_request_called(self, mock_schedule_request):
+        """
+        Test if schedule method from Azkaban class is calling schedule request with expected arguments
+        """
+
+        self.azk.schedule(self.project, self.flow, self.cron)
+
+        mock_schedule_request.assert_called_with(ANY, self.host, self.session_id, self.project, self.flow, self.cron)
+
+    @patch('azkaban_cli.azkaban.api.schedule_request')
+    def test_error_project_doesnt_exist_upload(self, mock_schedule_request):
+        """
+        Test if schedule method from Azkaban class returns False if request returns error caused by project doesn't exist
+        """
+
+        mock_response = Mock()
+        mock_schedule_request.return_value = mock_response
+        mock_response.json.return_value = {
+            'message': 'Project ProjectTest does not exist',
+            'status': 'error'
+        }
+
+        return_value = self.azk.schedule(self.project, self.flow, self.cron)
+
+        self.assertFalse(return_value)
+
+    @patch('azkaban_cli.azkaban.api.schedule_request')
+    def test_error_flow_cannot_be_found_upload(self, mock_schedule_request):
+        """
+        Test if schedule method from Azkaban class returns False if request returns error caused by flow not be found
+        """
+
+        mock_response = Mock()
+        mock_schedule_request.return_value = mock_response
+        mock_response.json.return_value = {
+            'message': 'Flow FlowTest cannot be found in project GustavoTest',
+            'status': 'error'
+        }
+
+        return_value = self.azk.schedule(self.project, self.flow, self.cron)
+
+        self.assertFalse(return_value)
+
+    @patch('azkaban_cli.azkaban.api.schedule_request')
+    def test_error_cron_cannot_be_parsed_upload(self, mock_schedule_request):
+        """
+        Test if schedule method from Azkaban class returns False if request returns error caused by wrong cron expression
+        """
+
+        mock_response = Mock()
+        mock_schedule_request.return_value = mock_response
+        mock_response.json.return_value = {
+            'error': 'This expression <0 23 ? * *> can not be parsed to quartz cron.'
+        }
+
+        return_value = self.azk.schedule(self.project, self.flow, self.cron)
+
+        self.assertFalse(return_value)
+
+class AzkabanExecuteTest(TestCase):
+    def setUp(self):
+        """
+        Creates an Azkaban instance and set a logged session for all upload tests
+        """
+
+        self.azk = azkaban_cli.azkaban.Azkaban()
+
+        self.host = 'host'
+        self.session_id = 'aebe406b-d5e6-4056-add6-bf41091e42c6'
+
+        self.azk.set_logged_session(self.host, self.session_id)
+
+        self.project = 'ProjectTest'
+        self.flow    = 'FlowTest'
+
+    def tearDown(self):
+        pass
+
+    @patch('azkaban_cli.azkaban.api.execute_request')
+    def test_execute(self, mock_execute_request):
+        """
+        Test if execute method from Azkaban class returns True if request is fine
+        """
+
+        mock_response = Mock()
+        mock_execute_request.return_value = mock_response
+        mock_response.json.return_value = {
+            'project': 'ProjectTest',
+            'message': 'Execution submitted successfully with exec id 6867',
+            'flow': 'FlowTest',
+            'execid': '6867'
+        }
+
+        return_value = self.azk.execute(self.project, self.flow)
+
+        self.assertTrue(return_value)
+
+
+    @patch('azkaban_cli.azkaban.api.execute_request')
+    def test_execute_request_called(self, mock_execute_request):
+        """
+        Test if execute method from Azkaban class is calling execute request with expected arguments
+        """
+
+        self.azk.execute(self.project, self.flow)
+
+        mock_execute_request.assert_called_with(ANY, self.host, self.session_id, self.project, self.flow)
+
+
+    @patch('azkaban_cli.azkaban.api.execute_request')
+    def test_flow_cannot_be_found_execute(self, mock_execute_request):
+        """
+        Test if execute method from Azkaban class returns False if request returns error caused by flow not be found
+        """
+
+        mock_response = Mock()
+        mock_execute_request.return_value = mock_response
+        mock_response.json.return_value = {
+            'project': 'ProjectTest',
+            'error': "Flow 'FlowTest' cannot be found in project ProjectTest",
+            'flow': 'FlowTest'
+        }
+
+        return_value = self.azk.execute(self.project, self.flow)
+
+        self.assertFalse(return_value)
+
+    @patch('azkaban_cli.azkaban.api.execute_request')
+    def test_project_doesnt_exist_execute(self, mock_execute_request):
+        """
+        Test if execute method from Azkaban class returns False if request returns error caused by flow not be found
+        """
+
+        mock_response = Mock()
+        mock_execute_request.return_value = mock_response
+        mock_response.json.return_value = {
+            'project': 'ProjectTest',
+            'error': "Project 'ProjectTest' doesn't exist."
+        }
+
+        return_value = self.azk.execute(self.project, self.flow)
+
+        self.assertFalse(return_value)
