@@ -19,21 +19,6 @@ class Azkaban(object):
         self.__host = None
         self.__session_id = None
 
-        self.logger = self.__config_log()
-
-    def __config_log(self):
-        log_level = logging.INFO
-
-        # log record format string
-        format_string = u'%(asctime)s\t%(levelname)s\t%(message)s'
-
-        # set default logging (to console)
-        logging.basicConfig(level=log_level, format=format_string)
-
-        logger = logging.getLogger()
-
-        return logger
-
     def __validate_host(self, host):
         valid_host = host
 
@@ -41,9 +26,6 @@ class Azkaban(object):
             valid_host = valid_host[:-1]
 
         return valid_host
-
-    def set_logger(self, logger):
-        self.logger = logger
 
     def get_logged_session(self):
         logged_session = {
@@ -53,14 +35,12 @@ class Azkaban(object):
 
         return logged_session
 
-    def set_logged_session(self, logged_session):
-        self.__host = None
-        self.__session_id = None
+    def set_logged_session(self, host, session_id):
+        self.__host = host
+        self.__session_id = session_id
 
-        if logged_session:
-            if u'host' in logged_session.keys() and u'session_id' in logged_session.keys():
-                self.__host = logged_session[u'host']
-                self.__session_id = logged_session[u'session_id']
+    def logout(self):
+        self.set_logged_session(None, None)
 
     def login(self, host, user, password):
         valid_host = self.__validate_host(host)
@@ -68,28 +48,23 @@ class Azkaban(object):
         try:
             response_json = api.login_request(self.__session, valid_host, user, password).json()
         except requests.exceptions.ConnectionError:
-            self.logger.error("Could not connect to host")
+            logging.error("Could not connect to host")
             return False
 
         if u'error' in response_json.keys():
             error_msg = response_json[u'error']
-            self.logger.error(error_msg)
+            logging.error(error_msg)
             return False
 
-        logged_session = {
-            u'host': valid_host,
-            u'session_id': response_json['session.id']
-        }
+        self.set_logged_session(valid_host, response_json['session.id'])
 
-        self.set_logged_session(logged_session)
-
-        self.logger.info('Logged as %s' % (user))
+        logging.info('Logged as %s' % (user))
 
         return True
 
     def upload(self, path, project=None, zip_name=None):
         if not self.__session_id:
-            self.logger.error(u'You are not logged')
+            logging.error(u'You are not logged')
             return False
 
         if not project:
@@ -107,50 +82,50 @@ class Azkaban(object):
 
         # check if zip was created
         if not zip_path:
-            self.logger.error('Could not find zip file. Aborting upload')
+            logging.error('Could not find zip file. Aborting upload')
             return False
 
         response_json = api.upload_request(self.__session ,self.__host, self.__session_id, project, zip_name, zip_path).json()
 
         if u'error' in response_json.keys():
             error_msg = response_json[u'error']
-            self.logger.error(error_msg)
+            logging.error(error_msg)
             return False
         else:
-            self.logger.info('Project %s updated to version %s' % (project, response_json[u'version']))
+            logging.info('Project %s updated to version %s' % (project, response_json[u'version']))
             return True
 
     def schedule(self, project, flow, cron):
         if not self.__session_id:
-            self.logger.error(u'You are not logged')
+            logging.error(u'You are not logged')
             return False
-        
+
         response_json = api.schedule_request(self.__session, self.__host, self.__session_id, project, flow, cron).json()
 
         if u'error' in response_json.keys():
             error_msg = response_json[u'error']
-            self.logger.error(error_msg)
+            logging.error(error_msg)
             return False
         else:
             if response_json[u'status'] == u'error':
-                self.logger.error(response_json[u'message'])
+                logging.error(response_json[u'message'])
                 return False
             else:
-                self.logger.info(response_json[u'message'])
-                self.logger.info('scheduleId: %s' % (response_json[u'scheduleId']))
+                logging.info(response_json[u'message'])
+                logging.info('scheduleId: %s' % (response_json[u'scheduleId']))
                 return True
 
     def execute(self, project, flow, **kwargs):
         if not self.__session_id:
-            self.logger.error(u'You are not logged')
+            logging.error(u'You are not logged')
             return False
         
         response_json = api.execute_request(self.__session, self.__host, self.__session_id, project, flow, **kwargs).json()
 
         if u'error' in response_json.keys():
             error_msg = response_json[u'error']
-            self.logger.error(error_msg)
+            logging.error(error_msg)
             return False
         else:
-            self.logger.info('%s' % (response_json[u'message']))
+            logging.info('%s' % (response_json[u'message']))
             return True
