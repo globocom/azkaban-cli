@@ -121,9 +121,10 @@ class AzkabanUploadTest(TestCase):
     def tearDown(self):
         pass
 
-    @patch('azkaban_cli.azkaban.zip_directory')
+    @patch('azkaban_cli.azkaban.os.remove')
+    @patch('azkaban_cli.azkaban.make_archive')
     @patch('azkaban_cli.azkaban.api.upload_request')
-    def test_upload(self, mock_upload_request, mock_zip_directory):
+    def test_upload(self, mock_upload_request, mock_make_archive, mock_os_remove):
         """
         Test if upload method from Azkaban class returns True if request is fine
         """
@@ -132,7 +133,7 @@ class AzkabanUploadTest(TestCase):
         mock_upload_request.return_value = mock_response
         mock_response.json.return_value = {'projectId': '33', 'version': '58'}
 
-        mock_zip_directory.return_value = 'zip_path'
+        mock_make_archive.return_value = 'zip_path'
 
         return_value = self.azk.upload('path', 'project', 'zip_name')
 
@@ -151,9 +152,10 @@ class AzkabanUploadTest(TestCase):
         mock_upload_request.assert_not_called()
         self.assertFalse(return_value)
 
-    @patch('azkaban_cli.azkaban.zip_directory')
+    @patch('azkaban_cli.azkaban.os.remove')
+    @patch('azkaban_cli.azkaban.make_archive')
     @patch('azkaban_cli.azkaban.api.upload_request')
-    def test_error_unzip_file_upload(self, mock_upload_request, mock_zip_directory):
+    def test_error_unzip_file_upload(self, mock_upload_request, mock_make_archive, mock_os_remove):
         """
         Test if upload method from Azkaban class returns False if request returns error unzipping file
         """
@@ -162,15 +164,16 @@ class AzkabanUploadTest(TestCase):
         mock_upload_request.return_value = mock_response
         mock_response.json.return_value = {'projectId': '33', 'version': '58', 'error': 'Installation Failed.\nError unzipping file.'}
 
-        mock_zip_directory.return_value = 'zip_path'
+        mock_make_archive.return_value = 'zip_path'
 
         return_value = self.azk.upload('path', 'project', 'zip_name')
 
         self.assertFalse(return_value)
 
-    @patch('azkaban_cli.azkaban.zip_directory')
+    @patch('azkaban_cli.azkaban.os.remove')
+    @patch('azkaban_cli.azkaban.make_archive')
     @patch('azkaban_cli.azkaban.api.upload_request')
-    def test_error_project_doesnt_exist_upload(self, mock_upload_request, mock_zip_directory):
+    def test_error_project_doesnt_exist_upload(self, mock_upload_request, mock_make_archive, mock_os_remove):
         """
         Test if upload method from Azkaban class returns False if request returns error caused by project doesn't exist
         """
@@ -179,102 +182,102 @@ class AzkabanUploadTest(TestCase):
         mock_upload_request.return_value = mock_response
         mock_response.json.return_value = {"error" : "Installation Failed. Project 'no-existing-project' doesn't exist."}
 
-        mock_zip_directory.return_value = 'zip_path'
+        mock_make_archive.return_value = 'zip_path'
 
         return_value = self.azk.upload('path', 'project', 'zip_name')
 
         self.assertFalse(return_value)
 
-    @patch('azkaban_cli.azkaban.zip_directory')
+    @patch('azkaban_cli.azkaban.os.remove')
+    @patch('azkaban_cli.azkaban.make_archive')
     @patch('azkaban_cli.azkaban.api.upload_request')
-    def test_error_could_not_find_zip_upload(self, mock_upload_request, mock_zip_directory):
+    def test_error_file_not_found_upload(self, mock_upload_request, mock_make_archive, mock_os_remove):
         """
         Test if upload method from Azkaban class returns False if could not create zip from path passed as argument, 
         usually because path is wrong
         """
 
-        mock_zip_directory.return_value = None
+        mock_make_archive.side_effect = FileNotFoundError
 
         return_value = self.azk.upload('path', 'project', 'zip_name')
 
         mock_upload_request.assert_not_called()
         self.assertFalse(return_value)
 
-    @patch('azkaban_cli.azkaban.zip_directory')
+    @patch('azkaban_cli.azkaban.os.remove')
+    @patch('azkaban_cli.azkaban.make_archive')
     @patch('azkaban_cli.azkaban.api.upload_request')
-    def test_upload_request_called(self, mock_upload_request, mock_zip_directory):
+    def test_upload_request_called(self, mock_upload_request, mock_make_archive, mock_os_remove):
         """
         Test if upload method from Azkaban class is calling upload request with expected arguments
         """
 
         path     = '/path/to/project'
         project  = 'project'
-        zip_name = 'zip_name.zip'
+        zip_name = 'zip_name'
         zip_path = '/path/to/zip_name.zip'
 
-        mock_zip_directory.return_value = zip_path
+        mock_make_archive.return_value = zip_path
 
         self.azk.upload(path, project, zip_name)
 
-        mock_upload_request.assert_called_with(ANY, self.host, self.session_id, project, zip_name, zip_path)
+        mock_upload_request.assert_called_with(ANY, self.host, self.session_id, project, zip_path)
 
-    @patch('azkaban_cli.azkaban.zip_directory')
+    @patch('azkaban_cli.azkaban.os.remove')
+    @patch('azkaban_cli.azkaban.make_archive')
     @patch('azkaban_cli.azkaban.api.upload_request')
-    def test_get_project_name(self, mock_upload_request, mock_zip_directory):
+    def test_get_project_name(self, mock_upload_request, mock_make_archive, mock_os_remove):
         """
-        Test if upload method from Azkaban class still works if project name is not passed. 
-        
+        Test if upload method from Azkaban class still works if project name is not passed.
+
         Expected to get project name from path
         """
 
         path             = '/path/to/project'
         get_project_name = 'project'
 
-        mock_zip_directory.return_value = 'zip_path'
+        mock_make_archive.return_value = 'zip_path'
 
         self.azk.upload(path)
 
-        mock_upload_request.assert_called_with(ANY, self.host, self.session_id, get_project_name, ANY, ANY)
+        mock_upload_request.assert_called_with(ANY, self.host, self.session_id, get_project_name, ANY)
 
-    @patch('azkaban_cli.azkaban.zip_directory')
+    @patch('azkaban_cli.azkaban.os.remove')
+    @patch('azkaban_cli.azkaban.make_archive')
     @patch('azkaban_cli.azkaban.api.upload_request')
-    def test_get_zip_name(self, mock_upload_request, mock_zip_directory):
+    def test_get_zip_name(self, mock_upload_request, mock_make_archive, mock_os_remove):
         """
-        Test if upload method from Azkaban class still works if project name is not passed. 
+        Test if upload method from Azkaban class still works if zip name is not passed.
 
-        Expected to get zip name from project name, adding .zip suffix
+        Expected to get zip name from project
         """
 
         path     = '/path/to/project'
         project  = 'project'
-        zip_name = 'project.zip'
-
-        mock_zip_directory.return_value = 'zip_path'
 
         self.azk.upload(path, project=project)
 
-        mock_upload_request.assert_called_with(ANY, self.host, self.session_id, ANY, zip_name, ANY)
+        mock_make_archive.assert_called_with(project, 'zip', path)
+        mock_upload_request.assert_called_with(ANY, self.host, self.session_id, ANY, ANY)
 
-
-    @patch('azkaban_cli.azkaban.zip_directory')
+    @patch('azkaban_cli.azkaban.os.remove')
+    @patch('azkaban_cli.azkaban.make_archive')
     @patch('azkaban_cli.azkaban.api.upload_request')
-    def test_validate_zip_name(self, mock_upload_request, mock_zip_directory):
+    def test_delete_zip_after_upload(self, mock_upload_request, mock_make_archive, mock_os_remove):
         """
-        Test if upload method from Azkaban class still works if zip name is passed without zip suffix
-
-        Expected to validate zip_name, adding .zip suffix
+        Test if upload method from Azkaban class is removing the zip that created for upload 
         """
 
-        path            = '/path/to/project'
-        project         = 'project'
-        zip_name        = 'zip_name'
-        valid_zip_name  = 'zip_name.zip'
+        path     = '/path/to/project'
+        project  = 'project'
+        zip_path = 'zip_path'
 
-        mock_zip_directory.return_value = 'zip_path'
+        mock_make_archive.return_value = zip_path
 
-        self.azk.upload(path, project=project, zip_name=zip_name)
+        self.azk.upload(path, project=project)
 
-        mock_upload_request.assert_called_with(ANY, self.host, self.session_id, ANY, valid_zip_name, ANY)
+        mock_os_remove.assert_called_with(zip_path)
+        mock_upload_request.assert_called_with(ANY, self.host, self.session_id, ANY, ANY)
 
 class AzkabanScheduleTest(TestCase):
     def setUp(self):

@@ -6,18 +6,17 @@ azkaban_cli.api
 This module provides a set of requests for the Azkaban API
 """
 
-import requests
 import logging
+import os
 
-def upload_request(session, host, session_id, project, zip_name, zip_path):
+def upload_request(session, host, session_id, project, zip_path):
     """Upload request for the Azkaban API
 
-    :param session: A requests session for creating the request
+    :param session: A session for creating the request
     :type session: requests.Session
     :param str host: Hostname where the request should go
     :param str session_id: An id that the user should have when is logged in
     :param str project: Project name on Azkaban
-    :param str zip_name: Name that zip will receive
     :param str zip_path: Local path from zip that will be uploaded
     :return: The response from the request made
     :rtype: requests.Response
@@ -25,6 +24,7 @@ def upload_request(session, host, session_id, project, zip_name, zip_path):
     """
 
     zip_file = open(zip_path, 'rb')
+    zip_name = os.path.basename(zip_path)
 
     response = session.post(
         host + '/manager',
@@ -45,7 +45,7 @@ def upload_request(session, host, session_id, project, zip_name, zip_path):
 def login_request(session, host, user, password):
     """Login request for the Azkaban API
 
-    :param session: A requests session for creating the request
+    :param session: A session for creating the request
     :type session: requests.Session
     :param str host: Hostname where the request should go
     :param str user: The user name
@@ -71,7 +71,7 @@ def login_request(session, host, user, password):
 def schedule_request(session, host, session_id, project, flow, cron):
     """Schedule request for the Azkaban API
 
-    :param session: A requests session for creating the request
+    :param session: A session for creating the request
     :type session: requests.Session
     :param str host: Hostname where the request should go
     :param str session_id: An id that the user should have when is logged in
@@ -102,7 +102,7 @@ def schedule_request(session, host, session_id, project, flow, cron):
 def execute_request(session, host, session_id, project, flow):
     """Execute request for the Azkaban API
 
-    :param session: A requests session for creating the request
+    :param session: A session for creating the request
     :type session: requests.Session
     :param str host: Hostname where the request should go
     :param str session_id: An id that the user should have when is logged in

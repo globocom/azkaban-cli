@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from azkaban_cli.zip import zip_directory
+from shutil import make_archive
 from urllib3.exceptions import InsecureRequestWarning
 import azkaban_cli.api as api
 import logging
@@ -13,7 +13,7 @@ class Azkaban(object):
         session = requests.Session()
         session.verify = False
         urllib3.disable_warnings(InsecureRequestWarning)
-        
+
         self.__session = session
 
         self.__host = None
@@ -74,18 +74,16 @@ class Azkaban(object):
         if not zip_name:
             # define zip name as project name
             zip_name = project
-        
-        if not zip_name.endswith('.zip'):
-            zip_name = zip_name + '.zip'
 
-        zip_path = zip_directory(path, zip_name)
-
-        # check if zip was created
-        if not zip_path:
-            logging.error('Could not find zip file. Aborting upload')
+        try:
+            zip_path = make_archive(zip_name, 'zip', path)
+        except FileNotFoundError as e:
+            logging.error(str(e))
             return False
 
-        response_json = api.upload_request(self.__session ,self.__host, self.__session_id, project, zip_name, zip_path).json()
+        response_json = api.upload_request(self.__session ,self.__host, self.__session_id, project, zip_path).json()
+
+        os.remove(zip_path)
 
         if u'error' in response_json.keys():
             error_msg = response_json[u'error']
