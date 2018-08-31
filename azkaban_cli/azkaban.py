@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from azkaban_cli.exceptions import NotLoggedOnError, LoginError
+from azkaban_cli.exceptions import NotLoggedOnError, LoginError, UploadError, ScheduleError, ExecuteError
 from shutil import make_archive
 from urllib3.exceptions import InsecureRequestWarning
 import azkaban_cli.api as api
@@ -27,6 +27,20 @@ class Azkaban(object):
             valid_host = valid_host[:-1]
 
         return valid_host
+
+    def __check_if_logged(self):
+        if not self.__session_id:
+            raise NotLoggedOnError()
+
+    def __treat_response(self, response_json, exception):
+        if u'error' in response_json.keys():
+            error_msg = response_json[u'error']
+            raise exception(error_msg)
+
+        response_status = response_json.get('status')
+        if response_status == u'error':
+            error_msg = response_json[u'message']
+            raise exception(error_msg)
 
     def get_logged_session(self):
         """Method for return the host and session id of the logged session saved on the class
@@ -70,22 +84,18 @@ class Azkaban(object):
         :param str host: Azkaban hostname
         :param str user: Username to login
         :param str password: Password from user
-        :return: True if everything is fine, False if something goes wrong
-        :rtype: bool
+        :raises LoginError: when Azkaban api returns error in response
         """
 
         valid_host = self.__validate_host(host)
 
         response_json = api.login_request(self.__session, valid_host, user, password).json()
 
-        if u'error' in response_json.keys():
-            raise LoginError(response_json[u'error'])
+        self.__treat_response(response_json, LoginError)
 
         self.set_logged_session(valid_host, response_json['session.id'])
 
         logging.info('Logged as %s' % (user))
-
-        return True
 
     def upload(self, path, project=None, zip_name=None):
         """Upload command, intended to make the request to Azkaban and treat the response properly
@@ -105,12 +115,10 @@ class Azkaban(object):
         :param project: str, optional
         :param zip_name: Zip name that will be created and uploaded
         :param zip_name: str, optional
-        :return: True if everything is fine, False if something goes wrong
-        :rtype: bool
+        :raises UploadError: when Azkaban api returns error in response
         """
 
-        if not self.__session_id:
-            raise NotLoggedOnError()
+        self.__check_if_logged()
 
         if not project:
             # define project name as basename
@@ -123,20 +131,15 @@ class Azkaban(object):
         try:
             zip_path = make_archive(zip_name, 'zip', path)
         except FileNotFoundError as e:
-            logging.error(str(e))
-            return False
+            raise UploadError(str(e))
 
         response_json = api.upload_request(self.__session ,self.__host, self.__session_id, project, zip_path).json()
 
         os.remove(zip_path)
 
-        if u'error' in response_json.keys():
-            error_msg = response_json[u'error']
-            logging.error(error_msg)
-            return False
-        else:
-            logging.info('Project %s updated to version %s' % (project, response_json[u'version']))
-            return True
+        self.__treat_response(response_json, UploadError)
+
+        logging.info('Project %s updated to version %s' % (project, response_json[u'version']))
 
     def schedule(self, project, flow, cron):
         """Schedule command, intended to make the request to Azkaban and treat the response properly.
@@ -153,27 +156,17 @@ class Azkaban(object):
         :type flow: str
         :param cron: Cron expression, in quartz format
         :type cron: str
-        :return: True if everything is fine, False if something goes wrong
-        :rtype: bool
+        :raises ScheduleError: when Azkaban api returns error in response
         """
 
-        if not self.__session_id:
-            raise NotLoggedOnError()
+        self.__check_if_logged()
 
         response_json = api.schedule_request(self.__session, self.__host, self.__session_id, project, flow, cron).json()
 
-        if u'error' in response_json.keys():
-            error_msg = response_json[u'error']
-            logging.error(error_msg)
-            return False
-        else:
-            if response_json[u'status'] == u'error':
-                logging.error(response_json[u'message'])
-                return False
-            else:
-                logging.info(response_json[u'message'])
-                logging.info('scheduleId: %s' % (response_json[u'scheduleId']))
-                return True
+        self.__treat_response(response_json, ScheduleError)
+
+        logging.info(response_json[u'message'])
+        logging.info('scheduleId: %s' % (response_json[u'scheduleId']))
 
     def execute(self, project, flow):
         """Execute command, intended to make the request to Azkaban and treat the response properly.
@@ -187,12 +180,10 @@ class Azkaban(object):
         :type project: str
         :param flow: Flow name on Azkaban
         :type flow: str
-        :return: True if everything is fine, False if something goes wrong
-        :rtype: bool
+        :raises ExecuteError: when Azkaban api returns error in response
         """
 
-        if not self.__session_id:
-            raise NotLoggedOnError()
+        self.__check_if_logged()
 
         response_json = api.execute_request(
             self.__session,
@@ -202,10 +193,6 @@ class Azkaban(object):
             flow,
         ).json()
 
-        if u'error' in response_json.keys():
-            error_msg = response_json[u'error']
-            logging.error(error_msg)
-            return False
-        else:
-            logging.info('%s' % (response_json[u'message']))
-            return True
+        self.__treat_response(response_json, ExecuteError)
+
+        logging.info('%s' % (response_json[u'message']))

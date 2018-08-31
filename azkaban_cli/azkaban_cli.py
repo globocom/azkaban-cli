@@ -7,7 +7,7 @@ import sys
 import zipfile
 import os
 from azkaban_cli.azkaban import Azkaban
-from azkaban_cli.exceptions import NotLoggedOnError, LoginError
+from azkaban_cli.exceptions import NotLoggedOnError, LoginError, UploadError, ScheduleError, ExecuteError
 
 __version__ = u'0.3.0beta'
 APP_NAME = 'Azkaban CLI'
@@ -58,26 +58,38 @@ def __login(ctx, host, user, password):
     except LoginError as e:
         logging.error("Login error: %s", str(e))
 
-def __logout():
+def __logout(ctx):
+    azkaban = ctx.obj[u'azkaban']
+
+    azkaban.logout()
     __delete_logged_session()
 
 @login_required
 def __upload(ctx, path, project, zip_name):
     azkaban = ctx.obj[u'azkaban']
 
-    azkaban.upload(path, project, zip_name)
+    try:
+        azkaban.upload(path, project, zip_name)
+    except UploadError as e:
+        logging.error(str(e))
 
 @login_required
 def __schedule(ctx, project, flow, cron):
     azkaban = ctx.obj[u'azkaban']
 
-    azkaban.schedule(project, flow, cron)
+    try:
+        azkaban.schedule(project, flow, cron)
+    except ScheduleError as e:
+        logging.error(str(e))
 
 @login_required
 def __execute(ctx, project, flow):
     azkaban = ctx.obj[u'azkaban']
 
-    azkaban.execute(project, flow)
+    try:
+        azkaban.execute(project, flow)
+    except ExecuteError as e:
+        logging.error(str(e))
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
@@ -86,13 +98,8 @@ def __execute(ctx, project, flow):
 @click.group(chain=True)
 @click.version_option(version=__version__, prog_name=APP_NAME)
 def cli():
-    log_level = logging.INFO
-
-    # log record format string
-    format_string = u'%(asctime)s\t%(levelname)s\t%(message)s'
-
     # set default logging (to console)
-    logging.basicConfig(level=log_level, format=format_string)
+    logging.basicConfig(level=logging.INFO, format=u'%(asctime)s\t%(levelname)s\t%(message)s')
 
     ctx = click.get_current_context()
     ctx.obj = {}
@@ -117,9 +124,10 @@ def login(ctx, host, user, password):
     __login(ctx, host, user, password)
 
 @click.command(u'logout')
-def logout():
+@click.pass_context
+def logout(ctx):
     """Logout from Azkaban session"""
-    __logout()
+    __logout(ctx)
 
 @click.command(u'upload')
 @click.pass_context
@@ -157,7 +165,7 @@ cli.add_command(execute)
 # Interface
 # ----------------------------------------------------------------------------------------------------------------------
 
-        
+
 if __name__ == u'__main__':
     try:
         cli()

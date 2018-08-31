@@ -1,5 +1,6 @@
 from unittest.mock import patch, Mock, ANY
 from unittest import TestCase
+from azkaban_cli.exceptions import LoginError, NotLoggedOnError, UploadError, ScheduleError, ExecuteError
 import requests
 import azkaban_cli.azkaban
 
@@ -39,71 +40,70 @@ class AzkabanLoginTest(TestCase):
         mock_login_request.return_value = mock_response
         mock_response.json.return_value = {'session.id': 'aebe406b-d5e6-4056-add6-bf41091e42c6', 'status': 'success'}
 
-        return_value = self.azk.login('host', 'user', 'password')
+        self.azk.login('host', 'user', 'password')
 
         logged_session = self.azk.get_logged_session()
         expected = {'host': 'host', 'session_id': 'aebe406b-d5e6-4056-add6-bf41091e42c6'}
 
         self.assertEqual(logged_session, expected)
-        self.assertTrue(return_value)
 
     @patch('azkaban_cli.azkaban.api.login_request')
     def test_wrong_host_login(self, mock_login_request):
         """
         Test if login method from Azkaban class treats correctly ConnectionError, usually raised when host is wrong.
 
-        Expected to not save logged session and method return false
+        Expected to not save logged session and method to raise requests.exceptions.ConnectionError
         """
 
         mock_login_request.side_effect = requests.exceptions.ConnectionError
 
-        return_value = self.azk.login('wrong_host', 'user', 'password')
+        with self.assertRaises(requests.exceptions.ConnectionError):
+            self.azk.login('wrong_host', 'user', 'password')
 
         logged_session = self.azk.get_logged_session()
         expected = {'host': None, 'session_id': None}
 
         self.assertEqual(logged_session, expected)
-        self.assertFalse(return_value)
-    
+
     @patch('azkaban_cli.azkaban.api.login_request')
     def test_wrong_user_login(self, mock_login_request):
         """
         Test if login method from Azkaban class treats correctly when request returns error caused by wrong user.
 
-        Expected to not save logged session and method return false
+        Expected to not save logged session and method to raise LoginError
         """
 
         mock_response = Mock()
         mock_login_request.return_value = mock_response
         mock_response.json.return_value = {'error': 'Incorrect Login. No user wrong_user found'}
 
-        return_value = self.azk.login('host', 'wrong_user', 'password')
+        with self.assertRaises(LoginError):
+            self.azk.login('host', 'wrong_user', 'password')
 
         logged_session = self.azk.get_logged_session()
         expected = {'host': None, 'session_id': None}
 
         self.assertEqual(logged_session, expected)
-        self.assertFalse(return_value)
-    
+
     @patch('azkaban_cli.azkaban.api.login_request')
     def test_wrong_password_login(self, mock_login_request):
         """
         Test if login method from Azkaban class treats correctly when request returns error caused by wrong password.
 
-        Expected to not save logged session and method return false
+        Expected to not save logged session and method to raise LoginError
         """
 
         mock_response = Mock()
         mock_login_request.return_value = mock_response
         mock_response.json.return_value = {'error': 'Incorrect Login. LDAP error: '}
 
-        return_value = self.azk.login('host', 'user', 'wrong_password')
+        with self.assertRaises(LoginError):
+            self.azk.login('host', 'user', 'wrong_password')
 
         logged_session = self.azk.get_logged_session()
         expected = {'host': None, 'session_id': None}
 
         self.assertEqual(logged_session, expected)
-        self.assertFalse(return_value)
 
 class AzkabanUploadTest(TestCase):
     def setUp(self):
@@ -126,7 +126,7 @@ class AzkabanUploadTest(TestCase):
     @patch('azkaban_cli.azkaban.api.upload_request')
     def test_upload(self, mock_upload_request, mock_make_archive, mock_os_remove):
         """
-        Test if upload method from Azkaban class returns True if request is fine
+        Test upload method from Azkaban class
         """
 
         mock_response = Mock()
@@ -135,29 +135,27 @@ class AzkabanUploadTest(TestCase):
 
         mock_make_archive.return_value = 'zip_path'
 
-        return_value = self.azk.upload('path', 'project', 'zip_name')
-
-        self.assertTrue(return_value)
+        self.azk.upload('path', 'project', 'zip_name')
 
     @patch('azkaban_cli.azkaban.api.upload_request')
     def test_error_not_logged_upload(self, mock_upload_request):
         """
-        Test if upload method from Azkaban class returns False and doesn't make the request if there is no logged session
+        Test if upload method from Azkaban class raises NotLoggedOnError and doesn't make the request if there is no logged session
         """
 
         self.azk.logout()
 
-        return_value = self.azk.upload('path', 'project', 'zip_name')
+        with self.assertRaises(NotLoggedOnError):
+            self.azk.upload('path', 'project', 'zip_name')
 
         mock_upload_request.assert_not_called()
-        self.assertFalse(return_value)
 
     @patch('azkaban_cli.azkaban.os.remove')
     @patch('azkaban_cli.azkaban.make_archive')
     @patch('azkaban_cli.azkaban.api.upload_request')
     def test_error_unzip_file_upload(self, mock_upload_request, mock_make_archive, mock_os_remove):
         """
-        Test if upload method from Azkaban class returns False if request returns error unzipping file
+        Test if upload method from Azkaban class raises UploadError if request returns error unzipping file
         """
 
         mock_response = Mock()
@@ -166,16 +164,15 @@ class AzkabanUploadTest(TestCase):
 
         mock_make_archive.return_value = 'zip_path'
 
-        return_value = self.azk.upload('path', 'project', 'zip_name')
-
-        self.assertFalse(return_value)
+        with self.assertRaises(UploadError):
+            self.azk.upload('path', 'project', 'zip_name')
 
     @patch('azkaban_cli.azkaban.os.remove')
     @patch('azkaban_cli.azkaban.make_archive')
     @patch('azkaban_cli.azkaban.api.upload_request')
     def test_error_project_doesnt_exist_upload(self, mock_upload_request, mock_make_archive, mock_os_remove):
         """
-        Test if upload method from Azkaban class returns False if request returns error caused by project doesn't exist
+        Test if upload method from Azkaban class raises UploadError if request returns error caused by project doesn't exist
         """
 
         mock_response = Mock()
@@ -184,25 +181,24 @@ class AzkabanUploadTest(TestCase):
 
         mock_make_archive.return_value = 'zip_path'
 
-        return_value = self.azk.upload('path', 'project', 'zip_name')
-
-        self.assertFalse(return_value)
+        with self.assertRaises(UploadError):
+            self.azk.upload('path', 'project', 'zip_name')
 
     @patch('azkaban_cli.azkaban.os.remove')
     @patch('azkaban_cli.azkaban.make_archive')
     @patch('azkaban_cli.azkaban.api.upload_request')
     def test_error_file_not_found_upload(self, mock_upload_request, mock_make_archive, mock_os_remove):
         """
-        Test if upload method from Azkaban class returns False if could not create zip from path passed as argument, 
+        Test if upload method from Azkaban class raises UploadError if could not create zip from path passed as argument, 
         usually because path is wrong
         """
 
         mock_make_archive.side_effect = FileNotFoundError
 
-        return_value = self.azk.upload('path', 'project', 'zip_name')
+        with self.assertRaises(UploadError):
+           self.azk.upload('path', 'project', 'zip_name')
 
         mock_upload_request.assert_not_called()
-        self.assertFalse(return_value)
 
     @patch('azkaban_cli.azkaban.os.remove')
     @patch('azkaban_cli.azkaban.make_archive')
@@ -302,7 +298,7 @@ class AzkabanScheduleTest(TestCase):
     @patch('azkaban_cli.azkaban.api.schedule_request')
     def test_schedule(self, mock_schedule_request):
         """
-        Test if schedule method from Azkaban class returns True if request is fine
+        Test schedule method from Azkaban class 
         """
 
         mock_response = Mock()
@@ -313,9 +309,7 @@ class AzkabanScheduleTest(TestCase):
             'status': 'success'
         }
 
-        return_value = self.azk.schedule(self.project, self.flow, self.cron)
-
-        self.assertTrue(return_value)
+        self.azk.schedule(self.project, self.flow, self.cron)
 
     @patch('azkaban_cli.azkaban.api.schedule_request')
     def test_schedule_request_called(self, mock_schedule_request):
@@ -330,7 +324,7 @@ class AzkabanScheduleTest(TestCase):
     @patch('azkaban_cli.azkaban.api.schedule_request')
     def test_error_project_doesnt_exist_upload(self, mock_schedule_request):
         """
-        Test if schedule method from Azkaban class returns False if request returns error caused by project doesn't exist
+        Test if schedule method from Azkaban class raises ScheduleError if request returns error caused by project doesn't exist
         """
 
         mock_response = Mock()
@@ -340,14 +334,13 @@ class AzkabanScheduleTest(TestCase):
             'status': 'error'
         }
 
-        return_value = self.azk.schedule(self.project, self.flow, self.cron)
-
-        self.assertFalse(return_value)
+        with self.assertRaises(ScheduleError):
+            self.azk.schedule(self.project, self.flow, self.cron)
 
     @patch('azkaban_cli.azkaban.api.schedule_request')
     def test_error_flow_cannot_be_found_upload(self, mock_schedule_request):
         """
-        Test if schedule method from Azkaban class returns False if request returns error caused by flow not be found
+        Test if schedule method from Azkaban class raises ScheduleError if request returns error caused by flow not be found
         """
 
         mock_response = Mock()
@@ -357,14 +350,13 @@ class AzkabanScheduleTest(TestCase):
             'status': 'error'
         }
 
-        return_value = self.azk.schedule(self.project, self.flow, self.cron)
-
-        self.assertFalse(return_value)
+        with self.assertRaises(ScheduleError):
+            self.azk.schedule(self.project, self.flow, self.cron)
 
     @patch('azkaban_cli.azkaban.api.schedule_request')
     def test_error_cron_cannot_be_parsed_upload(self, mock_schedule_request):
         """
-        Test if schedule method from Azkaban class returns False if request returns error caused by wrong cron expression
+        Test if schedule method from Azkaban class raises ScheduleError if request returns error caused by wrong cron expression
         """
 
         mock_response = Mock()
@@ -373,9 +365,8 @@ class AzkabanScheduleTest(TestCase):
             'error': 'This expression <0 23 ? * *> can not be parsed to quartz cron.'
         }
 
-        return_value = self.azk.schedule(self.project, self.flow, self.cron)
-
-        self.assertFalse(return_value)
+        with self.assertRaises(ScheduleError):
+            self.azk.schedule(self.project, self.flow, self.cron)
 
 class AzkabanExecuteTest(TestCase):
     def setUp(self):
@@ -399,7 +390,7 @@ class AzkabanExecuteTest(TestCase):
     @patch('azkaban_cli.azkaban.api.execute_request')
     def test_execute(self, mock_execute_request):
         """
-        Test if execute method from Azkaban class returns True if request is fine
+        Test execute method from Azkaban class
         """
 
         mock_response = Mock()
@@ -411,10 +402,7 @@ class AzkabanExecuteTest(TestCase):
             'execid': '6867'
         }
 
-        return_value = self.azk.execute(self.project, self.flow)
-
-        self.assertTrue(return_value)
-
+        self.azk.execute(self.project, self.flow)
 
     @patch('azkaban_cli.azkaban.api.execute_request')
     def test_execute_request_called(self, mock_execute_request):
@@ -430,7 +418,7 @@ class AzkabanExecuteTest(TestCase):
     @patch('azkaban_cli.azkaban.api.execute_request')
     def test_flow_cannot_be_found_execute(self, mock_execute_request):
         """
-        Test if execute method from Azkaban class returns False if request returns error caused by flow not be found
+        Test if execute method from Azkaban class raises ExecuteError if request returns error caused by flow not be found
         """
 
         mock_response = Mock()
@@ -441,14 +429,13 @@ class AzkabanExecuteTest(TestCase):
             'flow': 'FlowTest'
         }
 
-        return_value = self.azk.execute(self.project, self.flow)
-
-        self.assertFalse(return_value)
+        with self.assertRaises(ExecuteError):
+            self.azk.execute(self.project, self.flow)
 
     @patch('azkaban_cli.azkaban.api.execute_request')
     def test_project_doesnt_exist_execute(self, mock_execute_request):
         """
-        Test if execute method from Azkaban class returns False if request returns error caused by flow not be found
+        Test if execute method from Azkaban class raises ExecuteError if request returns error caused by flow not be found
         """
 
         mock_response = Mock()
@@ -458,6 +445,5 @@ class AzkabanExecuteTest(TestCase):
             'error': "Project 'ProjectTest' doesn't exist."
         }
 
-        return_value = self.azk.execute(self.project, self.flow)
-
-        self.assertFalse(return_value)
+        with self.assertRaises(ExecuteError):
+            self.azk.execute(self.project, self.flow)
