@@ -13,3 +13,6 @@ release:
 
 dist: clean
 	@python setup.py sdist
+
+test:
+	@python -m unittest
