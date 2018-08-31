@@ -53,6 +53,7 @@ def __login(ctx, host, user, password):
     try:
         azkaban.login(host, user, password)
         __save_logged_session(azkaban.get_logged_session())
+        logging.info("Logged in succesfully!")
     except (requests.exceptions.ConnectionError, requests.exceptions.MissingSchema) as e:
         logging.error("Could not connect to host: %s", str(e))
     except LoginError as e:
@@ -63,6 +64,8 @@ def __logout(ctx):
 
     azkaban.logout()
     __delete_logged_session()
+
+    logging.info("Logged out")
 
 @login_required
 def __upload(ctx, path, project, zip_name):
