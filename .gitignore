@@ -6,3 +6,8 @@ dist/
 
 .pytest_cache/
 .vscode/
+
+.cache/
+.scannerwork/
+docs/
+sonar-project.properties
