@@ -1,7 +1,9 @@
 from __future__ import absolute_import
+from azkaban_cli.exceptions import NotLoggedOnError, LoginError
 from shutil import make_archive
 from urllib3.exceptions import InsecureRequestWarning
 import azkaban_cli.api as api
+import json
 import logging
 import os
 import requests
@@ -16,8 +18,7 @@ class Azkaban(object):
 
         self.__session = session
 
-        self.__host = None
-        self.__session_id = None
+        self.set_logged_session(None, None)
 
     def __validate_host(self, host):
         valid_host = host
@@ -75,16 +76,10 @@ class Azkaban(object):
 
         valid_host = self.__validate_host(host)
 
-        try:
-            response_json = api.login_request(self.__session, valid_host, user, password).json()
-        except requests.exceptions.ConnectionError:
-            logging.error("Could not connect to host")
-            return False
+        response_json = api.login_request(self.__session, valid_host, user, password).json()
 
         if u'error' in response_json.keys():
-            error_msg = response_json[u'error']
-            logging.error(error_msg)
-            return False
+            raise LoginError(response_json[u'error'])
 
         self.set_logged_session(valid_host, response_json['session.id'])
 
@@ -115,8 +110,7 @@ class Azkaban(object):
         """
 
         if not self.__session_id:
-            logging.error(u'You are not logged')
-            return False
+            raise NotLoggedOnError()
 
         if not project:
             # define project name as basename
@@ -164,8 +158,7 @@ class Azkaban(object):
         """
 
         if not self.__session_id:
-            logging.error(u'You are not logged')
-            return False
+            raise NotLoggedOnError()
 
         response_json = api.schedule_request(self.__session, self.__host, self.__session_id, project, flow, cron).json()
 
@@ -199,8 +192,7 @@ class Azkaban(object):
         """
 
         if not self.__session_id:
-            logging.error(u'You are not logged')
-            return False
+            raise NotLoggedOnError()
 
         response_json = api.execute_request(
             self.__session,
