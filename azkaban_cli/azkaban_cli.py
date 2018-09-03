@@ -7,7 +7,7 @@ import sys
 import zipfile
 import os
 from azkaban_cli.azkaban import Azkaban
-from azkaban_cli.exceptions import NotLoggedOnError, LoginError, UploadError, ScheduleError, ExecuteError
+from azkaban_cli.exceptions import NotLoggedOnError, LoginError, SessionError, UploadError, ScheduleError, ExecuteError
 
 __version__ = u'0.3.0beta'
 APP_NAME = 'Azkaban CLI'
@@ -24,7 +24,7 @@ def login_required(function):
     def function_wrapper(ctx, *args):
         try:
             function(ctx, *args)
-        except NotLoggedOnError:
+        except (NotLoggedOnError, SessionError):
             __call_for_login(ctx)
             function_wrapper(ctx, *args)
 

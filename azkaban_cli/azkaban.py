@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from azkaban_cli.exceptions import NotLoggedOnError, LoginError, UploadError, ScheduleError, ExecuteError
+from azkaban_cli.exceptions import NotLoggedOnError, SessionError, LoginError, UploadError, ScheduleError, ExecuteError
 from shutil import make_archive
 from urllib3.exceptions import InsecureRequestWarning
 import azkaban_cli.api as api
@@ -32,9 +32,11 @@ class Azkaban(object):
         if not self.__session_id:
             raise NotLoggedOnError()
 
-    def __treat_response(self, response_json, exception):
+    def __catch_response_error(self, response_json, exception):
         if u'error' in response_json.keys():
             error_msg = response_json[u'error']
+            if error_msg == "session":
+                raise SessionError(error_msg)
             raise exception(error_msg)
 
         response_status = response_json.get('status')
@@ -91,7 +93,7 @@ class Azkaban(object):
 
         response_json = api.login_request(self.__session, valid_host, user, password).json()
 
-        self.__treat_response(response_json, LoginError)
+        self.__catch_response_error(response_json, LoginError)
 
         self.set_logged_session(valid_host, response_json['session.id'])
 
@@ -137,7 +139,7 @@ class Azkaban(object):
 
         os.remove(zip_path)
 
-        self.__treat_response(response_json, UploadError)
+        self.__catch_response_error(response_json, UploadError)
 
         logging.info('Project %s updated to version %s' % (project, response_json[u'version']))
 
@@ -163,7 +165,7 @@ class Azkaban(object):
 
         response_json = api.schedule_request(self.__session, self.__host, self.__session_id, project, flow, cron).json()
 
-        self.__treat_response(response_json, ScheduleError)
+        self.__catch_response_error(response_json, ScheduleError)
 
         logging.info(response_json[u'message'])
         logging.info('scheduleId: %s' % (response_json[u'scheduleId']))
@@ -193,6 +195,6 @@ class Azkaban(object):
             flow,
         ).json()
 
-        self.__treat_response(response_json, ExecuteError)
+        self.__catch_response_error(response_json, ExecuteError)
 
         logging.info('%s' % (response_json[u'message']))

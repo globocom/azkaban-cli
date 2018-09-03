@@ -1,6 +1,9 @@
 class NotLoggedOnError(Exception):
     pass
 
+class SessionError(Exception):
+    pass
+
 class LoginError(Exception):
     pass
 
