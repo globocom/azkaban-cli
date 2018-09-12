@@ -9,7 +9,7 @@ import os
 from azkaban_cli.azkaban import Azkaban
 from azkaban_cli.exceptions import NotLoggedOnError, LoginError, SessionError, UploadError, ScheduleError, ExecuteError
 
-__version__ = u'0.3.0beta'
+__version__ = u'0.3.0'
 APP_NAME = 'Azkaban CLI'
 
 HOME_PATH = os.path.expanduser("~")
@@ -77,11 +77,11 @@ def __upload(ctx, path, project, zip_name):
         logging.error(str(e))
 
 @login_required
-def __schedule(ctx, project, flow, cron):
+def __schedule(ctx, project, flow, cron, concurrent_option):
     azkaban = ctx.obj[u'azkaban']
 
     try:
-        azkaban.schedule(project, flow, cron)
+        azkaban.schedule(project, flow, cron, concurrentOption=concurrent_option)
     except ScheduleError as e:
         logging.error(str(e))
 
@@ -146,9 +146,10 @@ def upload(ctx, path, project, zip_name):
 @click.argument(u'project', type=click.STRING)
 @click.argument(u'flow', type=click.STRING)
 @click.argument(u'cron', type=click.STRING)
-def schedule(ctx, project, flow, cron):
+@click.option(u'--concurrent-option', type=click.STRING, help=u'If you wanna specify concurrent option for scheduling flow')
+def schedule(ctx, project, flow, cron, concurrent_option):
     """Schedule a flow from a project with specified cron in quartz format"""
-    __schedule(ctx, project, flow, cron)
+    __schedule(ctx, project, flow, cron, concurrent_option)
 
 @click.command(u'execute')
 @click.pass_context

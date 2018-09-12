@@ -68,7 +68,7 @@ def login_request(session, host, user, password):
 
     return response
 
-def schedule_request(session, host, session_id, project, flow, cron):
+def schedule_request(session, host, session_id, project, flow, cron, **execution_options):
     """Schedule request for the Azkaban API
 
     :param session: A session for creating the request
@@ -83,15 +83,20 @@ def schedule_request(session, host, session_id, project, flow, cron):
     :raises requests.exceptions.ConnectionError: if cannot connect to host
     """
 
+    data = {
+        u'session.id': session_id,
+        u'ajax': u'scheduleCronFlow',
+        u'projectName': project,
+        u'flow': flow,
+        u'cronExpression': cron
+    }
+    data.update(execution_options)
+
+    logging.debug("Request data: \n%s", data)
+
     response = session.post(
         host + '/schedule',
-        data={
-            u'session.id': session_id,
-            u'ajax': u'scheduleCronFlow',
-            u'projectName': project,
-            u'flow': flow,
-            u'cronExpression': cron
-        }
+        data=data
     )
 
     logging.debug("Response: \n%s", response.text)

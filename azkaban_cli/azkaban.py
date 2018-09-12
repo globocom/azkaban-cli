@@ -143,7 +143,7 @@ class Azkaban(object):
 
         logging.info('Project %s updated to version %s' % (project, response_json[u'version']))
 
-    def schedule(self, project, flow, cron):
+    def schedule(self, project, flow, cron, **execution_options):
         """Schedule command, intended to make the request to Azkaban and treat the response properly.
 
         This method receives the project, the flow and the cron expression in quartz format, make the schedule request
@@ -163,7 +163,9 @@ class Azkaban(object):
 
         self.__check_if_logged()
 
-        response_json = api.schedule_request(self.__session, self.__host, self.__session_id, project, flow, cron).json()
+        execution_options = {k:v for (k, v) in execution_options.items() if v}
+
+        response_json = api.schedule_request(self.__session, self.__host, self.__session_id, project, flow, cron, **execution_options).json()
 
         self.__catch_response_error(response_json, ScheduleError)
 
