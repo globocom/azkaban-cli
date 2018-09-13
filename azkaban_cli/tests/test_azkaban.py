@@ -1,6 +1,6 @@
 from unittest.mock import patch, Mock, ANY
 from unittest import TestCase
-from azkaban_cli.exceptions import LoginError, NotLoggedOnError, UploadError, ScheduleError, ExecuteError
+from azkaban_cli.exceptions import LoginError, NotLoggedOnError, UploadError, ScheduleError, ExecuteError, SessionError
 import requests
 import azkaban_cli.azkaban
 
@@ -281,6 +281,24 @@ class AzkabanUploadTest(TestCase):
         mock_os_remove.assert_called_with(zip_path)
         mock_upload_request.assert_called_with(ANY, self.host, self.session_id, ANY, ANY)
 
+    @patch('azkaban_cli.azkaban.os.remove')
+    @patch('azkaban_cli.azkaban.make_archive')
+    @patch('azkaban_cli.azkaban.api.upload_request')
+    def test_error_session_expired_upload(self, mock_upload_request, mock_make_archive, mock_os_remove):
+        """
+        Test if upload method from Azkaban class raises Session if request returns error caused by expired session
+        """
+
+        mock_response = Mock()
+        mock_upload_request.return_value = mock_response
+        mock_response.text = "Login error. Need username and password"
+
+        path     = '/path/to/project'
+
+        with self.assertRaises(SessionError):
+            self.azk.upload(path)
+
+
 class AzkabanScheduleTest(TestCase):
     def setUp(self):
         """
@@ -329,7 +347,7 @@ class AzkabanScheduleTest(TestCase):
         mock_schedule_request.assert_called_with(ANY, self.host, self.session_id, self.project, self.flow, self.cron)
 
     @patch('azkaban_cli.azkaban.api.schedule_request')
-    def test_error_project_doesnt_exist_upload(self, mock_schedule_request):
+    def test_error_project_doesnt_exist_schedule(self, mock_schedule_request):
         """
         Test if schedule method from Azkaban class raises ScheduleError if request returns error caused by project doesn't exist
         """
@@ -346,7 +364,7 @@ class AzkabanScheduleTest(TestCase):
             self.azk.schedule(self.project, self.flow, self.cron)
 
     @patch('azkaban_cli.azkaban.api.schedule_request')
-    def test_error_flow_cannot_be_found_upload(self, mock_schedule_request):
+    def test_error_flow_cannot_be_found_schedule(self, mock_schedule_request):
         """
         Test if schedule method from Azkaban class raises ScheduleError if request returns error caused by flow not be found
         """
@@ -363,7 +381,7 @@ class AzkabanScheduleTest(TestCase):
             self.azk.schedule(self.project, self.flow, self.cron)
 
     @patch('azkaban_cli.azkaban.api.schedule_request')
-    def test_error_cron_cannot_be_parsed_upload(self, mock_schedule_request):
+    def test_error_cron_cannot_be_parsed_schedule(self, mock_schedule_request):
         """
         Test if schedule method from Azkaban class raises ScheduleError if request returns error caused by wrong cron expression
         """
@@ -376,6 +394,20 @@ class AzkabanScheduleTest(TestCase):
         }
 
         with self.assertRaises(ScheduleError):
+            self.azk.schedule(self.project, self.flow, self.cron)
+
+    @patch('azkaban_cli.azkaban.api.schedule_request')
+    def test_error_session_expired_schedule(self, mock_schedule_request):
+        """
+        Test if schedule method from Azkaban class raises SessionError if request returns html from login because of expired session
+        """
+
+        mock_response = Mock()
+        mock_schedule_request.return_value = mock_response
+        with open("azkaban_cli/tests/resources/schedule_session_expired.html") as f:
+            mock_response.text = f.read()
+
+        with self.assertRaises(SessionError):
             self.azk.schedule(self.project, self.flow, self.cron)
 
 class AzkabanExecuteTest(TestCase):
@@ -459,4 +491,20 @@ class AzkabanExecuteTest(TestCase):
         }
 
         with self.assertRaises(ExecuteError):
+            self.azk.execute(self.project, self.flow)
+
+    @patch('azkaban_cli.azkaban.api.execute_request')
+    def test_error_session_expired_execute(self, mock_execute_request):
+        """
+        Test if execute method from Azkaban class raises SessionError if request returns error caused by session expired
+        """
+
+        mock_response = Mock()
+        mock_execute_request.return_value = mock_response
+        mock_response.text = "{\"error\" : \"session\"}"
+        mock_response.json.return_value = {
+            "error": "session"
+        }
+
+        with self.assertRaises(SessionError):
             self.azk.execute(self.project, self.flow)

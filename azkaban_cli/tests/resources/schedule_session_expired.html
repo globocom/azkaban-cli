@@ -1,0 +1,154 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+
+<meta charset="utf-8">
+<title>Azkaban Web Client
+</title>
+
+<link rel="shortcut icon" href="/favicon.ico"/>
+<!-- Bootstrap core CSS -->
+<link href="/css/bootstrap.css" rel="stylesheet">
+<link href="/css/azkaban.css" rel="stylesheet">
+<style type="text/css">
+  .navbar-enviro .navbar-enviro-name {
+    color: #0077ff;
+  }
+
+  .navbar-inverse {
+    border-top: 5px solid #0077ff;
+  }
+
+  .navbar-inverse .navbar-nav > .active > a {
+    border-bottom: 1px solid #0077ff;
+  }
+</style>
+
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+  <script src="/js/html5shiv.js"></script>
+  <script src="/js/respond.min.js"></script>
+<![endif]-->
+
+
+<script type="text/javascript" src="/js/jquery/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/js/underscore-1.4.4-min.js"></script>
+<script type="text/javascript" src="/js/azkaban/namespace.js"></script>
+<script type="text/javascript" src="/js/backbone-0.9.10-min.js"></script>
+
+  <script type="text/javascript" src="/js/azkaban/view/login.js"></script>
+  <script type="text/javascript">
+    var contextURL = "";
+  </script>
+</head>
+<body>
+
+
+
+<style type="text/css">
+  #banner {
+    width: 100%;
+    background: orange;
+    height: 70px;
+    position: float;
+    top: 0;
+    display: none;
+    left: 0;
+    text-align: center;
+    line-height: 70px;
+    font-weight: bold;
+  }
+
+  #banner span:hover {
+    color: red;
+    cursor: pointer;
+  }
+</style>
+<script type="text/javascript">
+  function navMenuClick(url) {
+    window.location.href = url;
+  }
+
+  $(function () {
+
+    if ($("#banner").data("id").indexOf('$') == -1 && $('#banner').is(':empty') == false) {
+      $('#banner').attr('Target', '_blank');
+      $("#banner").on("click", function () {
+        window.open($("#banner").data("url"));
+      });
+
+      $("#banner").slideDown(function () {
+        if ($("#banner").data("id") == "Warning") {
+          $('#bannerText').append('<img ' + 'src=' + '"images/warning.png"'
+              + ' width="50" height="50" ' + ' style=' + '"display:inline;" >' + ' </img>');
+          $('#bannerText').append('<span style="font-size: 150%;" >' + $("#banner").data("message")
+              + '</span>');
+        } else if ($("#banner").data("id") == "Action Required") {
+          $('#bannerText').append('<img ' + 'src=' + '"images/warning.png"'
+              + ' width="50" height="50" ' + ' style=' + '"display:inline;" >' + ' </img>');
+          $('#bannerText').append('<span style="font-size: 150%;" >' + $("#banner").data("id")
+              + ":    " + '</span>');
+          $('#bannerText').append('<span style="font-size: 150%;" >' + $("#banner").data("message")
+              + '</span>');
+        }
+        // The banner will side up after 30 seconds
+        setTimeout(function () {
+          $("#banner").slideUp();
+        }, 30000);
+      });
+    }
+  });
+</script>
+
+<div id='banner' data-id="$note_type" data-message="$note_message" data-url="$note_url">
+  <div id="bannerText">
+  </div>
+</div>
+
+<div class="navbar navbar-inverse navbar-static-top">
+  <div class="container-full">
+    <div class="navbar-header">
+      <div class="navbar-logo">
+        <a href="/">Azkaban</a>
+        <div class="navbar-version">
+          0.1.0-SNAPSHOT
+        </div>
+      </div>
+
+    </div>
+    <div class="navbar-left navbar-enviro">
+      <div class="navbar-enviro-name">Azkaban</div>
+      <div class="navbar-enviro-server">Azkaban web server</div>
+    </div>
+    <div class="navbar-collapse collapse">
+          </div><!--/.nav-collapse -->
+  </div>
+</div>
+
+<div class="container-full">
+  <div class="login">
+    <div class="alert alert-danger" id="error-msg"></div>
+    <div class="well">
+      <form id="login-form" role="form">
+        <fieldset>
+          <legend>Login</legend>
+          <input type="text" class="form-control" name="username" id="username"
+                 placeholder="Username">
+          <input type="password" class="form-control" name="password" id="password"
+                 placeholder="Password">
+          <button type="button" class="btn btn-primary btn-lg btn-block" id="login-submit">Login
+          </button>
+        </fieldset>
+      </form>
+    </div><!-- /.well -->
+  </div><!-- /.login -->
+
+</div><!-- /container -->
+</body>
+</html>
+
