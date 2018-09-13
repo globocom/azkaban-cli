@@ -38,6 +38,7 @@ class AzkabanLoginTest(TestCase):
 
         mock_response = Mock()
         mock_login_request.return_value = mock_response
+        mock_response.text = "{'session.id': 'aebe406b-d5e6-4056-add6-bf41091e42c6', 'status': 'success'}"
         mock_response.json.return_value = {'session.id': 'aebe406b-d5e6-4056-add6-bf41091e42c6', 'status': 'success'}
 
         self.azk.login('host', 'user', 'password')
@@ -75,6 +76,7 @@ class AzkabanLoginTest(TestCase):
 
         mock_response = Mock()
         mock_login_request.return_value = mock_response
+        mock_response.text = "{'error': 'Incorrect Login. No user wrong_user found'}"
         mock_response.json.return_value = {'error': 'Incorrect Login. No user wrong_user found'}
 
         with self.assertRaises(LoginError):
@@ -95,6 +97,7 @@ class AzkabanLoginTest(TestCase):
 
         mock_response = Mock()
         mock_login_request.return_value = mock_response
+        mock_response.text = "{'error': 'Incorrect Login. LDAP error: '}"
         mock_response.json.return_value = {'error': 'Incorrect Login. LDAP error: '}
 
         with self.assertRaises(LoginError):
@@ -131,6 +134,7 @@ class AzkabanUploadTest(TestCase):
 
         mock_response = Mock()
         mock_upload_request.return_value = mock_response
+        mock_response.text = "{'projectId': '33', 'version': '58'}"
         mock_response.json.return_value = {'projectId': '33', 'version': '58'}
 
         mock_make_archive.return_value = 'zip_path'
@@ -160,6 +164,7 @@ class AzkabanUploadTest(TestCase):
 
         mock_response = Mock()
         mock_upload_request.return_value = mock_response
+        mock_response.text = "{'projectId': '33', 'version': '58', 'error': 'Installation Failed.\nError unzipping file.'}"
         mock_response.json.return_value = {'projectId': '33', 'version': '58', 'error': 'Installation Failed.\nError unzipping file.'}
 
         mock_make_archive.return_value = 'zip_path'
@@ -177,6 +182,7 @@ class AzkabanUploadTest(TestCase):
 
         mock_response = Mock()
         mock_upload_request.return_value = mock_response
+        mock_response.text = "{\"error\" : \"Installation Failed. Project 'no-existing-project' doesn't exist.\"}"
         mock_response.json.return_value = {"error" : "Installation Failed. Project 'no-existing-project' doesn't exist."}
 
         mock_make_archive.return_value = 'zip_path'
@@ -303,6 +309,7 @@ class AzkabanScheduleTest(TestCase):
 
         mock_response = Mock()
         mock_schedule_request.return_value = mock_response
+        mock_response.text = "{'message': 'ProjectTest.FlowTest scheduled.','scheduleId': '41','status': 'success'}"
         mock_response.json.return_value = {
             'message': 'ProjectTest.FlowTest scheduled.',
             'scheduleId': '41',
@@ -329,6 +336,7 @@ class AzkabanScheduleTest(TestCase):
 
         mock_response = Mock()
         mock_schedule_request.return_value = mock_response
+        mock_response.text = "{'message': 'Project ProjectTest does not exist','status': 'error'}"
         mock_response.json.return_value = {
             'message': 'Project ProjectTest does not exist',
             'status': 'error'
@@ -345,6 +353,7 @@ class AzkabanScheduleTest(TestCase):
 
         mock_response = Mock()
         mock_schedule_request.return_value = mock_response
+        mock_response.text = "{'message': 'Flow FlowTest cannot be found in project GustavoTest','status': 'error'}"
         mock_response.json.return_value = {
             'message': 'Flow FlowTest cannot be found in project GustavoTest',
             'status': 'error'
@@ -361,6 +370,7 @@ class AzkabanScheduleTest(TestCase):
 
         mock_response = Mock()
         mock_schedule_request.return_value = mock_response
+        mock_response.text = "{'error': 'This expression <0 23 ? * *> can not be parsed to quartz cron.'}"
         mock_response.json.return_value = {
             'error': 'This expression <0 23 ? * *> can not be parsed to quartz cron.'
         }
@@ -395,6 +405,7 @@ class AzkabanExecuteTest(TestCase):
 
         mock_response = Mock()
         mock_execute_request.return_value = mock_response
+        mock_response.text = "{'project': 'ProjectTest','message': 'Execution submitted successfully with exec id 6867','flow': 'FlowTest','execid': '6867'}"
         mock_response.json.return_value = {
             'project': 'ProjectTest',
             'message': 'Execution submitted successfully with exec id 6867',
@@ -423,6 +434,7 @@ class AzkabanExecuteTest(TestCase):
 
         mock_response = Mock()
         mock_execute_request.return_value = mock_response
+        mock_response.text = "{'project': 'ProjectTest','error': \"Flow 'FlowTest' cannot be found in project ProjectTest\",'flow': 'FlowTest'}"
         mock_response.json.return_value = {
             'project': 'ProjectTest',
             'error': "Flow 'FlowTest' cannot be found in project ProjectTest",
@@ -440,6 +452,7 @@ class AzkabanExecuteTest(TestCase):
 
         mock_response = Mock()
         mock_execute_request.return_value = mock_response
+        mock_response.text = "{'project': 'ProjectTest','error': \"Project 'ProjectTest' doesn't exist.\"}"
         mock_response.json.return_value = {
             'project': 'ProjectTest',
             'error': "Project 'ProjectTest' doesn't exist."

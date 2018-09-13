@@ -32,7 +32,14 @@ class Azkaban(object):
         if not self.__session_id:
             raise NotLoggedOnError()
 
-    def __catch_response_error(self, response_json, exception):
+    def __catch_response_error(self, response, exception):
+        if (response.text == "Login error. Need username and password"):
+            raise SessionError(response.text)
+
+        if ("  <script type=\"text/javascript\" src=\"/js/azkaban/view/login.js\"></script>" in response.text.splitlines()):
+            raise SessionError(response.text)
+
+        response_json = response.json()
         if u'error' in response_json.keys():
             error_msg = response_json[u'error']
             if error_msg == "session":
@@ -91,10 +98,11 @@ class Azkaban(object):
 
         valid_host = self.__validate_host(host)
 
-        response_json = api.login_request(self.__session, valid_host, user, password).json()
+        response = api.login_request(self.__session, valid_host, user, password)
 
-        self.__catch_response_error(response_json, LoginError)
+        self.__catch_response_error(response, LoginError)
 
+        response_json = response.json()
         self.set_logged_session(valid_host, response_json['session.id'])
 
         logging.info('Logged as %s' % (user))
@@ -135,12 +143,14 @@ class Azkaban(object):
         except FileNotFoundError as e:
             raise UploadError(str(e))
 
-        response_json = api.upload_request(self.__session ,self.__host, self.__session_id, project, zip_path).json()
+        try:
+            response = api.upload_request(self.__session ,self.__host, self.__session_id, project, zip_path)
+        finally:
+            os.remove(zip_path)
 
-        os.remove(zip_path)
+        self.__catch_response_error(response, UploadError)
 
-        self.__catch_response_error(response_json, UploadError)
-
+        response_json = response.json()
         logging.info('Project %s updated to version %s' % (project, response_json[u'version']))
 
     def schedule(self, project, flow, cron, **execution_options):
@@ -165,10 +175,11 @@ class Azkaban(object):
 
         execution_options = {k:v for (k, v) in execution_options.items() if v}
 
-        response_json = api.schedule_request(self.__session, self.__host, self.__session_id, project, flow, cron, **execution_options).json()
+        response = api.schedule_request(self.__session, self.__host, self.__session_id, project, flow, cron, **execution_options)
 
-        self.__catch_response_error(response_json, ScheduleError)
+        self.__catch_response_error(response, ScheduleError)
 
+        response_json = response.json()
         logging.info(response_json[u'message'])
         logging.info('scheduleId: %s' % (response_json[u'scheduleId']))
 
@@ -189,14 +200,15 @@ class Azkaban(object):
 
         self.__check_if_logged()
 
-        response_json = api.execute_request(
+        response = api.execute_request(
             self.__session,
             self.__host,
             self.__session_id,
             project,
             flow,
-        ).json()
+        )
 
-        self.__catch_response_error(response_json, ExecuteError)
+        self.__catch_response_error(response, ExecuteError)
 
+        response_json = response.json()
         logging.info('%s' % (response_json[u'message']))
