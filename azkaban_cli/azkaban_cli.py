@@ -146,7 +146,7 @@ def upload(ctx, path, project, zip_name):
 @click.argument(u'project', type=click.STRING)
 @click.argument(u'flow', type=click.STRING)
 @click.argument(u'cron', type=click.STRING)
-@click.option(u'--concurrent-option', type=click.STRING, help=u'If you wanna specify concurrent option for scheduling flow')
+@click.option(u'--concurrent-option', type=click.STRING, help=u'If you wanna specify concurrent option for scheduling flow. Possible values: ignore, pipeline, skip')
 def schedule(ctx, project, flow, cron, concurrent_option):
     """Schedule a flow from a project with specified cron in quartz format"""
     __schedule(ctx, project, flow, cron, concurrent_option)

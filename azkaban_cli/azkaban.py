@@ -156,8 +156,8 @@ class Azkaban(object):
     def schedule(self, project, flow, cron, **execution_options):
         """Schedule command, intended to make the request to Azkaban and treat the response properly.
 
-        This method receives the project, the flow and the cron expression in quartz format, make the schedule request
-        to schedule the flow with the cron specified and avaliate the response.
+        This method receives the project, the flow, the cron expression in quartz format and optional execution options,
+        make the schedule request to schedule the flow with the cron specified and avaliate the response.
 
         If project, flow or cron is wrong or if there is no session_id, it returns false. If everything is fine, returns
         True.
@@ -175,7 +175,15 @@ class Azkaban(object):
 
         execution_options = {k:v for (k, v) in execution_options.items() if v}
 
-        response = api.schedule_request(self.__session, self.__host, self.__session_id, project, flow, cron, **execution_options)
+        response = api.schedule_request(
+            self.__session,
+            self.__host,
+            self.__session_id,
+            project,
+            flow,
+            cron,
+            **execution_options
+        )
 
         self.__catch_response_error(response, ScheduleError)
 
