@@ -9,7 +9,7 @@ import os
 from azkaban_cli.azkaban import Azkaban
 from azkaban_cli.exceptions import NotLoggedOnError, LoginError, SessionError, UploadError, ScheduleError, ExecuteError
 
-__version__ = u'0.3.0'
+__version__ = u'0.3.1'
 APP_NAME = 'Azkaban CLI'
 
 HOME_PATH = os.path.expanduser("~")
