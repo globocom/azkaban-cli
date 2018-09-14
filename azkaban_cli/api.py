@@ -69,7 +69,7 @@ def login_request(session, host, user, password):
     return response
 
 def schedule_request(session, host, session_id, project, flow, cron, **execution_options):
-    """Schedule request for the Azkaban API
+    r"""Schedule request for the Azkaban API
 
     :param session: A session for creating the request
     :type session: requests.Session
@@ -78,6 +78,7 @@ def schedule_request(session, host, session_id, project, flow, cron, **execution
     :param str project: Project name that contains the flow that will be scheduled on Azkaban
     :param str flow: Flow name to be scheduled on Azkaban
     :param str cron: Cron expression in quartz format used to schedule
+    :param \*\*execution_options: Optional parameters to execution
     :return: The response from the request made
     :rtype: requests.Response
     :raises requests.exceptions.ConnectionError: if cannot connect to host
