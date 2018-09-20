@@ -122,9 +122,9 @@ class Azkaban(object):
         :param path: path to be zipped and uploaded
         :type path: str
         :param project: Project name on Azkaban
-        :param project: str, optional
+        :type project: str, optional
         :param zip_name: Zip name that will be created and uploaded
-        :param zip_name: str, optional
+        :type zip_name: str, optional
         :raises UploadError: when Azkaban api returns error in response
         """
 
