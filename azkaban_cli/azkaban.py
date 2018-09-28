@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from azkaban_cli.exceptions import NotLoggedOnError, SessionError, LoginError, UploadError, ScheduleError, ExecuteError
+from azkaban_cli.exceptions import NotLoggedOnError, SessionError, LoginError, UploadError, ScheduleError, ExecuteError, CreateError
 from shutil import make_archive
 from urllib3.exceptions import InsecureRequestWarning
 import azkaban_cli.api as api
@@ -220,3 +220,29 @@ class Azkaban(object):
 
         response_json = response.json()
         logging.info('%s' % (response_json[u'message']))
+
+    def create(self, project, description):
+        """Create command, intended to make the request to Azkaban and trear the response properly.
+
+        This method receives the project name and the description, make the execute request to create the project and avaliate
+        the response.
+
+        :param project: Project name on Azkaban
+        :type project: str
+        : param description: Description for the project
+        :type: str
+        """
+        
+        self.__check_if_logged()
+
+        response = api.create_request(
+            self.__session,
+            self.__host,
+            self.__session_id,
+            project,
+            description
+        )
+
+        self.__catch_response_error(response, CreateError)
+
+        logging.info('Project %s created successful' % (project))

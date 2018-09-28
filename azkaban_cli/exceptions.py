@@ -15,3 +15,6 @@ class ExecuteError(Exception):
 
 class ScheduleError(Exception):
     pass
+
+class CreateError(Exception):
+    pass

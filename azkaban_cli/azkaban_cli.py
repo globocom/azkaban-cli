@@ -7,9 +7,9 @@ import sys
 import zipfile
 import os
 from azkaban_cli.azkaban import Azkaban
-from azkaban_cli.exceptions import NotLoggedOnError, LoginError, SessionError, UploadError, ScheduleError, ExecuteError
+from azkaban_cli.exceptions import NotLoggedOnError, LoginError, SessionError, UploadError, ScheduleError, ExecuteError, CreateError
 
-__version__ = u'0.3.1'
+__version__ = u'0.4.0'
 APP_NAME = 'Azkaban CLI'
 
 HOME_PATH = os.path.expanduser("~")
@@ -94,6 +94,15 @@ def __execute(ctx, project, flow):
     except ExecuteError as e:
         logging.error(str(e))
 
+@login_required
+def __create(ctx,project,description):
+    azkaban = ctx.obj[u'azkaban']
+    try:
+        azkaban.create(project, description)
+    except CreateError as e:
+        logging.error(str(e))
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
 # ----------------------------------------------------------------------------------------------------------------------
@@ -159,11 +168,20 @@ def execute(ctx, project, flow):
     """Execute a flow from a project"""
     __execute(ctx, project, flow)
 
+@click.command(u'create')
+@click.pass_context
+@click.argument(u'project', type=click.STRING) 
+@click.argument(u'description', type=click.STRING) 
+def create(ctx, project, description):
+    """Create a new project"""
+    __create(ctx,project,description)
+
 cli.add_command(login)
 cli.add_command(logout)
 cli.add_command(upload)
 cli.add_command(schedule)
 cli.add_command(execute)
+cli.add_command(create)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface

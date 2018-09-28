@@ -1,6 +1,6 @@
 from unittest.mock import patch, Mock, ANY
 from unittest import TestCase
-from azkaban_cli.exceptions import LoginError, NotLoggedOnError, UploadError, ScheduleError, ExecuteError, SessionError
+from azkaban_cli.exceptions import LoginError, NotLoggedOnError, UploadError, ScheduleError, ExecuteError, SessionError,CreateError
 import requests
 import azkaban_cli.azkaban
 
@@ -508,3 +508,137 @@ class AzkabanExecuteTest(TestCase):
 
         with self.assertRaises(SessionError):
             self.azk.execute(self.project, self.flow)
+
+class AzkabanCreateTest(TestCase):
+    
+    def setUp(self):
+        """
+        Creates an Azkaban instance and set a logged session for all upload tests
+        """
+
+        self.azk = azkaban_cli.azkaban.Azkaban()
+
+        self.host = 'host'
+        self.session_id = 'aebe406b-d5e6-4056-add6-bf41091e42c6'
+
+        self.azk.set_logged_session(self.host, self.session_id)
+
+        self.project = 'ProjectTest'
+        self.description = 'DescriptionTest'
+    
+    def tearDown(self):
+        pass
+    
+    @patch('azkaban_cli.azkaban.api.create_request')
+    def test_create(self,mock_create_request):
+        """
+        Test execute method from Azkaban class
+        """
+        mock_response = Mock()
+        mock_create_request.return_value = mock_response
+        mock_response.text = "{'project': 'ProjectTest','message': 'Project 'ProjectTest' created successful','description':'DescriptionTest'}"
+        mock_response.json.return_value = {
+            'project': 'ProjectTest',
+            'message': 'Project ProjectTest created successful',
+            'description': 'DescriptionTest'
+        }
+
+        self.azk.create(self.project, self.description)
+
+    @patch('azkaban_cli.azkaban.api.create_request')
+    def test_create_request_called(self, mock_create_request):
+        """
+        Test if create method from Azkaban class is calling create request with expected arguments
+        """
+
+        self.azk.create(self.project, self.description)
+
+        mock_create_request.assert_called_with(ANY, self.host, self.session_id, self.project, self.description) 
+
+    @patch('azkaban_cli.azkaban.api.create_request')
+    def test_error_session_expired_create(self, mock_create_request):
+        """
+        Test if create method from Azkaban class raises SessionError if request returns error caused by session expired
+        """
+
+        mock_response = Mock()
+        mock_create_request.return_value = mock_response
+        mock_response.text = "{\"error\" : \"session\"}"
+        mock_response.json.return_value = {
+            "error": "session"
+        }
+
+        with self.assertRaises(SessionError):
+            self.azk.create(self.project, self.description)
+    
+    @patch('azkaban_cli.azkaban.api.create_request')
+    def test_project_exists_create(self, mock_create_request):
+        """
+        Test if create method from Azkaban class raises CreateError if request returns error caused by project already exists
+        """
+
+        mock_response = Mock()
+        mock_create_request.return_value = mock_response
+        mock_response.text = '{"message":"Project already exists.","status":"error"}'
+        mock_response.json.return_value = {
+            'status': 'error',
+            'message': "Project already exists."
+        }
+
+        with self.assertRaises(CreateError):
+            self.azk.create(self.project, self.description)
+    
+    @patch('azkaban_cli.azkaban.api.create_request')
+    def test_error_not_logged_create(self, mock_create_request):
+        """
+        Test if create method from Azkaban class raises NotLoggedOnError and doesn't make the request if there is no logged session
+        """
+
+        self.azk.logout()
+
+        with self.assertRaises(NotLoggedOnError):
+            self.azk.create('project', 'description')
+
+        mock_create_request.assert_not_called()
+
+    @patch('azkaban_cli.azkaban.api.create_request')
+    def test_invalid_project_create(self, mock_create_request):
+        """
+        Test if create method from Azkaban class treats correctly when request returns error caused by  invalid project.
+        """
+
+        mock_response = Mock()
+        mock_create_request.return_value = mock_response
+        mock_response.text = "{'message': \"Project names must start with a letter, followed by any number of letters, digits, '-' or '_'. \", 'status':'error'}"
+        mock_response.json.return_value = {'message': "Project names must start with a letter, followed by any number of letters, digits, '-' or '_'.", 'status':"error"}
+
+        with self.assertRaises(CreateError):
+            self.azk.create('123','description')
+
+    @patch('azkaban_cli.azkaban.api.create_request')
+    def test_empty_project_create(self, mock_create_request):
+        """
+        Test if create method from Azkaban class treats correctly when request returns error caused by  empty project.
+        """
+
+        mock_response = Mock()
+        mock_create_request.return_value = mock_response
+        mock_response.text = "{'message': 'Project name cannot be empty.', 'status':'error'}"
+        mock_response.json.return_value = {'message': "Project name cannot be empty.", 'status':"error"}
+
+        with self.assertRaises(CreateError):
+            self.azk.create('','description')
+
+    @patch('azkaban_cli.azkaban.api.create_request')
+    def test_empty_description_create(self, mock_create_request):
+        """
+        Test if create method from Azkaban class treats correctly when request returns error caused by  empty description.
+        """
+
+        mock_response = Mock()
+        mock_create_request.return_value = mock_response
+        mock_response.text = "{'message': 'Description cannot be empty.', 'status':'error'}"
+        mock_response.json.return_value = {'message': "Description cannot be empty.", 'status':"error"}
+
+        with self.assertRaises(CreateError):
+            self.azk.create('Project','')

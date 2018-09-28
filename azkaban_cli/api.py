@@ -132,3 +132,30 @@ def execute_request(session, host, session_id, project, flow):
     logging.debug("Response: \n%s", response.text)
 
     return response
+
+def create_request(session, host, session_id, project, description):
+    """"Create a Project request for the Azkaban API
+
+    :param session: A session for creating the request
+    :type session: requests.Session
+    :param str session_id: An id that the user should have when is logged in
+    :param str project: Project name that contains the flow that will be executed on Azkaban
+    :param str description: The description for the project
+    :return: The response from the request made
+    :rtype: requests.Response
+    :raises requests.exceptions.ConnectionError: if cannot connect to host
+    """
+
+    response = session.post(
+        host + '/manager',
+        data={
+            u'session.id': session_id,
+            u'action': u'create',
+            u'name': project,
+            u'description': description
+        }
+    )
+
+    logging.debug("Response: \n%s", response.text)
+
+    return response
