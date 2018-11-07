@@ -26,6 +26,9 @@ source azkaban_cli/bin/activate
 
 # Usando a CLI
 azkaban [OPTIONS] COMMAND [ARGS]
+
+# Fazendo login no azkaban (Este comando efetua um cache da sua autenticação para evitar o login repetido)
+azkaban login --host https://azkaban.globoi.com
 ```
 
 ## Exemplos
