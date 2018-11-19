@@ -5,7 +5,7 @@ Created on 2018-03-22
 '''
 from setuptools import setup, find_packages
 
-version = u'0.4.0'
+version = u'0.4.1'
 
 setup(
     name='azkaban_cli',
@@ -21,6 +21,7 @@ setup(
         "Intended Audience :: Developers",
         "Operating System :: POSIX",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.7",
     ],
     install_requires=[
         'requests==2.18.4',

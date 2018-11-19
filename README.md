@@ -1,37 +1,34 @@
 # Azkaban CLI
 
-Projeto criado para facilitar o uso do Azkaban, permitindo usar a API de forma fácil e fornecendo uma alternativa ao uso da interface gráfica.
+CLI for Azkaban 3 API access and flow upload.
 
-## Instalação
+## Install
 
-Para instalar, crie uma virtualenv e instale o módulo via pip
+Use virtualenv or conda env
 ```sh
-# Criando a virtualenv
+### Building virtualenv
 virtualenv azkaban_cli
 
-# Ativando ela
+### Activating virtualenv
 source azkaban_cli/bin/activate
 
-# Instalando o Azkaban CLI
-pip install azkaban_cli --index-url=https://artifactory.globoi.com/artifactory/api/pypi/pypi-all/simple
+### Installing Azkaban CLI
+pip install azkaban_cli
 ```
 
-## Uso
+## Usage
 
-Feito a instalação, sempre que for usar, basta ativar a virtualenv e chamar o comando ```azkaban```
+Actvate your virtualenv and call ```azkaban```
 
-```sh
-# Ativando a virtualenv
-source azkaban_cli/bin/activate
-
-# Usando a CLI
+### Using CLI
 azkaban [OPTIONS] COMMAND [ARGS]
 
-# Fazendo login no azkaban (Este comando efetua um cache da sua autenticação para evitar o login repetido)
-azkaban login --host https://azkaban.globoi.com
+### Making login (this login cache information and don't need to do again)
+
+azkaban login --host https://azkaban.your_company.com
 ```
 
-## Exemplos
+## Examples
 
 ```sh
 $ azkaban --help
@@ -42,15 +39,15 @@ Options:
   --help     Show this message and exit.
 
 Commands:
+  execute   Execute a flow from a project
+  login     Login to an Azkaban server
+  logout    Logout from Azkaban session
   schedule  Schedule a flow from a project with specified...
   upload    Generates a zip of path passed as argument...
 ```
 
-### Comandos
+### Commands
 
-Todas os comandos e seu funcionamento podem ser obtidos usando o ```--help``` após o nome do comando
-
-* **upload**: Recebe como argumento o path para o projeto. Se encarrega de gerar um arquivo ```.zip``` e de fazer o upload. Caso não seja especificado o nome do projeto, será usado o nome do diretório passado. 
 
 ```sh
 $ azkaban upload --help
@@ -67,7 +64,6 @@ Options:
   --help           Show this message and exit.
 ```
 
-* **schedule**: Recebe como argumento o nome do projeto, nome do flow e o cron do agendamento. 
 
 ```sh
 $ azkaban schedule --help
@@ -80,31 +76,19 @@ Options:
   --help       Show this message and exit.
 ```
 
-## Desenvolvendo
+## Developing
 
-Após o desenvolvimento, a geração de pacote deve ser feita atualizando a versão no ```setup.py``` e no módulo principal. Logo após, pode ser usado o comando do Makefile.
-
-* make dist
-
-Gera o pacote no diretório dist, permitindo a instalação local
+Update version in setup.py
 
 ```sh
-# Gera o pacote no diretório dist
+### Make package on dist
 make dist
 
-# Instala o pacote
+### Install package
 pip install dist/<module-name>-<version>.tar.gz
 ```
 
-* make release
-
-Envia o pacote para o artifactory. Necessário alterar a versão em ```setup.py```. Se nunca tiver feito deploy para o artifactory, verificar a seção [Configurações para artifactory](#configurações-para-artifactory)
-
 ```sh
-# Gera a dist e envia para o artifactory
+### Release package to pypi
 make release
 ```
-
-### Configurações para artifactory
-
-[Google Doc](https://docs.google.com/document/d/1zgbYfdU0KPF3IeK9udVk7FKXqFCD8swhfXLSyzmyIIw)

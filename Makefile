@@ -8,8 +8,7 @@ clean:
 	-@rm -rf $(ROOT_PATH)/build
 
 release: 
-	@python setup.py sdist upload -r pypi-local
-	@python setup.py sdist upload -r ipypi-local
+	@python setup.py sdist upload -r pypi
 
 dist: clean
 	@python setup.py sdist
