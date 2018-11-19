@@ -24,7 +24,7 @@ setup(
         "Programming Language :: Python :: 3.7",
     ],
     install_requires=[
-        'requests==2.18.4',
+        'requests==2.20.1',
         'click==6.7',
     ],
     entry_points='''
