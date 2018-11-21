@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from unittest.mock import patch, Mock, ANY
 from unittest import TestCase
 from azkaban_cli.exceptions import LoginError, NotLoggedOnError, UploadError, ScheduleError, ExecuteError, SessionError,CreateError

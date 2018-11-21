@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import absolute_import
 from azkaban_cli.exceptions import NotLoggedOnError, SessionError, LoginError, UploadError, ScheduleError, ExecuteError, CreateError
 from shutil import make_archive
