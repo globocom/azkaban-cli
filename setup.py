@@ -29,6 +29,9 @@ setup(
         'requests==2.20.1',
         'click==6.7',
     ],
+    tests_require = [
+        'responses==0.10.5',
+    ],
     entry_points='''
         [console_scripts]
         azkaban=azkaban_cli.azkaban_cli:cli
