@@ -98,7 +98,7 @@ class Azkaban(object):
     def login(self, host, user, password):
         """Login command, intended to make the request to Azkaban and treat the response properly
 
-        This method validate the host, make the request to Azkaban, and avaliate the response. If host, user or
+        This method validate the host, make the request to Azkaban, and evaluate the response. If host, user or
         password is wrong or could not connect to host, it returns false and do not change the host and session_id
         attribute from the class. If everything is fine, saves the new session_id and corresponding host as attributes
         in the class and returns True
@@ -125,7 +125,7 @@ class Azkaban(object):
 
         This method receives a path to a directory that contains all the files that should be in the Azkaban project,
         zip this path (as Azkaban expects it zipped), make the upload request to Azkaban, deletes the zip that was
-        created and avaliate the response.
+        created and evaluate the response.
 
         If project name is not passed as argument, it will be assumed that the project name is the basename of the path
         passed. If zip name is not passed as argument, the project name will be used for the zip.
@@ -170,7 +170,7 @@ class Azkaban(object):
         """Schedule command, intended to make the request to Azkaban and treat the response properly.
 
         This method receives the project, the flow, the cron expression in quartz format and optional execution options,
-        make the schedule request to schedule the flow with the cron specified and avaliate the response.
+        make the schedule request to schedule the flow with the cron specified and evaluate the response.
 
         If project, flow or cron is wrong or if there is no session_id, it returns false. If everything is fine, returns
         True.
@@ -207,7 +207,7 @@ class Azkaban(object):
     def execute(self, project, flow):
         """Execute command, intended to make the request to Azkaban and treat the response properly.
 
-        This method receives the project and the flow, make the execute request to execute the flow and avaliate the
+        This method receives the project and the flow, make the execute request to execute the flow and evaluate the
         response.
 
         If project or flow is wrong or if there is no session_id, it returns false. If everything is fine, returns True.
@@ -235,14 +235,14 @@ class Azkaban(object):
         logging.info('%s' % (response_json[u'message']))
 
     def create(self, project, description):
-        """Create command, intended to make the request to Azkaban and trear the response properly.
+        """Create command, intended to make the request to Azkaban and treat the response properly.
 
-        This method receives the project name and the description, make the execute request to create the project and avaliate
-        the response.
+        This method receives the project name and the description, make the execute request to create the project and
+        evaluate the response.
 
         :param project: Project name on Azkaban
         :type project: str
-        : param description: Description for the project
+        :param description: Description for the project
         :type: str
         """
         
@@ -258,4 +258,4 @@ class Azkaban(object):
 
         self.__catch_response_error(response, CreateError)
 
-        logging.info('Project %s created successful' % (project))
+        logging.info('Project %s created successfully' % (project))
