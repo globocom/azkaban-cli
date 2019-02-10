@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from unittest.mock import patch, mock_open, Mock, ANY
+from unittest.mock import patch, mock_open, ANY
 from unittest import TestCase
 from azkaban_cli.exceptions import LoginError, NotLoggedOnError, UploadError, ScheduleError, ExecuteError, SessionError,CreateError
 import requests
