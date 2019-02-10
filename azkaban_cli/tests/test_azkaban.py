@@ -416,7 +416,7 @@ class AzkabanScheduleTest(TestCase):
         Test if schedule method from Azkaban class raises SessionError if request returns html from login because of expired session
         """
 
-        fixture_path = os.path.join(os.path.dirname(__file__), "resources", "session_expired.html")
+        fixture_path = os.path.join(os.path.dirname(__file__), "fixtures", "session_expired.html")
         with open(fixture_path) as f:
             responses.add(responses.POST, self.host + "/schedule", body=f.read(), status=200)
 
@@ -574,7 +574,7 @@ class AzkabanCreateTest(TestCase):
         Test if create method from Azkaban class raises SessionError if request returns error caused by session expired
         """
 
-        fixture_path = os.path.join(os.path.dirname(__file__), "resources", "session_expired.html")
+        fixture_path = os.path.join(os.path.dirname(__file__), "fixtures", "session_expired.html")
         with open(fixture_path) as f:
             responses.add(responses.POST, self.host + "/manager", body=f.read(), status=200)
 
