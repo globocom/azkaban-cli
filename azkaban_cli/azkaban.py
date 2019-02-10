@@ -19,8 +19,8 @@ class Azkaban(object):
         urllib3.disable_warnings(InsecureRequestWarning)
 
         self.__session = session
-
-        self.set_logged_session(None, None)
+        self.__host = None
+        self.__session_id = None
 
     def __validate_host(self, host):
         valid_host = host
@@ -34,24 +34,35 @@ class Azkaban(object):
         if not self.__session_id:
             raise NotLoggedOnError()
 
-    def __catch_response_error(self, response, exception):
-        if (response.text == "Login error. Need username and password"):
+    def __catch_login_html(self, response):
+        if "  <script type=\"text/javascript\" src=\"/js/azkaban/view/login.js\"></script>" in response.text.splitlines():
             raise SessionError(response.text)
 
-        if ("  <script type=\"text/javascript\" src=\"/js/azkaban/view/login.js\"></script>" in response.text.splitlines()):
-            raise SessionError(response.text)
+    def __catch_response_status_error(self, exception, response_json):
+        response_status = response_json.get('status')
+        if response_status == u'error':
+            error_msg = response_json[u'message']
+            raise exception(error_msg)
 
-        response_json = response.json()
+    def __catch_response_error_msg(self, exception, response_json):
         if u'error' in response_json.keys():
             error_msg = response_json[u'error']
             if error_msg == "session":
                 raise SessionError(error_msg)
             raise exception(error_msg)
 
-        response_status = response_json.get('status')
-        if response_status == u'error':
-            error_msg = response_json[u'message']
-            raise exception(error_msg)
+    def __catch_login_text(self, response):
+        if response.text == "Login error. Need username and password":
+            raise SessionError(response.text)
+
+    def __catch_response_error(self, response, exception):
+        self.__catch_login_text(response)
+        self.__catch_login_html(response)
+
+        response_json = response.json()
+
+        self.__catch_response_error_msg(exception, response_json)
+        self.__catch_response_status_error(exception, response_json)
 
     def get_logged_session(self):
         """Method for return the host and session id of the logged session saved on the class
