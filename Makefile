@@ -10,8 +10,5 @@ clean:
 release: 
 	@python setup.py sdist upload -r pypi
 
-dist: clean
-	@python setup.py sdist
-
 test:
 	@python -m unittest
