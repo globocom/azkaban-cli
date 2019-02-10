@@ -6,12 +6,11 @@ import click
 import json
 import requests
 import sys
-import zipfile
 import os
 from azkaban_cli.azkaban import Azkaban
 from azkaban_cli.exceptions import NotLoggedOnError, LoginError, SessionError, UploadError, ScheduleError, ExecuteError, CreateError
+from version import __version__
 
-__version__ = u'0.4.0'
 APP_NAME = 'Azkaban CLI'
 
 HOME_PATH = os.path.expanduser("~")

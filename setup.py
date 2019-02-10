@@ -6,12 +6,11 @@ Created on 2018-03-22
 @author: gustavo.alves
 '''
 from setuptools import setup, find_packages
-
-version = u'0.4.2'
+from version import __version__
 
 setup(
     name='azkaban_cli',
-    version=version,
+    version=__version__,
     author = "Gustavo Alves",
     author_email = "gustavo.alves@corp.globo.com",
     description = ("Azkaban CLI"),
