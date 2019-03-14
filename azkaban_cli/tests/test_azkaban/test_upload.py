@@ -23,8 +23,6 @@ class AzkabanUploadTest(TestCase):
     def tearDown(self):
         pass
 
-#        responses.add(responses.POST, self.host, json={'projectId': '33', 'version': '58'}, status=200)
-
     @responses.activate
     @patch('azkaban_cli.azkaban.os.remove')
     @patch('azkaban_cli.azkaban.make_archive')
@@ -199,6 +197,9 @@ class AzkabanUploadTest(TestCase):
         responses.add(responses.POST, self.host + "/manager", body="Login error. Need username and password", status=200)
 
         path     = '/path/to/project'
+        zip_path = 'zip_path'
+
+        mock_make_archive.return_value = zip_path
 
         with self.assertRaises(SessionError):
             self.azk.upload(path)
