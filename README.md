@@ -2,6 +2,8 @@
 
 CLI for Azkaban 3 API access and flow upload.
 
+[![Build Status](https://travis-ci.com/globocom/azkaban-cli.svg?branch=master)](https://travis-ci.com/globocom/azkaban-cli)
+
 ## Install
 
 Use virtualenv or conda env
