@@ -4,16 +4,18 @@
 
 .cache/
 .scannerwork/
-docs/
 sonar-project.properties
 
-.vscode/*
+.vscode
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
 
 .idea/
+
+# Sphinx docs
+docs/_*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
