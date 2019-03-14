@@ -20,8 +20,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Azkaban CLI'
-copyright = '2019, Gustavo Alves'
-author = 'Gustavo Alves'
+copyright = '2019, Globo.com'
+author = 'Globo.com'
 
 # The short X.Y version
 version = ''
@@ -129,7 +129,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'AzkabanCLI.tex', 'Azkaban CLI Documentation',
-     'Gustavo Alves', 'manual'),
+     'Globo.com', 'manual'),
 ]
 
 
