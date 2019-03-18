@@ -9,8 +9,7 @@ import sys
 import os
 from azkaban_cli.azkaban import Azkaban
 from azkaban_cli.exceptions import NotLoggedOnError, LoginError, SessionError, UploadError, ScheduleError, ExecuteError, CreateError
-from version import __version__
-
+from azkaban_cli.__version__ import __version__
 
 APP_NAME = 'Azkaban CLI'
 

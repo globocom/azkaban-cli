@@ -6,7 +6,7 @@ Created on 2018-03-22
 @author: gustavo.alves
 '''
 from setuptools import setup, find_packages
-from version import __version__
+from azkaban_cli.__version__ import __version__
 
 setup(
     name='azkaban_cli',
