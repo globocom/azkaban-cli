@@ -16,9 +16,10 @@ class AzkabanUploadTest(TestCase):
         self.azk = azkaban_cli.azkaban.Azkaban()
 
         self.host = 'http://azkaban-mock.com'
+        self.user = 'username'
         self.session_id = 'aebe406b-d5e6-4056-add6-bf41091e42c6'
 
-        self.azk.set_logged_session(self.host, self.session_id)
+        self.azk.set_logged_session(self.host, self.user, self.session_id)
 
     def tearDown(self):
         pass

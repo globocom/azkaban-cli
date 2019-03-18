@@ -11,22 +11,39 @@ from azkaban_cli.azkaban import Azkaban
 from azkaban_cli.exceptions import NotLoggedOnError, LoginError, SessionError, UploadError, ScheduleError, ExecuteError, CreateError
 from version import __version__
 
+
 APP_NAME = 'Azkaban CLI'
 
 HOME_PATH = os.path.expanduser("~")
 AZKABAN_CLI_PATH = os.path.join(HOME_PATH, ".azkaban_cli")
-SESSION_JSON_PATH = os.path.join(AZKABAN_CLI_PATH, "session.json")
+SESSION_JSON_PATH = os.path.join(AZKABAN_CLI_PATH, "user-session.json")
 
 
 def __call_for_login(ctx):
     ctx.invoke(login, host=click.prompt('Host'), user=click.prompt('User'), password=click.prompt('Password', hide_input=True))
 
+
+def __login_expired(ctx):
+    azkaban = ctx.obj[u'azkaban']
+
+    session = azkaban.get_logged_session()
+    host = session['host']
+    user = session['user']
+
+    click.echo("Host: {}".format(host))
+    click.echo("User: {}".format(user))
+    ctx.invoke(login, host=host, user=user, password=click.prompt('Password', hide_input=True))
+
+
 def login_required(function):
     def function_wrapper(ctx, *args):
         try:
             function(ctx, *args)
-        except (NotLoggedOnError, SessionError):
+        except NotLoggedOnError:
             __call_for_login(ctx)
+            function_wrapper(ctx, *args)
+        except SessionError:
+            __login_expired(ctx)
             function_wrapper(ctx, *args)
 
     return function_wrapper
@@ -54,7 +71,7 @@ def __login(ctx, host, user, password):
     try:
         azkaban.login(host, user, password)
         __save_logged_session(azkaban.get_logged_session())
-        logging.info("Logged in succesfully!")
+        logging.info("Logged in successfully!")
     except (requests.exceptions.ConnectionError, requests.exceptions.MissingSchema) as e:
         logging.error("Could not connect to host: %s", str(e))
     except LoginError as e:

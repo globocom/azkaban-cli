@@ -41,13 +41,14 @@ class AzkabanLoginTest(TestCase):
         """
 
         host = "http://azkaban-mock.com"
+        user = 'user'
         session_id = 'aebe406b-d5e6-4056-add6-bf41091e42c6'
         responses.add(responses.POST, host, json={'session.id': session_id, 'status': 'success'}, status=200)
 
-        self.azk.login(host, 'user', 'password')
+        self.azk.login(host, user, 'password')
 
         logged_session = self.azk.get_logged_session()
-        expected = {'host': host, 'session_id': session_id}
+        expected = {'host': host, 'user': user, 'session_id': session_id}
 
         self.assertEqual(logged_session, expected)
 
@@ -66,7 +67,7 @@ class AzkabanLoginTest(TestCase):
             self.azk.login(host, 'user', 'password')
 
         logged_session = self.azk.get_logged_session()
-        expected = {'host': None, 'session_id': None}
+        expected = {'host': None, 'user': None, 'session_id': None}
 
         self.assertEqual(logged_session, expected)
 
@@ -85,7 +86,7 @@ class AzkabanLoginTest(TestCase):
             self.azk.login(host, 'wrong_user', 'password')
 
         logged_session = self.azk.get_logged_session()
-        expected = {'host': None, 'session_id': None}
+        expected = {'host': None, 'user': None, 'session_id': None}
 
         self.assertEqual(logged_session, expected)
 
@@ -104,6 +105,6 @@ class AzkabanLoginTest(TestCase):
             self.azk.login(host, 'user', 'wrong_password')
 
         logged_session = self.azk.get_logged_session()
-        expected = {'host': None, 'session_id': None}
+        expected = {'host': None, 'user': None, 'session_id': None}
 
         self.assertEqual(logged_session, expected)

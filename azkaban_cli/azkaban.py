@@ -20,6 +20,7 @@ class Azkaban(object):
 
         self.__session = session
         self.__host = None
+        self.__user = None
         self.__session_id = None
 
     def __validate_host(self, host):
@@ -73,27 +74,28 @@ class Azkaban(object):
 
         logged_session = {
             u'host': self.__host,
+            u'user': self.__user,
             u'session_id': self.__session_id
         }
 
         return logged_session
 
-    def set_logged_session(self, host, session_id):
-        """Method for set host and session_id, attributes of the class
+    def set_logged_session(self, host, user, session_id):
+        """Method for set host, user and session_id, attributes of the class
 
-        :param host: Azkaban hostname
-        :type host: str
-        :param session_id: session.id received from a login request
-        :type session_id: str
+        :param str host: Azkaban hostname
+        :param str user: Azkaban username
+        :param str session_id: session.id received from a login request
         """
 
         self.__host = host
+        self.__user = user
         self.__session_id = session_id
 
     def logout(self):
-        """Logout command, intended to clear the host and session_id attributes from the class"""
+        """Logout command, intended to clear the host, user and session_id attributes from the class"""
 
-        self.set_logged_session(None, None)
+        self.set_logged_session(None, None, None)
 
     def login(self, host, user, password):
         """Login command, intended to make the request to Azkaban and treat the response properly
@@ -116,7 +118,7 @@ class Azkaban(object):
         self.__catch_response_error(response, LoginError)
 
         response_json = response.json()
-        self.set_logged_session(valid_host, response_json['session.id'])
+        self.set_logged_session(valid_host, user, response_json['session.id'])
 
         logging.info('Logged as %s' % (user))
 
