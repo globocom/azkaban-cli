@@ -24,8 +24,8 @@ setup(
         "Programming Language :: Python :: 3.7",
     ],
     install_requires=[
-        'requests==2.20.1',
-        'click==6.7',
+        'requests<2.30.0',
+        'click<8.0',
     ],
     tests_require = [
         'responses==0.10.5',
