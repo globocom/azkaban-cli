@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
-from azkaban_cli.exceptions import NotLoggedOnError, SessionError, LoginError, UploadError, ScheduleError, ExecuteError, CreateError
+from azkaban_cli.exceptions import NotLoggedOnError, SessionError, LoginError, UploadError, ScheduleError, UnscheduleError, ExecuteError, CreateError
 from shutil import make_archive
 from urllib3.exceptions import InsecureRequestWarning
 import azkaban_cli.api as api
@@ -205,6 +205,34 @@ class Azkaban(object):
         response_json = response.json()
         logging.info(response_json[u'message'])
         logging.info('scheduleId: %s' % (response_json[u'scheduleId']))
+
+    def unschedule(self, schedule_id):
+        """Unschedule command, intended to make the request to Azkaban and treat the response properly.
+
+        This method receives the schedule id and optional execution options, makes the unschedule
+        request to unschedule the flow and evaluates the response.
+
+        If schedule_id is wrong or there is no session_id, it returns false. If everything is fine, returns
+        True.
+
+        :param schedule_id: Schedule id on Azkaban
+        :type schedule: str
+        :raises UnscheduleError: when Azkaban api returns error in response
+        """
+
+        self.__check_if_logged()
+
+        response = api.unschedule_request(
+            self.__session,
+            self.__host,
+            self.__session_id,
+            schedule_id
+        )
+
+        self.__catch_response_error(response, UnscheduleError)
+
+        response_json = response.json()
+        logging.info(response_json[u'message'])
 
     def execute(self, project, flow):
         """Execute command, intended to make the request to Azkaban and treat the response properly.

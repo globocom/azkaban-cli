@@ -8,7 +8,7 @@ import requests
 import sys
 import os
 from azkaban_cli.azkaban import Azkaban
-from azkaban_cli.exceptions import NotLoggedOnError, LoginError, SessionError, UploadError, ScheduleError, ExecuteError, CreateError
+from azkaban_cli.exceptions import NotLoggedOnError, LoginError, SessionError, UploadError, ScheduleError, UnscheduleError, ExecuteError, CreateError
 from azkaban_cli.__version__ import __version__
 
 APP_NAME = 'Azkaban CLI'
@@ -103,6 +103,15 @@ def __schedule(ctx, project, flow, cron, concurrent_option):
         logging.error(str(e))
 
 @login_required
+def __unschedule(ctx, schedule_id, concurrent_option):
+    azkaban = ctx.obj[u'azkaban']
+
+    try:
+        azkaban.unschedule(schedule_id, concurrentOption=concurrent_option)
+    except UnscheduleError as e:
+        logging.error(str(e))
+
+@login_required
 def __execute(ctx, project, flow):
     azkaban = ctx.obj[u'azkaban']
 
@@ -177,6 +186,13 @@ def schedule(ctx, project, flow, cron, concurrent_option):
     """Schedule a flow from a project with specified cron in quartz format"""
     __schedule(ctx, project, flow, cron, concurrent_option)
 
+@click.command(u'unschedule')
+@click.pass_context
+@click.argument(u'schedule_id', type=click.STRING)
+def unschedule(ctx, schedule_id):
+    """Unschedule a flow from a project"""
+    __unschedule(ctx, schedule_id)
+
 @click.command(u'execute')
 @click.pass_context
 @click.argument(u'project', type=click.STRING)
@@ -197,6 +213,7 @@ cli.add_command(login)
 cli.add_command(logout)
 cli.add_command(upload)
 cli.add_command(schedule)
+cli.add_command(unschedule)
 cli.add_command(execute)
 cli.add_command(create)
 
