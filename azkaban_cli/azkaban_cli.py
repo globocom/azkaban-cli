@@ -103,7 +103,7 @@ def __schedule(ctx, project, flow, cron, concurrent_option):
         logging.error(str(e))
 
 @login_required
-def __unschedule(ctx, schedule_id, concurrent_option):
+def __unschedule(ctx, schedule_id):
     azkaban = ctx.obj[u'azkaban']
 
     try:
