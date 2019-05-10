@@ -22,7 +22,10 @@ class AzkabanUnscheduleTest(TestCase):
 
         self.azk.set_logged_session(self.host, self.user, self.session_id)
 
-        self.schedule_id = '123'
+        self.project = 'ProjectTest'
+        self.flow = 'FlowTest'
+        self.project_id = 123
+        self.schedule_id = '456'
 
     def tearDown(self):
         pass
@@ -37,7 +40,7 @@ class AzkabanUnscheduleTest(TestCase):
             responses.POST,
             self.host + "/schedule",
             json={
-                'message': 'flow FLOW_NAME removed from Schedules.',
+                'message': 'flow FlowTest removed from Schedules.',
                 'status': 'success'
             },
             status=200
@@ -45,10 +48,12 @@ class AzkabanUnscheduleTest(TestCase):
 
         self.azk.unschedule(self.schedule_id)
 
+    @responses.activate
     @patch('azkaban_cli.azkaban.api.unschedule_request')
     def test_unschedule_request_called(self, mock_unschedule_request):
         """
-        Test if unschedule method from Azkaban class is calling unschedule request with expected arguments
+        Test if unschedule method from Azkaban class is calling unschedule, fetch_schedule, fetch_flows requests
+        with expected arguments
         """
 
         self.azk.unschedule(self.schedule_id)
@@ -65,10 +70,10 @@ class AzkabanUnscheduleTest(TestCase):
             responses.POST,
             self.host + "/schedule",
             json={
-                'message': 'Schedule with ID SCHEDULE_ID does not exist',
+                'message': 'Schedule with ID FlowTest does not exist',
                 'status': 'error'
             },
-            status=200
+            status=400
         )
 
         with self.assertRaises(UnscheduleError):

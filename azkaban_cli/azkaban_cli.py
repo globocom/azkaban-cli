@@ -8,7 +8,18 @@ import requests
 import sys
 import os
 from azkaban_cli.azkaban import Azkaban
-from azkaban_cli.exceptions import NotLoggedOnError, LoginError, SessionError, UploadError, ScheduleError, UnscheduleError, ExecuteError, CreateError
+from azkaban_cli.exceptions import (
+    NotLoggedOnError,
+    LoginError,
+    SessionError,
+    UploadError,
+    ScheduleError,
+    FetchFlowsError,
+    FetchScheduleError,
+    UnscheduleError,
+    ExecuteError,
+    CreateError
+)
 from azkaban_cli.__version__ import __version__
 
 APP_NAME = 'Azkaban CLI'
@@ -103,11 +114,19 @@ def __schedule(ctx, project, flow, cron, concurrent_option):
         logging.error(str(e))
 
 @login_required
-def __unschedule(ctx, schedule_id):
+def __unschedule(ctx, project, flow):
     azkaban = ctx.obj[u'azkaban']
 
     try:
-        azkaban.unschedule(schedule_id, concurrentOption=concurrent_option)
+        flows = azkaban.fetch_flows(project)
+        project_id = flows[u'projectId']
+        schedule = azkaban.fetch_schedule(project_id, flow)
+        schedule_id = schedule[u'schedule'][u'scheduleId']
+        azkaban.unschedule(schedule_id)
+    except FetchFlowsError as e:
+        logging.error(str(e))
+    except FetchScheduleError as e:
+        logging.error(str(e))
     except UnscheduleError as e:
         logging.error(str(e))
 
@@ -121,7 +140,7 @@ def __execute(ctx, project, flow):
         logging.error(str(e))
 
 @login_required
-def __create(ctx,project,description):
+def __create(ctx, project, description):
     azkaban = ctx.obj[u'azkaban']
     try:
         azkaban.create(project, description)
@@ -188,10 +207,11 @@ def schedule(ctx, project, flow, cron, concurrent_option):
 
 @click.command(u'unschedule')
 @click.pass_context
-@click.argument(u'schedule_id', type=click.STRING)
-def unschedule(ctx, schedule_id):
+@click.argument(u'project', type=click.STRING)
+@click.argument(u'flow', type=click.STRING)
+def unschedule(ctx, project, flow):
     """Unschedule a flow from a project"""
-    __unschedule(ctx, schedule_id)
+    __unschedule(ctx, project, flow)
 
 @click.command(u'execute')
 @click.pass_context

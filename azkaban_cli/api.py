@@ -104,6 +104,60 @@ def schedule_request(session, host, session_id, project, flow, cron, **execution
 
     return response
 
+def fetch_flows_request(session, host, session_id, project):
+    """Fetch flows of a project request for the Azkaban API
+
+    :param session: A session for creating the request
+    :type session: requests.Session
+    :param str host: Hostname where the request should go
+    :param str session_id: An id that the user should have when is logged in
+    :param str project: Project name whose flows will be fetched on Azkaban
+    :return: The response from the request made
+    :rtype: requests.Response
+    :raises requests.exceptions.ConnectionError: if cannot connect to host
+    """
+
+    response = session.get(
+        host + '/manager',
+        params={
+            u'session.id': session_id,
+            u'ajax': 'fetchprojectflows',
+            u'project': project
+        }
+    )
+
+    logging.debug("Response: \n%s", response.text)
+
+    return response
+
+def fetch_schedule_request(session, host, session_id, project_id, flow):
+    """Fetch flow of a project request for the Azkaban API
+
+    :param session: A session for creating the request
+    :type session: requests.Session
+    :param str host: Hostname where the request should go
+    :param str session_id: An id that the user should have when is logged in
+    :param str project_id: Project ID whose flow schedule will be fetched on Azkaban
+    :param str flow: Flow name whose schedule will be fetched on Azkaban
+    :return: The response from the request made
+    :rtype: requests.Response
+    :raises requests.exceptions.ConnectionError: if cannot connect to host
+    """
+
+    response = session.get(
+        host + '/schedule',
+        params={
+            u'session.id': session_id,
+            u'ajax': 'fetchSchedule',
+            u'projectId': project_id,
+            u'flowId': flow
+        }
+    )
+
+    logging.debug("Response: \n%s", response.text)
+
+    return response
+
 def unschedule_request(session, host, session_id, schedule_id):
     r"""Unschedule request for the Azkaban API
 

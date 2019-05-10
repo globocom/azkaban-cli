@@ -18,6 +18,12 @@ class ExecuteError(Exception):
 class ScheduleError(Exception):
     pass
 
+class FetchFlowsError(Exception):
+    pass
+
+class FetchScheduleError(Exception):
+    pass
+
 class UnscheduleError(Exception):
     pass
 
