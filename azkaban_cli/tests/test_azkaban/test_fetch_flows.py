@@ -75,6 +75,26 @@ class AzkabanFetchFlowsTest(TestCase):
             self.azk.fetch_flows(self.project)
 
     @responses.activate
+    def test_permission_error_fetch_flows(self):
+        """
+        Test if fetch flows method from Azkaban class raises FetchFlowsError if request returns error caused by permission error
+        """
+
+        responses.add(
+            responses.GET,
+            self.host + "/manager",
+            json={
+                'project': 'ProjectTest',
+                'error': "Permission denied. Need READ access.",
+                'projectId': 123
+            },
+            status=200
+        )
+
+        with self.assertRaises(FetchFlowsError):
+            self.azk.fetch_flows(self.project)
+
+    @responses.activate
     def test_error_session_expired_fetch_flows(self):
         """
         Test if fetch flows method from Azkaban class raises SessionError if request returns error caused by session expired
