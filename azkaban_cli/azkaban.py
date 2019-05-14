@@ -11,7 +11,8 @@ from azkaban_cli.exceptions import (
     FetchScheduleError,
     UnscheduleError,
     ExecuteError,
-    CreateError
+    CreateError,
+    DeleteError
 )
 from shutil import make_archive
 from urllib3.exceptions import InsecureRequestWarning
@@ -71,9 +72,12 @@ class Azkaban(object):
         if response.text == "Login error. Need username and password":
             raise SessionError(response.text)
 
-    def __catch_response_error(self, response, exception):
+    def __catch_login(self, response):
         self.__catch_login_text(response)
         self.__catch_login_html(response)
+
+    def __catch_response_error(self, response, exception):
+        self.__catch_login(response)
 
         response_json = response.json()
 
@@ -366,3 +370,26 @@ class Azkaban(object):
         self.__catch_response_error(response, CreateError)
 
         logging.info('Project %s created successfully' % (project))
+
+    def delete(self, project):
+        """Delete command, intended to make the request to Azkaban and treat the response properly.
+
+        This method receives the project name, make the execute request to delete the project and
+        evaluate the response.
+
+        :param project: Project name on Azkaban
+        :type project: str
+        """
+
+        self.__check_if_logged()
+
+        response = api.delete_request(
+            self.__session,
+            self.__host,
+            self.__session_id,
+            project
+        )
+
+        self.__catch_login(response)
+
+        logging.info('Command executed successfully')

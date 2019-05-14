@@ -18,7 +18,8 @@ from azkaban_cli.exceptions import (
     FetchScheduleError,
     UnscheduleError,
     ExecuteError,
-    CreateError
+    CreateError,
+    DeleteError
 )
 from azkaban_cli.__version__ import __version__
 
@@ -147,6 +148,14 @@ def __create(ctx, project, description):
     except CreateError as e:
         logging.error(str(e))
 
+@login_required
+def __delete(ctx, project):
+    azkaban = ctx.obj[u'azkaban']
+    try:
+        azkaban.delete(project)
+    except DeleteError as e:
+        logging.error(str(e))
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
@@ -227,7 +236,14 @@ def execute(ctx, project, flow):
 @click.argument(u'description', type=click.STRING) 
 def create(ctx, project, description):
     """Create a new project"""
-    __create(ctx,project,description)
+    __create(ctx, project, description)
+
+@click.command(u'delete')
+@click.pass_context
+@click.argument(u'project', type=click.STRING)
+def delete(ctx, project):
+    """Delete a project"""
+    __delete(ctx, project)
 
 cli.add_command(login)
 cli.add_command(logout)
@@ -236,6 +252,7 @@ cli.add_command(schedule)
 cli.add_command(unschedule)
 cli.add_command(execute)
 cli.add_command(create)
+cli.add_command(delete)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
