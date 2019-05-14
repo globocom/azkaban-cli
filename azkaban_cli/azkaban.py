@@ -390,6 +390,7 @@ class Azkaban(object):
             project
         )
 
+        # The delete request does not return any message, so we only catch login errors
         self.__catch_login(response)
 
         logging.info('Command executed successfully')
