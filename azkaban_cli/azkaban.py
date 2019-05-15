@@ -386,8 +386,7 @@ class Azkaban(object):
             self.__session_id
         )
 
+        # The delete request does not return any message, so we only catch login errors
         self.__catch_login(response)
 
-        # response_json = response.json()
-        # return response_json
         return response.text
