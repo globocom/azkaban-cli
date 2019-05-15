@@ -5,7 +5,7 @@ from unittest.mock import patch, ANY
 import responses
 
 import azkaban_cli.azkaban
-from azkaban_cli.exceptions import SessionError, DeleteError, NotLoggedOnError
+from azkaban_cli.exceptions import SessionError, NotLoggedOnError
 
 
 class AzkabanDeleteTest(TestCase):

@@ -18,8 +18,7 @@ from azkaban_cli.exceptions import (
     FetchScheduleError,
     UnscheduleError,
     ExecuteError,
-    CreateError,
-    DeleteError
+    CreateError
 )
 from azkaban_cli.__version__ import __version__
 
@@ -152,9 +151,21 @@ def __create(ctx, project, description):
 def __delete(ctx, project):
     azkaban = ctx.obj[u'azkaban']
     try:
+        # Since delete doesn't raise an exception, we try fetching the project flows.
+        # Project IDs get stored within the database even after deletion, so we then
+        # try to fetch the project schedule.
+        # If the project was successfully deleted, this will raise a FetchScheduleError.
+        # Else, it means the project was not deleted, so we print an error.
         azkaban.delete(project)
-    except DeleteError as e:
-        logging.error(str(e))
+        flows = azkaban.fetch_flows(project)
+        project_id = flows[u'projectId']
+        azkaban.fetch_schedule(project_id, 'abc')
+    except FetchScheduleError:
+        logging.info('Project %s successfully deleted' % (project))
+    except FetchFlowsError:
+        logging.error('Project %s does not exist' % (project))
+    else:
+        logging.error('Project %s was not deleted' % (project))
 
 
 # ----------------------------------------------------------------------------------------------------------------------

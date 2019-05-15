@@ -11,8 +11,7 @@ from azkaban_cli.exceptions import (
     FetchScheduleError,
     UnscheduleError,
     ExecuteError,
-    CreateError,
-    DeleteError
+    CreateError
 )
 from shutil import make_archive
 from urllib3.exceptions import InsecureRequestWarning
@@ -392,5 +391,3 @@ class Azkaban(object):
 
         # The delete request does not return any message, so we only catch login errors
         self.__catch_login(response)
-
-        logging.info('Command executed successfully')

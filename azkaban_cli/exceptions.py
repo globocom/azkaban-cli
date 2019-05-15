@@ -29,6 +29,3 @@ class UnscheduleError(Exception):
 
 class CreateError(Exception):
     pass
-
-class DeleteError(Exception):
-    pass
