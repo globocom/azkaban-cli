@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
+from bs4 import BeautifulSoup
 import logging
 import click
 import json
@@ -81,6 +82,7 @@ def __login(ctx, host, user, password):
     try:
         azkaban.login(host, user, password)
         __save_logged_session(azkaban.get_logged_session())
+        ctx.obj[u'user'] = user
         logging.info("Logged in successfully!")
     except (requests.exceptions.ConnectionError, requests.exceptions.MissingSchema) as e:
         logging.error("Could not connect to host: %s", str(e))
@@ -146,6 +148,28 @@ def __create(ctx, project, description):
         azkaban.create(project, description)
     except CreateError as e:
         logging.error(str(e))
+
+def __parse_projects(text, user):
+    def get_text(div):
+        return div.find_all('a')[0].text
+
+    def get_user(div):
+        return div.find_all('p', {'class': 'project-last-modified'})[0].text.split('\n')[-1].strip()[:-1]
+
+    soup = BeautifulSoup(text, 'html.parser')
+    all_projects = soup.find_all('div', {'class': 'project-info'})
+    all_projects_for_user = [get_text(div) for div in all_projects if get_user(div) == user]
+    logging.info('Found %d projects for user %s:' % (len(all_projects_for_user), user))
+
+    for project in all_projects_for_user:
+        logging.info('- %s' % (project))
+
+@login_required
+def __fetch_projects(ctx):
+    azkaban = ctx.obj[u'azkaban']
+    text = azkaban.fetch_projects()
+    user = ctx.obj[u'user']
+    __parse_projects(text, user)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -229,6 +253,12 @@ def create(ctx, project, description):
     """Create a new project"""
     __create(ctx,project,description)
 
+@click.command(u'fetch_projects')
+@click.pass_context
+def fetch_projects(ctx):
+    """Fetch all project"""
+    __fetch_projects(ctx)
+
 cli.add_command(login)
 cli.add_command(logout)
 cli.add_command(upload)
@@ -236,6 +266,7 @@ cli.add_command(schedule)
 cli.add_command(unschedule)
 cli.add_command(execute)
 cli.add_command(create)
+cli.add_command(fetch_projects)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface

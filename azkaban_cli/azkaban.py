@@ -70,10 +70,13 @@ class Azkaban(object):
     def __catch_login_text(self, response):
         if response.text == "Login error. Need username and password":
             raise SessionError(response.text)
-
-    def __catch_response_error(self, response, exception):
+    
+    def __catch_login(self, response):
         self.__catch_login_text(response)
         self.__catch_login_html(response)
+
+    def __catch_response_error(self, response, exception):
+        self.__catch_login(response)
 
         response_json = response.json()
 
@@ -366,3 +369,25 @@ class Azkaban(object):
         self.__catch_response_error(response, CreateError)
 
         logging.info('Project %s created successfully' % (project))
+
+    def fetch_projects(self):
+        """Fetch all projects command, intended to make the request to Azkaban and treat the response properly.
+
+        This method makes the fetch projects request to fetch all the projects and evaluates the response.
+
+        :raises FetchFlowsError: when Azkaban api returns error in response
+        """
+
+        self.__check_if_logged()
+
+        response = api.fetch_projects_request(
+            self.__session,
+            self.__host,
+            self.__session_id
+        )
+
+        self.__catch_login(response)
+
+        # response_json = response.json()
+        # return response_json
+        return response.text
