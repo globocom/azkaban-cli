@@ -171,9 +171,12 @@ def __parse_projects(text, user):
 @login_required
 def __fetch_projects(ctx):
     azkaban = ctx.obj[u'azkaban']
-    text = azkaban.fetch_projects()
-    user = ctx.obj[u'user']
-    __parse_projects(text, user)
+    try:
+        text = azkaban.fetch_projects()
+        user = ctx.obj[u'user']
+        __parse_projects(text, user)
+    except FetchProjectsError as e:
+        logging.error(str(e))
 
 
 # ----------------------------------------------------------------------------------------------------------------------
