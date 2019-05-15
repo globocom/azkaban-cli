@@ -19,7 +19,8 @@ from azkaban_cli.exceptions import (
     FetchScheduleError,
     UnscheduleError,
     ExecuteError,
-    CreateError
+    CreateError,
+    FetchProjectsError
 )
 from azkaban_cli.__version__ import __version__
 
@@ -156,13 +157,16 @@ def __parse_projects(text, user):
     def get_user(div):
         return div.find_all('p', {'class': 'project-last-modified'})[0].text.split('\n')[-1].strip()[:-1]
 
-    soup = BeautifulSoup(text, 'html.parser')
-    all_projects = soup.find_all('div', {'class': 'project-info'})
-    all_projects_for_user = [get_text(div) for div in all_projects if get_user(div) == user]
-    logging.info('Found %d projects for user %s:' % (len(all_projects_for_user), user))
+    try:
+        soup = BeautifulSoup(text, 'html.parser')
+        all_projects = soup.find_all('div', {'class': 'project-info'})
+        all_projects_for_user = [get_text(div) for div in all_projects if get_user(div) == user]
+        logging.info('Found %d projects for user %s:' % (len(all_projects_for_user), user))
 
-    for project in all_projects_for_user:
-        logging.info('- %s' % (project))
+        for project in all_projects_for_user:
+            logging.info('- %s' % (project))
+    except:
+        raise FetchProjectsError('Error parsing response')
 
 @login_required
 def __fetch_projects(ctx):
