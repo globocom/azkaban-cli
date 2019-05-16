@@ -265,7 +265,7 @@ def create(ctx, project, description):
 @click.pass_context
 @click.option(u'--user', type=click.STRING, required=False, help=u'Azkaban user to fetch projects from')
 def fetch_projects(ctx, user):
-    """Fetch all project"""
+    """Fetch all project from a user"""
     __fetch_projects(ctx, user)
 
 cli.add_command(login)
