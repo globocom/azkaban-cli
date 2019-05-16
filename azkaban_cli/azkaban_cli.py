@@ -169,11 +169,12 @@ def __parse_projects(text, user):
         raise FetchProjectsError('Error parsing response')
 
 @login_required
-def __fetch_projects(ctx):
+def __fetch_projects(ctx, user):
     azkaban = ctx.obj[u'azkaban']
     try:
         text = azkaban.fetch_projects()
-        user = ctx.obj[u'user']
+        if not user:
+            user = ctx.obj[u'user']
         __parse_projects(text, user)
     except FetchProjectsError as e:
         logging.error(str(e))
@@ -262,9 +263,10 @@ def create(ctx, project, description):
 
 @click.command(u'fetch_projects')
 @click.pass_context
-def fetch_projects(ctx):
+@click.option(u'--user', type=click.STRING, required=False, help=u'Azkaban user to fetch projects from')
+def fetch_projects(ctx, user):
     """Fetch all project"""
-    __fetch_projects(ctx)
+    __fetch_projects(ctx, user)
 
 cli.add_command(login)
 cli.add_command(logout)
