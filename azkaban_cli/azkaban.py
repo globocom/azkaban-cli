@@ -71,12 +71,9 @@ class Azkaban(object):
         if response.text == "Login error. Need username and password":
             raise SessionError(response.text)
 
-    def __catch_login(self, response):
+    def __catch_response_error(self, response, exception):
         self.__catch_login_text(response)
         self.__catch_login_html(response)
-
-    def __catch_response_error(self, response, exception):
-        self.__catch_login(response)
 
         response_json = response.json()
 
