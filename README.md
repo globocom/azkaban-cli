@@ -33,6 +33,7 @@ Options:
 Commands:
   create      Create a new project
   execute     Execute a flow from a project
+  fetch_projects  Fetch all project from a user
   login       Login to an Azkaban server
   logout      Logout from Azkaban session
   schedule    Schedule a flow from a project with specified cron in quartz...
