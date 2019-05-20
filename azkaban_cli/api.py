@@ -257,7 +257,10 @@ def fetch_projects_request(session, host, session_id):
     """
 
     response = session.get(
-        host + '/index?all'
+        host + '/index?all',
+        params={
+            u'session.id': session_id
+        }
     )
 
     logging.debug("Response: \n%s", response.text)

@@ -83,7 +83,6 @@ def __login(ctx, host, user, password):
     try:
         azkaban.login(host, user, password)
         __save_logged_session(azkaban.get_logged_session())
-        ctx.obj[u'user'] = user
         logging.info("Logged in successfully!")
     except (requests.exceptions.ConnectionError, requests.exceptions.MissingSchema) as e:
         logging.error("Could not connect to host: %s", str(e))
@@ -171,10 +170,12 @@ def __parse_projects(text, user):
 @login_required
 def __fetch_projects(ctx, user):
     azkaban = ctx.obj[u'azkaban']
+
+    if not user:
+        user = azkaban.get_logged_session().get(u'user')
+
     try:
         text = azkaban.fetch_projects()
-        if not user:
-            user = ctx.obj[u'user']
         __parse_projects(text, user)
     except FetchProjectsError as e:
         logging.error(str(e))

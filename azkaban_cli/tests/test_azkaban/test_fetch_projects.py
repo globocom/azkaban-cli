@@ -32,7 +32,7 @@ class AzkabanFetchProjectsTest(TestCase):
 
         responses.add(
             responses.GET,
-            self.host + "/index?all",
+            self.host + "/index",
             status=200
         )
 
@@ -47,3 +47,16 @@ class AzkabanFetchProjectsTest(TestCase):
         self.azk.fetch_projects()
 
         mock_fetch_projects_request.assert_called_with(ANY, self.host, self.session_id)
+
+    @responses.activate
+    def test_error_session_expired_fetch_projects(self):
+        """
+        Test if fetch projects method from Azkaban class raises SessionError if request returns error caused by session expired
+        """
+
+        body = '  <script type=\"text/javascript\" src=\"/js/azkaban/view/login.js\"></script>'
+
+        responses.add(responses.GET, self.host + "/index", body=body, status=200)
+
+        with self.assertRaises(SessionError):
+            self.azk.fetch_projects()
