@@ -382,12 +382,11 @@ class Azkaban(object):
 
         self.__check_if_logged()
 
-        response = api.delete_request(
+        _ = api.delete_request(
             self.__session,
             self.__host,
             self.__session_id,
             project
         )
 
-        # The delete request does not return any message, so we only catch login errors
-        self.__catch_login(response)
+        # The delete request does not return any message

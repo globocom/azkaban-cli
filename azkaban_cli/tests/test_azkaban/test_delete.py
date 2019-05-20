@@ -53,19 +53,6 @@ class AzkabanDeleteTest(TestCase):
 
         mock_delete_request.assert_called_with(ANY, self.host, self.session_id, self.project)
 
-    @responses.activate
-    def test_error_session_expired_delete(self):
-        """
-        Test if delete method from Azkaban class raises SessionError if request returns error caused by session expired
-        """
-
-        fixture_path = os.path.join(os.path.dirname(__file__), os.pardir, "fixtures", "session_expired.html")
-        with open(fixture_path) as f:
-            responses.add(responses.GET, self.host + "/manager", body=f.read(), status=200)
-
-        with self.assertRaises(SessionError):
-            self.azk.delete(self.project)
-
     @patch('azkaban_cli.azkaban.api.delete_request')
     def test_error_not_logged_delete(self, mock_delete_request):
         """
