@@ -1,5 +1,6 @@
 from unittest import TestCase
 from unittest.mock import patch, ANY
+import os
 
 import responses
 
@@ -54,9 +55,9 @@ class AzkabanFetchProjectsTest(TestCase):
         Test if fetch projects method from Azkaban class raises SessionError if request returns error caused by session expired
         """
 
-        body = '  <script type=\"text/javascript\" src=\"/js/azkaban/view/login.js\"></script>'
-
-        responses.add(responses.GET, self.host + "/index", body=body, status=200)
+        fixture_path = os.path.join(os.path.dirname(__file__), os.pardir, "fixtures", "session_expired.html")
+        with open(fixture_path) as f:
+            responses.add(responses.GET, self.host + "/index", body=f.read(), status=200)
 
         with self.assertRaises(SessionError):
             self.azk.fetch_projects()
