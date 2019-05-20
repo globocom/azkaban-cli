@@ -379,7 +379,7 @@ class Azkaban(object):
 
         self.__check_if_logged()
 
-        _ = api.delete_request(
+        api.delete_request(
             self.__session,
             self.__host,
             self.__session_id,

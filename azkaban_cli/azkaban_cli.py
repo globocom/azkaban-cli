@@ -151,21 +151,42 @@ def __create(ctx, project, description):
 def __delete(ctx, project):
     azkaban = ctx.obj[u'azkaban']
     try:
-        # Since delete doesn't raise an exception, we try fetching the project flows.
-        # Project IDs get stored within the database even after deletion, so we then
-        # try to fetch the project schedule.
-        # If the project was successfully deleted, this will raise a FetchScheduleError.
-        # Else, it means the project was not deleted, so we print an error.
-        azkaban.delete(project)
+        # To delete a project, all flows must be unscheduled. The first thing we do
+        # is try fetching the project flows and unscheduling each one in succession.
+        # Then, we attempt to delete the project. If no exception was raised, it means
+        # the project was deleted successfully.
+        # Note: the projectID is stored in Azkaban's internal database. Therefore,
+        # fetching its flows will work even if the project has already been deleted.
+        # An INFO log is printed to explain this scenario, since this command will say that
+        # the project was deleted (even though it had already been deleted prior to this).
+
         flows = azkaban.fetch_flows(project)
         project_id = flows[u'projectId']
-        azkaban.fetch_schedule(project_id, 'abc')
-    except FetchScheduleError:
-        logging.info('Project %s successfully deleted' % (project))
-    except FetchFlowsError:
-        logging.error('Project %s does not exist' % (project))
+        flow_ids = flows[u'flows']
+
+        if len(flow_ids) > 0:
+            logging.debug('Will unschedule %d flows before deleting the project' % (len(flow_ids)))
+        else:
+            logging.info('Project %s has no flows or does not exist anymore!' % (project))
+
+        for flow_id in flow_ids:
+            flow_name = flow_id[u'flowId']
+            logging.debug('Unscheduling flow %s' % (flow_name))
+            schedule = azkaban.fetch_schedule(project_id, flow_name)
+            schedule_id = schedule[u'schedule'][u'scheduleId']
+            azkaban.unschedule(schedule_id)
+            logging.debug('Done')
+
+        azkaban.delete(project)
+
+    except FetchScheduleError as e:
+        logging.error(str(e))
+    except FetchFlowsError as e:
+        logging.error(str(e))
+    except UnscheduleError as e:
+        logging.error(str(e))
     else:
-        logging.error('Project %s was not deleted' % (project))
+        logging.info('Project %s was successfully deleted' % (project))
 
 
 # ----------------------------------------------------------------------------------------------------------------------
