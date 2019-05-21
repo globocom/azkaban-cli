@@ -26,6 +26,7 @@ setup(
     install_requires=[
         'requests<2.30.0',
         'click<8.0',
+        'beautifulsoup4<=4.7.1'
     ],
     tests_require = [
         'responses==0.10.5',
