@@ -1,4 +1,4 @@
 requests<2.30.0
 click<8.0
 responses==0.10.5
-beautifulsoup4
+beautifulsoup4<=4.7.1
