@@ -32,6 +32,7 @@ Options:
 
 Commands:
   create      Create a new project
+  delete      Delete a project
   execute     Execute a flow from a project
   fetch_projects  Fetch all project from a user
   login       Login to an Azkaban server

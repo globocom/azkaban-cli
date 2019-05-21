@@ -149,6 +149,47 @@ def __create(ctx, project, description):
     except CreateError as e:
         logging.error(str(e))
 
+@login_required
+def __delete(ctx, project):
+    azkaban = ctx.obj[u'azkaban']
+    try:
+        # To delete a project, all flows must be unscheduled. The first thing we do
+        # is try fetching the project flows and unscheduling each one in succession.
+        # Then, we attempt to delete the project. If no exception was raised, it means
+        # the project was deleted successfully.
+        # Note: the projectID is stored in Azkaban's internal database. Therefore,
+        # fetching its flows will work even if the project has already been deleted.
+        # An INFO log is printed to explain this scenario, since this command will say that
+        # the project was deleted (even though it had already been deleted prior to this).
+
+        flows = azkaban.fetch_flows(project)
+        project_id = flows[u'projectId']
+        flow_ids = flows[u'flows']
+
+        if len(flow_ids) > 0:
+            logging.debug('Will unschedule %d flows before deleting the project' % (len(flow_ids)))
+        else:
+            logging.info('Project %s has no flows or does not exist anymore!' % (project))
+
+        for flow_id in flow_ids:
+            flow_name = flow_id[u'flowId']
+            logging.debug('Unscheduling flow %s' % (flow_name))
+            schedule = azkaban.fetch_schedule(project_id, flow_name)
+            schedule_id = schedule[u'schedule'][u'scheduleId']
+            azkaban.unschedule(schedule_id)
+            logging.debug('Done')
+
+        azkaban.delete(project)
+
+    except FetchScheduleError as e:
+        logging.error(str(e))
+    except FetchFlowsError as e:
+        logging.error(str(e))
+    except UnscheduleError as e:
+        logging.error(str(e))
+    else:
+        logging.info('Project %s was successfully deleted' % (project))
+
 def __parse_projects(text, user):
     def get_text(div):
         return div.find_all('a')[0].text
@@ -260,7 +301,14 @@ def execute(ctx, project, flow):
 @click.argument(u'description', type=click.STRING) 
 def create(ctx, project, description):
     """Create a new project"""
-    __create(ctx,project,description)
+    __create(ctx, project, description)
+
+@click.command(u'delete')
+@click.pass_context
+@click.argument(u'project', type=click.STRING)
+def delete(ctx, project):
+    """Delete a project"""
+    __delete(ctx, project)
 
 @click.command(u'fetch_projects')
 @click.pass_context
@@ -276,6 +324,7 @@ cli.add_command(schedule)
 cli.add_command(unschedule)
 cli.add_command(execute)
 cli.add_command(create)
+cli.add_command(delete)
 cli.add_command(fetch_projects)
 
 # ----------------------------------------------------------------------------------------------------------------------
