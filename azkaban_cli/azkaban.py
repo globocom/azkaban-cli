@@ -70,10 +70,13 @@ class Azkaban(object):
     def __catch_login_text(self, response):
         if response.text == "Login error. Need username and password":
             raise SessionError(response.text)
-
-    def __catch_response_error(self, response, exception):
+    
+    def __catch_login(self, response):
         self.__catch_login_text(response)
         self.__catch_login_html(response)
+
+    def __catch_response_error(self, response, exception):
+        self.__catch_login(response)
 
         response_json = response.json()
 
@@ -387,3 +390,22 @@ class Azkaban(object):
         )
 
         # The delete request does not return any message
+
+    def fetch_projects(self):
+        """Fetch all projects command, intended to make the request to Azkaban and treat the response properly.
+
+        This method makes the fetch projects request to fetch all the projects and evaluates the response.
+        """
+
+        self.__check_if_logged()
+
+        response = api.fetch_projects_request(
+            self.__session,
+            self.__host,
+            self.__session_id
+        )
+
+        # The fetch projects request returns an html content, so we only catch login errors
+        self.__catch_login(response)
+
+        return response.text

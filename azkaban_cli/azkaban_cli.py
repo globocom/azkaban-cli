@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
+from bs4 import BeautifulSoup
 import logging
 import click
 import json
@@ -18,7 +19,8 @@ from azkaban_cli.exceptions import (
     FetchScheduleError,
     UnscheduleError,
     ExecuteError,
-    CreateError
+    CreateError,
+    FetchProjectsError
 )
 from azkaban_cli.__version__ import __version__
 
@@ -188,6 +190,37 @@ def __delete(ctx, project):
     else:
         logging.info('Project %s was successfully deleted' % (project))
 
+def __parse_projects(text, user):
+    def get_text(div):
+        return div.find_all('a')[0].text
+
+    def get_user(div):
+        return div.find_all('p', {'class': 'project-last-modified'})[0].text.split('\n')[-1].strip()[:-1]
+
+    try:
+        soup = BeautifulSoup(text, 'html.parser')
+        all_projects = soup.find_all('div', {'class': 'project-info'})
+        all_projects_for_user = [get_text(div) for div in all_projects if get_user(div) == user]
+        logging.info('Found %d projects for user %s:' % (len(all_projects_for_user), user))
+
+        for project in all_projects_for_user:
+            logging.info('- %s' % (project))
+    except:
+        raise FetchProjectsError('Error parsing response')
+
+@login_required
+def __fetch_projects(ctx, user):
+    azkaban = ctx.obj[u'azkaban']
+
+    if not user:
+        user = azkaban.get_logged_session().get(u'user')
+
+    try:
+        text = azkaban.fetch_projects()
+        __parse_projects(text, user)
+    except FetchProjectsError as e:
+        logging.error(str(e))
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
@@ -277,6 +310,13 @@ def delete(ctx, project):
     """Delete a project"""
     __delete(ctx, project)
 
+@click.command(u'fetch_projects')
+@click.pass_context
+@click.option(u'--user', type=click.STRING, required=False, help=u'Azkaban user to fetch projects from')
+def fetch_projects(ctx, user):
+    """Fetch all project from a user"""
+    __fetch_projects(ctx, user)
+
 cli.add_command(login)
 cli.add_command(logout)
 cli.add_command(upload)
@@ -285,6 +325,7 @@ cli.add_command(unschedule)
 cli.add_command(execute)
 cli.add_command(create)
 cli.add_command(delete)
+cli.add_command(fetch_projects)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
