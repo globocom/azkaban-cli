@@ -366,3 +366,24 @@ class Azkaban(object):
         self.__catch_response_error(response, CreateError)
 
         logging.info('Project %s created successfully' % (project))
+
+    def delete(self, project):
+        """Delete command, intended to make the request to Azkaban and treat the response properly.
+
+        This method receives the project name, make the execute request to delete the project and
+        evaluate the response.
+
+        :param project: Project name on Azkaban
+        :type project: str
+        """
+
+        self.__check_if_logged()
+
+        api.delete_request(
+            self.__session,
+            self.__host,
+            self.__session_id,
+            project
+        )
+
+        # The delete request does not return any message
