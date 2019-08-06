@@ -221,6 +221,20 @@ def __fetch_projects(ctx, user):
     except FetchProjectsError as e:
         logging.error(str(e))
 
+@login_required
+def __add_permission(ctx, project, group, admin, read, write, _execute, schedule):
+    azkaban = ctx.obj[u'azkaban']
+    try:
+        text = azkaban.add_permission(
+            project, 
+            group, 
+            permission_options= {
+                'admin':admin, 'read':read, 'write':write, 'execute':_execute, 'schedule': schedule
+            }
+        )
+        __parse_projects(text, user)
+    except FetchProjectsError as e:
+        logging.error(str(e))
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
@@ -317,6 +331,27 @@ def fetch_projects(ctx, user):
     """Fetch all project from a user"""
     __fetch_projects(ctx, user)
 
+@click.command(u'delete')
+@click.pass_context
+@click.argument(u'project', type=click.STRING)
+def delete(ctx, project):
+    """Delete a project"""
+    __delete(ctx, project)
+
+@click.command(u'add_permission')
+@click.pass_context
+@click.argument(u'project', type=click.STRING)
+@click.argument(u'group', type=click.STRING)
+@click.option('--admin', '-a', required=False, help=u'The group has admin rights in the project', is_flag=True)
+@click.option('--read', '-r', required=False, default=True, help=u'The group can read the project', is_flag=True)
+@click.option('--write', '-w', required=False, help=u'The group can write on the project', is_flag=True)
+@click.option('--execute', '-e', '_execute', required=False, help=u'The group can execute on the project', is_flag=True)
+@click.option('--schedule', '-s', required=False, help=u'The group can schedule on the project', is_flag=True)
+def add_permission(ctx, project, group, admin, read, write, _execute, schedule):
+    """Add a group with permission in a project"""
+    __add_permission(ctx, project, group, admin, read, write, _execute, schedule) 
+    
+
 cli.add_command(login)
 cli.add_command(logout)
 cli.add_command(upload)
@@ -326,6 +361,7 @@ cli.add_command(execute)
 cli.add_command(create)
 cli.add_command(delete)
 cli.add_command(fetch_projects)
+cli.add_command(add_permission)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
