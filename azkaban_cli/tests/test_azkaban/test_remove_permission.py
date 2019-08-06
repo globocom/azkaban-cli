@@ -4,9 +4,9 @@ from unittest.mock import patch, ANY
 import responses
 
 import azkaban_cli.azkaban
-from azkaban_cli.exceptions import AddPermissionError, SessionError
+from azkaban_cli.exceptions import RemovePermissionError, SessionError
 
-class AzkabanAddPermissionTest(TestCase):
+class AzkabanRemovePermissionTest(TestCase):
     def setUp(self):
         """
         Creates an Azkaban instance and set a logged session for all upload tests
@@ -22,15 +22,14 @@ class AzkabanAddPermissionTest(TestCase):
 
         self.project = 'ProjectTest'
         self.group   = 'GroupTest'
-        self.permission_options = {'admin':True, 'read':True, 'write':False, 'execute':False, 'schedule':False}
 
     def tearDown(self):
         pass
 
     @responses.activate
-    def test_add_permission(self):
+    def test_remove_permission(self):
         """
-        Test add_permission method from Azkaban class
+        Test remove_permission method from Azkaban class
         """
 
         responses.add(
@@ -39,23 +38,23 @@ class AzkabanAddPermissionTest(TestCase):
             status=200
         )
 
-        self.azk.add_permission(self.project,self.group, self.permission_options)
+        self.azk.remove_permission(self.project,self.group)
 
-    @patch('azkaban_cli.azkaban.api.add_permission_request')
-    def test_add_permission_request_called(self, mock_add_permission_request):
+    @patch('azkaban_cli.azkaban.api.remove_permission_request')
+    def test_remove_permission_request_called(self, mock_remove_permission_request):
         """
-        Test if add_permission method from Azkaban class is calling add_permission request with expected arguments
+        Test if remove_permission method from Azkaban class is calling remove_permission request with expected arguments
         """
 
-        self.azk.add_permission(self.project,self.group, self.permission_options)
+        self.azk.remove_permission(self.project,self.group)
 
-        mock_add_permission_request.assert_called_with(ANY, self.host, self.session_id, self.project, self.group, self.permission_options)
+        mock_remove_permission_request.assert_called_with(ANY, self.host, self.session_id, self.project, self.group)
 
 
     @responses.activate
-    def test_invalid_group_add_permission(self):
+    def test_invalid_group_remove_permission(self):
         """
-        Test if add_permission method from Azkaban class raises AddPermissionError if request returns error caused by group not be found
+        Test if remove_permission method from Azkaban class raises RemovePermissionError if request returns error caused by group not be found
         """
 
         responses.add(
@@ -69,13 +68,13 @@ class AzkabanAddPermissionTest(TestCase):
             status=200
         )
 
-        with self.assertRaises(AddPermissionError):
-            self.azk.add_permission(self.project, self.group, self.permission_options)
+        with self.assertRaises(RemovePermissionError):
+            self.azk.remove_permission(self.project, self.group)
 
     @responses.activate
-    def test_if_group_already_exist_add_permission(self):
+    def test_if_group_dont_exist_remove_permission(self):
         """
-        Test if add_permission method from Azkaban class raises AddPermissionError if request returns error caused by group already have permission
+        Test if remove_permission method from Azkaban class raises RemovePermissionError if request returns error caused by group already have permission
         """
 
         responses.add(
@@ -83,14 +82,14 @@ class AzkabanAddPermissionTest(TestCase):
             self.host + "/manager",
             json={
               "project" : "teste-permission-api-20190806",
-              "error" : "Group permission already exists.",
+              "error" : "Group permission don't exists.",
               "projectId" : 107
             },
             status=200
         )
 
-        with self.assertRaises(AddPermissionError):
-            self.azk.add_permission(self.project, self.group, self.permission_options)
+        with self.assertRaises(RemovePermissionError):
+            self.azk.remove_permission(self.project, self.group)
 
     @responses.activate
     def test_error_session_expired_execute(self):
@@ -101,4 +100,4 @@ class AzkabanAddPermissionTest(TestCase):
         responses.add(responses.GET, self.host + "/manager", json={"error": "session"}, status=200)
 
         with self.assertRaises(SessionError):
-            self.azk.add_permission(self.project, self.group, self.permission_options)
+            self.azk.remove_permission(self.project, self.group)

@@ -12,7 +12,9 @@ from azkaban_cli.exceptions import (
     UnscheduleError,
     ExecuteError,
     CreateError,
-    AddPermissionError
+    AddPermissionError,
+    RemovePermissionError,
+    ChangePermissionError
 )
 from shutil import make_archive
 from urllib3.exceptions import InsecureRequestWarning
@@ -485,7 +487,7 @@ class Azkaban(object):
         
         logging.info('Group [%s] add with permission in the Project [%s] successfully' % (group, project))
 
-def remove_permission(self, project, group):
+    def remove_permission(self, project, group):
         """Remove permission command, intended to make the request to Azkaban and treat the response properly.
 
         This method receives the project name and the group name and execute 
@@ -509,6 +511,6 @@ def remove_permission(self, project, group):
             group 
         )
 
-        self.__catch_response_error_ignore_empty(response, AddPermissionError)
+        self.__catch_response_error_ignore_empty(response, RemovePermissionError)
         
         logging.info('Group [%s] permission removed from the Project [%s] successfully' % (group, project))
