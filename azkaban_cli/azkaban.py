@@ -453,26 +453,7 @@ class Azkaban(object):
 
         self.__check_if_logged()
 
-        #validate the dictionary options
-        if('admin' not in permission_options): permission_options['admin'] = False
-        if('write' not in permission_options): permission_options['write'] = False
-        if('read' not in permission_options): permission_options['read'] = False
-        if('execute' not in permission_options): permission_options['execute'] = False
-        if('schedule' not in permission_options): permission_options['schedule'] = False
-
-        #if we have the admin opt, then all be true
-        if(permission_options['admin']):
-            permission_options['write'] = True
-            permission_options['read'] = True
-            permission_options['execute'] = True
-            permission_options['schedule'] = True
-
-        #if we don`t have declared options, then we have to set the read option as default, like in the Azkaban web-ui
-        elif(not \
-                (permission_options['admin'] and permission_options['read'] and permission_options['write'] \
-                    and permission_options['execute'] and permission_options['schedule']) \
-                ):
-            permission_options['read'] = True
+        permission_options = self.__check_group_permissions(permission_options)
 
         response = api.add_permission_request(
             self.__session,
@@ -514,3 +495,62 @@ class Azkaban(object):
         self.__catch_response_error_ignore_empty(response, RemovePermissionError)
         
         logging.info('Group [%s] permission removed from the Project [%s] successfully' % (group, project))
+
+
+    def change_permission(self, project, group, permission_options):
+        """Change permission command, intended to make the request to Azkaban and treat the response properly.
+
+        This method receives the project name, the group name, and the permission options and execute 
+        request to change a existing group permission in a project and evaluate the response.
+
+        :param project: Project name on Azkaban
+        :type project: str
+
+        :param group: Group name on Azkaban
+        :type project: str
+
+        :param permission_options: The group permissions in the project on Azkaban
+        :type project: Dictionary
+        """
+
+        self.__check_if_logged()
+
+        permission_options = self.__check_group_permissions(permission_options)
+
+        response = api.change_permission_request(
+            self.__session,
+            self.__host,
+            self.__session_id,
+            project,
+            group, 
+            permission_options
+        )
+
+        self.__catch_response_error_ignore_empty(response, ChangePermissionError)
+        
+        logging.info('Group [%s] received new permissions in the Project [%s] successfully' % (group, project))
+
+    def __check_group_permissions(self, permission_options):
+        #validate the dictionary options
+        if('admin' not in permission_options): permission_options['admin'] = False
+        if('write' not in permission_options): permission_options['write'] = False
+        if('read' not in permission_options): permission_options['read'] = False
+        if('execute' not in permission_options): permission_options['execute'] = False
+        if('schedule' not in permission_options): permission_options['schedule'] = False
+
+        #if we have the admin opt, then all be true
+        if(permission_options['admin']):
+            permission_options['write'] = True
+            permission_options['read'] = True
+            permission_options['execute'] = True
+            permission_options['schedule'] = True
+
+        #if we don`t have declared options, then we have to set the read option as default, like in the Azkaban web-ui
+        elif(not \
+                (permission_options['admin'] and permission_options['read'] and permission_options['write'] \
+                    and permission_options['execute'] and permission_options['schedule']) \
+                ):
+            permission_options['read'] = True
+        
+        return permission_options
+        

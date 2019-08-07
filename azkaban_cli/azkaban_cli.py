@@ -246,6 +246,20 @@ def __remove_permission(ctx, project, group):
     except FetchProjectsError as e:
         logging.error(str(e))
 
+@login_required
+def __change_permission(ctx, project, group, admin, read, write, _execute, _schedule):
+    azkaban = ctx.obj[u'azkaban']
+    try:
+        azkaban.change_permission(
+            project, 
+            group, 
+            permission_options= {
+                'admin':admin, 'read':read, 'write':write, 'execute':_execute, 'schedule': _schedule
+            }
+        )
+    except FetchProjectsError as e:
+        logging.error(str(e))
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
 # ----------------------------------------------------------------------------------------------------------------------
@@ -362,6 +376,18 @@ def remove_permission(ctx, project, group):
     """Add a group with permission in a project"""
     __remove_permission(ctx, project, group) 
        
+@click.command(u'change_permission')
+@click.pass_context
+@click.argument(u'project', type=click.STRING)
+@click.argument(u'group', type=click.STRING)
+@click.option('--admin', '-a', required=False, help=u'The group has admin rights in the project', is_flag=True)
+@click.option('--read', '-r', required=False, default=True, help=u'The group can read the project', is_flag=True)
+@click.option('--write', '-w', required=False, help=u'The group can write on the project', is_flag=True)
+@click.option('--execute', '-e', '_execute', required=False, help=u'The group can execute on the project', is_flag=True)
+@click.option('--schedule', '-s', '_schedule', required=False, help=u'The group can schedule on the project', is_flag=True)
+def change_permission(ctx, project, group, admin, read, write, _execute, _schedule):
+    """Add a group with permission in a project"""
+    __change_permission(ctx, project, group, admin, read, write, _execute, _schedule) 
 
 cli.add_command(login)
 cli.add_command(logout)
@@ -374,6 +400,7 @@ cli.add_command(delete)
 cli.add_command(fetch_projects)
 cli.add_command(add_permission)
 cli.add_command(remove_permission)
+cli.add_command(change_permission)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
