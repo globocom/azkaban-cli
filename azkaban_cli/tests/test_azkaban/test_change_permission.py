@@ -22,7 +22,7 @@ class AzkabanChangePermissionTest(TestCase):
 
         self.project = 'ProjectTest'
         self.group   = 'GroupTest'
-        self.permission_options = {'admin':True, 'read':True, 'write':True, 'execute':False, 'schedule':False}
+        self.permission_options = {'admin': True, 'read': True, 'write': True, 'execute': False, 'schedule': False}
 
     def tearDown(self):
         pass
@@ -39,7 +39,7 @@ class AzkabanChangePermissionTest(TestCase):
             status=200
         )
 
-        self.azk.change_permission(self.project,self.group, self.permission_options)
+        self.azk.change_permission(self.project, self.group, self.permission_options)
 
     @patch('azkaban_cli.azkaban.api.change_permission_request')
     def test_change_permission_request_called(self, mock_change_permission_request):
@@ -47,7 +47,7 @@ class AzkabanChangePermissionTest(TestCase):
         Test if change_permission method from Azkaban class is calling change_permission request with expected arguments
         """
 
-        self.azk.change_permission(self.project,self.group, self.permission_options)
+        self.azk.change_permission(self.project, self.group, self.permission_options)
 
         mock_change_permission_request.assert_called_with(ANY, self.host, self.session_id, self.project, self.group, self.permission_options)
 

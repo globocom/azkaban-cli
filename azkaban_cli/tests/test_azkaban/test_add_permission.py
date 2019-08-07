@@ -22,7 +22,7 @@ class AzkabanAddPermissionTest(TestCase):
 
         self.project = 'ProjectTest'
         self.group   = 'GroupTest'
-        self.permission_options = {'admin':True, 'read':True, 'write':False, 'execute':False, 'schedule':False}
+        self.permission_options = {'admin': True, 'read': True, 'write': False, 'execute': False, 'schedule': False}
 
     def tearDown(self):
         pass
@@ -39,7 +39,7 @@ class AzkabanAddPermissionTest(TestCase):
             status=200
         )
 
-        self.azk.add_permission(self.project,self.group, self.permission_options)
+        self.azk.add_permission(self.project, self.group, self.permission_options)
 
     @patch('azkaban_cli.azkaban.api.add_permission_request')
     def test_add_permission_request_called(self, mock_add_permission_request):
@@ -47,7 +47,7 @@ class AzkabanAddPermissionTest(TestCase):
         Test if add_permission method from Azkaban class is calling add_permission request with expected arguments
         """
 
-        self.azk.add_permission(self.project,self.group, self.permission_options)
+        self.azk.add_permission(self.project, self.group, self.permission_options)
 
         mock_add_permission_request.assert_called_with(ANY, self.host, self.session_id, self.project, self.group, self.permission_options)
 

@@ -78,35 +78,23 @@ class Azkaban(object):
         self.__catch_login_text(response)
         self.__catch_login_html(response)
 
-    def __catch_response_error(self, response, exception, ignoreEmptyResponses=True):
-        self.__catch_login(response)
-        
-        #some ajax api operations don`t have return body making response.json() raise a ValueError exception
-        #The try block enable the __catch_empty_response raise the correct exception
-        #try:
-        response_json = response.json()
-        #except:
-        #    response_json = {}
-        
-        self.__catch_response_error_msg(exception, response_json)
-        self.__catch_response_status_error(exception, response_json)
-
-        #don't raise a exception with we know the request has a empty body
-        #if(not ignoreEmptyResponses):
-        self.__catch_empty_response(exception, response_json)
-
-    def __catch_response_error_ignore_empty(self, response, exception):
+    def __catch_response_error(self, response, exception, ignore_empty_responses=False):
         self.__catch_login(response)
         
         #some ajax api operations don`t have return body making response.json() raise a ValueError exception
         #The try block enable the __catch_empty_response raise the correct exception
         try:
             response_json = response.json()
-        except:
+        except Exception:
             response_json = {}
         
         self.__catch_response_error_msg(exception, response_json)
-        self.__catch_response_status_error(exception, response_json)        
+        self.__catch_response_status_error(exception, response_json)
+
+        #don't raise a exception with we know the request has a empty body
+        if not ignore_empty_responses:
+            self.__catch_empty_response(exception, response_json)
+   
 
     def get_logged_session(self):
         """Method for return the host and session id of the logged session saved on the class
@@ -464,7 +452,7 @@ class Azkaban(object):
             permission_options
         )
 
-        self.__catch_response_error_ignore_empty(response, AddPermissionError)
+        self.__catch_response_error(response, AddPermissionError, True)
         
         logging.info('Group [%s] add with permission in the Project [%s] successfully' % (group, project))
 
@@ -492,7 +480,7 @@ class Azkaban(object):
             group 
         )
 
-        self.__catch_response_error_ignore_empty(response, RemovePermissionError)
+        self.__catch_response_error(response, RemovePermissionError, True)
         
         logging.info('Group [%s] permission removed from the Project [%s] successfully' % (group, project))
 
@@ -526,7 +514,7 @@ class Azkaban(object):
             permission_options
         )
 
-        self.__catch_response_error_ignore_empty(response, ChangePermissionError)
+        self.__catch_response_error(response, ChangePermissionError, True)
         
         logging.info('Group [%s] received new permissions in the Project [%s] successfully' % (group, project))
 
@@ -553,4 +541,3 @@ class Azkaban(object):
             permission_options['read'] = True
         
         return permission_options
-        

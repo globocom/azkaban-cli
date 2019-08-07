@@ -359,14 +359,14 @@ def fetch_projects(ctx, user):
 @click.pass_context
 @click.argument(u'project', type=click.STRING)
 @click.argument(u'group', type=click.STRING)
-@click.option('--admin', '-a', required=False, help=u'The group has admin rights in the project', is_flag=True)
-@click.option('--read', '-r', required=False, default=True, help=u'The group can read the project', is_flag=True)
-@click.option('--write', '-w', required=False, help=u'The group can write on the project', is_flag=True)
+@click.option('--admin', '-a', '_admin', required=False, help=u'The group has admin rights in the project', is_flag=True)
+@click.option('--read', '-r', '_read', required=False, default=True, help=u'The group can read the project', is_flag=True)
+@click.option('--write', '-w', '_write', required=False, help=u'The group can write on the project', is_flag=True)
 @click.option('--execute', '-e', '_execute', required=False, help=u'The group can execute on the project', is_flag=True)
 @click.option('--schedule', '-s', '_schedule', required=False, help=u'The group can schedule on the project', is_flag=True)
-def add_permission(ctx, project, group, admin, read, write, _execute, _schedule):
+def add_permission(ctx, project, group, _admin, _read, _write, _execute, _schedule):
     """Add a group with permission in a project"""
-    __add_permission(ctx, project, group, admin, read, write, _execute, _schedule) 
+    __add_permission(ctx, project, group, _admin, _read, _write, _execute, _schedule) 
 
 @click.command(u'remove_permission')
 @click.pass_context
@@ -380,14 +380,14 @@ def remove_permission(ctx, project, group):
 @click.pass_context
 @click.argument(u'project', type=click.STRING)
 @click.argument(u'group', type=click.STRING)
-@click.option('--admin', '-a', required=False, help=u'The group has admin rights in the project', is_flag=True)
-@click.option('--read', '-r', required=False, default=True, help=u'The group can read the project', is_flag=True)
-@click.option('--write', '-w', required=False, help=u'The group can write on the project', is_flag=True)
+@click.option('--admin', '-a', '_admin', required=False, help=u'The group has admin rights in the project', is_flag=True)
+@click.option('--read', '-r', '_read', required=False, default=True, help=u'The group can read the project', is_flag=True)
+@click.option('--write', '-w', '_write', required=False, help=u'The group can write on the project', is_flag=True)
 @click.option('--execute', '-e', '_execute', required=False, help=u'The group can execute on the project', is_flag=True)
 @click.option('--schedule', '-s', '_schedule', required=False, help=u'The group can schedule on the project', is_flag=True)
-def change_permission(ctx, project, group, admin, read, write, _execute, _schedule):
+def change_permission(ctx, project, group, _admin, _read, _write, _execute, _schedule):
     """Add a group with permission in a project"""
-    __change_permission(ctx, project, group, admin, read, write, _execute, _schedule) 
+    __change_permission(ctx, project, group, _admin, _read, _write, _execute, _schedule) 
 
 cli.add_command(login)
 cli.add_command(logout)
@@ -415,4 +415,3 @@ if __name__ == u'__main__':
         logging.error(ex)
 
         sys.exit()
-

@@ -306,7 +306,7 @@ def add_permission_request(session, host, session_id, project, group, permission
     :raises requests.exceptions.ConnectionError: if cannot connect to host
     """
    
-    response = __call_permission_api(session,host,session_id,'addPermission',project, group, permission_options)
+    response = __call_permission_api(session, host, session_id, 'addPermission', project, group, permission_options)
 
     logging.debug("Response: \n%s", response.text)
 
@@ -327,9 +327,9 @@ def remove_permission_request(session, host, session_id, project, group):
     """
    
     #to remove a group permission, we have to pass all permissions as False
-    permission_options = {'admin':False, 'read':False, 'write':False, 'execute':False, 'schedule': False}
+    permission_options = {'admin': False, 'read': False, 'write': False, 'execute': False, 'schedule': False}
 
-    response = __call_permission_api(session,host,session_id,'changePermission',project, group, permission_options)
+    response = __call_permission_api(session, host, session_id, 'changePermission', project, group, permission_options)
 
     logging.debug("Response: \n%s", response.text)
 
@@ -350,7 +350,7 @@ def change_permission_request(session, host, session_id, project, group, permiss
     :raises requests.exceptions.ConnectionError: if cannot connect to host
     """
    
-    response = __call_permission_api(session,host,session_id,'changePermission',project, group, permission_options)
+    response = __call_permission_api(session, host, session_id, 'changePermission', project, group, permission_options)
 
     logging.debug("Response: \n%s", response.text)
 

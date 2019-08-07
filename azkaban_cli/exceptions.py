@@ -41,4 +41,3 @@ class RemovePermissionError(Exception):
 
 class ChangePermissionError(Exception):
     pass
-    

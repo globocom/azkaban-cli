@@ -38,7 +38,7 @@ class AzkabanRemovePermissionTest(TestCase):
             status=200
         )
 
-        self.azk.remove_permission(self.project,self.group)
+        self.azk.remove_permission(self.project, self.group)
 
     @patch('azkaban_cli.azkaban.api.remove_permission_request')
     def test_remove_permission_request_called(self, mock_remove_permission_request):
@@ -46,7 +46,7 @@ class AzkabanRemovePermissionTest(TestCase):
         Test if remove_permission method from Azkaban class is calling remove_permission request with expected arguments
         """
 
-        self.azk.remove_permission(self.project,self.group)
+        self.azk.remove_permission(self.project, self.group)
 
         mock_remove_permission_request.assert_called_with(ANY, self.host, self.session_id, self.project, self.group)
 
