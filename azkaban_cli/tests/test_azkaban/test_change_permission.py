@@ -22,7 +22,7 @@ class AzkabanChangePermissionTest(TestCase):
 
         self.project = 'ProjectTest'
         self.group   = 'GroupTest'
-        self.permission_options = {'admin': True, 'read': True, 'write': True, 'execute': False, 'schedule': False}
+        self.permission_options = {'admin': False, 'read': True, 'write': True, 'execute': False, 'schedule': False}
 
     def tearDown(self):
         pass

@@ -519,25 +519,21 @@ class Azkaban(object):
         logging.info('Group [%s] received new permissions in the Project [%s] successfully' % (group, project))
 
     def __check_group_permissions(self, permission_options):
-        #validate the dictionary options
-        if('admin' not in permission_options): permission_options['admin'] = False
-        if('write' not in permission_options): permission_options['write'] = False
-        if('read' not in permission_options): permission_options['read'] = False
-        if('execute' not in permission_options): permission_options['execute'] = False
-        if('schedule' not in permission_options): permission_options['schedule'] = False
+        
+        options = ["admin", "write", "read", "execute", "schedule"]
+        empty_permission_options = {option: False for option in options}
+
+        filled_permission_options = {**empty_permission_options, **permission_options}
+
+        have_declared_options = filled_permission_options['admin'] and filled_permission_options['read'] and filled_permission_options['write'] \
+        and filled_permission_options['execute'] and filled_permission_options['schedule']
 
         #if we have the admin opt, then all be true
-        if(permission_options['admin']):
-            permission_options['write'] = True
-            permission_options['read'] = True
-            permission_options['execute'] = True
-            permission_options['schedule'] = True
+        if filled_permission_options['admin']:
+            filled_permission_options = {key: True for key in filled_permission_options}
 
         #if we don`t have declared options, then we have to set the read option as default, like in the Azkaban web-ui
-        elif(not \
-                (permission_options['admin'] and permission_options['read'] and permission_options['write'] \
-                    and permission_options['execute'] and permission_options['schedule']) \
-                ):
+        elif have_declared_options:
             permission_options['read'] = True
         
-        return permission_options
+        return filled_permission_options
