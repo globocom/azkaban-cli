@@ -516,7 +516,7 @@ class Azkaban(object):
 
         self.__catch_response_error(response, ChangePermissionError, True)
         
-        logging.info('Group [%s] received new permissions [%s] in the Project [%s] successfully' % (group, permission_options, project))
+        logging.info('Group [%s] AAA received new permissions [%s] in the Project [%s] successfully' % (group, permission_options, project))
 
     def __check_group_permissions(self, permission_options):
         
@@ -534,6 +534,6 @@ class Azkaban(object):
 
         #if we don`t have declared options, then we have to set the read option as default, like in the Azkaban web-ui
         elif not have_declared_options:
-            permission_options['read'] = True
+            filled_permission_options['read'] = True
         
         return filled_permission_options
