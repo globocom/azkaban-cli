@@ -1,7 +1,7 @@
 language: python
 python:
 #  - "3.3" - Removed, travis CI don`t support this version actually
-  - "3.4"
+#  - "3.4"
   - "3.5"
   - "3.6"
   - "3.7-dev"

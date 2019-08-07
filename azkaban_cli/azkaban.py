@@ -454,7 +454,7 @@ class Azkaban(object):
 
         self.__catch_response_error(response, AddPermissionError, True)
         
-        logging.info('Group [%s] add with permission in the Project [%s] successfully' % (group, project))
+        logging.info('Group [%s] add with permission [%s] in the Project [%s] successfully' % (group,  permission_options, project))
 
     def remove_permission(self, project, group):
         """Remove permission command, intended to make the request to Azkaban and treat the response properly.
@@ -516,7 +516,7 @@ class Azkaban(object):
 
         self.__catch_response_error(response, ChangePermissionError, True)
         
-        logging.info('Group [%s] received new permissions in the Project [%s] successfully' % (group, project))
+        logging.info('Group [%s] received new permissions [%s] in the Project [%s] successfully' % (group, permission_options, project))
 
     def __check_group_permissions(self, permission_options):
         
@@ -533,7 +533,7 @@ class Azkaban(object):
             filled_permission_options = {key: True for key in filled_permission_options}
 
         #if we don`t have declared options, then we have to set the read option as default, like in the Azkaban web-ui
-        elif have_declared_options:
+        elif not have_declared_options:
             permission_options['read'] = True
         
         return filled_permission_options
