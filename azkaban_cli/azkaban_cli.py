@@ -20,7 +20,10 @@ from azkaban_cli.exceptions import (
     UnscheduleError,
     ExecuteError,
     CreateError,
-    FetchProjectsError
+    FetchProjectsError,
+    ChangePermissionError,
+    AddPermissionError,
+    RemovePermissionError
 )
 from azkaban_cli.__version__ import __version__
 
@@ -232,7 +235,7 @@ def __add_permission(ctx, project, group, admin, read, write, _execute, _schedul
                 'admin':admin, 'read':read, 'write':write, 'execute':_execute, 'schedule': _schedule
             }
         )
-    except FetchProjectsError as e:
+    except AddPermissionError as e:
         logging.error(str(e))
 
 @login_required
@@ -243,7 +246,7 @@ def __remove_permission(ctx, project, group):
             project, 
             group
         )
-    except FetchProjectsError as e:
+    except RemovePermissionError as e:
         logging.error(str(e))
 
 @login_required
@@ -257,7 +260,7 @@ def __change_permission(ctx, project, group, admin, read, write, _execute, _sche
                 'admin':admin, 'read':read, 'write':write, 'execute':_execute, 'schedule': _schedule
             }
         )
-    except FetchProjectsError as e:
+    except ChangePermissionError as e:
         logging.error(str(e))
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -373,7 +376,7 @@ def add_permission(ctx, project, group, _admin, _read, _write, _execute, _schedu
 @click.argument(u'project', type=click.STRING)
 @click.argument(u'group', type=click.STRING)
 def remove_permission(ctx, project, group):
-    """Add a group with permission in a project"""
+    """Remove group permission from a project"""
     __remove_permission(ctx, project, group) 
        
 @click.command(u'change_permission')
@@ -386,7 +389,7 @@ def remove_permission(ctx, project, group):
 @click.option('--execute', '-e', '_execute', required=False, help=u'The group can execute on the project', is_flag=True)
 @click.option('--schedule', '-s', '_schedule', required=False, help=u'The group can schedule on the project', is_flag=True)
 def change_permission(ctx, project, group, _admin, _read, _write, _execute, _schedule):
-    """Add a group with permission in a project"""
+    """Change a group permission in a project"""
     __change_permission(ctx, project, group, _admin, _read, _write, _execute, _schedule) 
 
 cli.add_command(login)
