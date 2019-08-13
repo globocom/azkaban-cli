@@ -32,3 +32,12 @@ class CreateError(Exception):
 
 class FetchProjectsError(Exception):
     pass
+
+class AddPermissionError(Exception):
+    pass
+
+class RemovePermissionError(Exception):
+    pass
+
+class ChangePermissionError(Exception):
+    pass

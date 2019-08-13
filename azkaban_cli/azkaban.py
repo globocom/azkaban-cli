@@ -11,7 +11,10 @@ from azkaban_cli.exceptions import (
     FetchScheduleError,
     UnscheduleError,
     ExecuteError,
-    CreateError
+    CreateError,
+    AddPermissionError,
+    RemovePermissionError,
+    ChangePermissionError
 )
 from shutil import make_archive
 from urllib3.exceptions import InsecureRequestWarning
@@ -75,14 +78,23 @@ class Azkaban(object):
         self.__catch_login_text(response)
         self.__catch_login_html(response)
 
-    def __catch_response_error(self, response, exception):
+    def __catch_response_error(self, response, exception, ignore_empty_responses=False):
         self.__catch_login(response)
-
-        response_json = response.json()
-
+        
+        #some ajax api operations don`t have return body making response.json() raise a ValueError exception
+        #The try block enable the __catch_empty_response raise the correct exception
+        try:
+            response_json = response.json()
+        except Exception:
+            response_json = {}
+        
         self.__catch_response_error_msg(exception, response_json)
         self.__catch_response_status_error(exception, response_json)
-        self.__catch_empty_response(exception, response_json)
+
+        #don't raise a exception with we know the request has a empty body
+        if not ignore_empty_responses:
+            self.__catch_empty_response(exception, response_json)
+   
 
     def get_logged_session(self):
         """Method for return the host and session id of the logged session saved on the class
@@ -409,3 +421,119 @@ class Azkaban(object):
         self.__catch_login(response)
 
         return response.text
+
+
+    def add_permission(self, project, group, permission_options):
+        """Add permission command, intended to make the request to Azkaban and treat the response properly.
+
+        This method receives the project name, the group name, and the permission options and execute 
+        request to add a group permission to the project and evaluate the response.
+
+        :param project: Project name on Azkaban
+        :type project: str
+
+        :param group: Group name on Azkaban
+        :type project: str
+
+        :param permission_options: The group permissions in the project on Azkaban
+        :type project: Dictionary
+        """
+
+        self.__check_if_logged()
+
+        permission_options = self.__check_group_permissions(permission_options)
+
+        response = api.add_permission_request(
+            self.__session,
+            self.__host,
+            self.__session_id,
+            project,
+            group, 
+            permission_options
+        )
+
+        self.__catch_response_error(response, AddPermissionError, True)
+        
+        logging.info('Group [%s] add with permission [%s] in the Project [%s] successfully' % (group,  permission_options, project))
+
+    def remove_permission(self, project, group):
+        """Remove permission command, intended to make the request to Azkaban and treat the response properly.
+
+        This method receives the project name and the group name and execute 
+        request to remove a group permission from the project and evaluate the response.
+
+        :param project: Project name on Azkaban
+        :type project: str
+
+        :param group: Group name on Azkaban
+        :type project: str
+
+        """
+
+        self.__check_if_logged()
+
+        response = api.remove_permission_request(
+            self.__session,
+            self.__host,
+            self.__session_id,
+            project,
+            group 
+        )
+
+        self.__catch_response_error(response, RemovePermissionError, True)
+        
+        logging.info('Group [%s] permission removed from the Project [%s] successfully' % (group, project))
+
+
+    def change_permission(self, project, group, permission_options):
+        """Change permission command, intended to make the request to Azkaban and treat the response properly.
+
+        This method receives the project name, the group name, and the permission options and execute 
+        request to change a existing group permission in a project and evaluate the response.
+
+        :param project: Project name on Azkaban
+        :type project: str
+
+        :param group: Group name on Azkaban
+        :type project: str
+
+        :param permission_options: The group permissions in the project on Azkaban
+        :type project: Dictionary
+        """
+
+        self.__check_if_logged()
+
+        permission_options = self.__check_group_permissions(permission_options)
+
+        response = api.change_permission_request(
+            self.__session,
+            self.__host,
+            self.__session_id,
+            project,
+            group, 
+            permission_options
+        )
+
+        self.__catch_response_error(response, ChangePermissionError, True)
+        
+        logging.info('Group [%s] AAA received new permissions [%s] in the Project [%s] successfully' % (group, permission_options, project))
+
+    def __check_group_permissions(self, permission_options):
+        
+        options = ["admin", "write", "read", "execute", "schedule"]
+        empty_permission_options = {option: False for option in options}
+
+        filled_permission_options = {**empty_permission_options, **permission_options}
+
+        have_declared_options = filled_permission_options['admin'] and filled_permission_options['read'] and filled_permission_options['write'] \
+        and filled_permission_options['execute'] and filled_permission_options['schedule']
+
+        #if we have the admin opt, then all be true
+        if filled_permission_options['admin']:
+            filled_permission_options = {key: True for key in filled_permission_options}
+
+        #if we don`t have declared options, then we have to set the read option as default, like in the Azkaban web-ui
+        elif not have_declared_options:
+            filled_permission_options['read'] = True
+        
+        return filled_permission_options

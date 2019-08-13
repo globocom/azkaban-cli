@@ -290,3 +290,104 @@ def fetch_projects_request(session, host, session_id):
     logging.debug("Response: \n%s", response.text)
 
     return response
+
+def add_permission_request(session, host, session_id, project, group, permission_options):
+    """Add permission request for the Azkaban API
+
+    :param session: A session for creating the request
+    :type session: requests.Session
+    :param str host: Hostname where the request should go
+    :param str session_id: An id that the user should have when is logged in
+    :param str project: Project name that will receive group permissions on Azkaban
+    :param str group: Group name on Azkaban
+    :param Dictionary permission_options: The permissions options added to group in the project on Azkaban
+    :return: The response from the request made
+    :rtype: requests.Response
+    :raises requests.exceptions.ConnectionError: if cannot connect to host
+    """
+   
+    response = __call_permission_api(session, host, session_id, 'addPermission', project, group, permission_options)
+
+    logging.debug("Response: \n%s", response.text)
+
+    return response
+
+def remove_permission_request(session, host, session_id, project, group):
+    """Remove permission request for the Azkaban API
+
+    :param session: A session for creating the request
+    :type session: requests.Session
+    :param str host: Hostname where the request should go
+    :param str session_id: An id that the user should have when is logged in
+    :param str project: Project name that will lose group permissions on Azkaban
+    :param str group: Group name on Azkaban
+    :return: The response from the request made
+    :rtype: requests.Response
+    :raises requests.exceptions.ConnectionError: if cannot connect to host
+    """
+   
+    #to remove a group permission, we have to pass all permissions as False
+    permission_options = {'admin': False, 'read': False, 'write': False, 'execute': False, 'schedule': False}
+
+    response = __call_permission_api(session, host, session_id, 'changePermission', project, group, permission_options)
+
+    logging.debug("Response: \n%s", response.text)
+
+    return response
+
+def change_permission_request(session, host, session_id, project, group, permission_options):
+    """Change permission request for the Azkaban API
+
+    :param session: A session for creating the request
+    :type session: requests.Session
+    :param str host: Hostname where the request should go
+    :param str session_id: An id that the user should have when is logged in
+    :param str project: Project name that will receive the newly updated group permissions on Azkaban
+    :param str group: Group name on Azkaban
+    :param Dictionary permission_options: The permissions options to replace old permission for the group in the project on Azkaban
+    :return: The response from the request made
+    :rtype: requests.Response
+    :raises requests.exceptions.ConnectionError: if cannot connect to host
+    """
+   
+    response = __call_permission_api(session, host, session_id, 'changePermission', project, group, permission_options)
+
+    logging.debug("Response: \n%s", response.text)
+
+    return response
+
+def __call_permission_api(session, host, session_id, operation, project, group, permission_options ):
+    """
+    This function is a utility to call permission API in Azkaban.
+
+    :param str operation:The action to be executed in Azkaban, can be with values [addPermission OU changePermission]
+    :param session: A session for creating the request
+    :type session: requests.Session
+    :param str host: Hostname where the request should go
+    :param str session_id: An id that the user should have when is logged in
+    :param str project: Project name that will receive the newly updated group permissions on Azkaban
+    :param str group: Group name on Azkaban
+    :param Dictionary permission_options: The permissions options to replace old permission for the group in the project on Azkaban
+    :return: The response from the request made
+    :rtype: requests.Response
+    :raises requests.exceptions.ConnectionError: if cannot connect to host
+
+    Sample request to Azkaban
+    #https://azkaban.qa.globoi.com/manager?project=teste-permission-api-20190806&name=time-dmp&ajax=addPermission&permissions%5Badmin%5D=false&permissions%5Bread%5D=true&permissions%5Bwrite%5D=false&permissions%5Bexecute%5D=true&permissions%5Bschedule%5D=false&group=true
+    """
+
+    return session.get(
+        host + '/manager',
+        params = {
+            u'session.id': session_id,
+            u'ajax': operation,
+            u'project': project,
+            u'name': group,
+            u'permissions[admin]': permission_options['admin'],
+            u'permissions[write]': permission_options['write'],
+            u'permissions[read]': permission_options['read'],
+            u'permissions[execute]': permission_options['execute'],
+            u'permissions[schedule]': permission_options['schedule'],
+            u'group': True
+        }
+    )
