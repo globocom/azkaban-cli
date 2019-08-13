@@ -336,7 +336,7 @@ def remove_permission_request(session, host, session_id, project, group):
     return response
 
 def change_permission_request(session, host, session_id, project, group, permission_options):
-    """Execute request for the Azkaban API
+    """Change permission request for the Azkaban API
 
     :param session: A session for creating the request
     :type session: requests.Session
