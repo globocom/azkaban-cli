@@ -232,7 +232,11 @@ def __add_permission(ctx, project, group, admin, read, write, _execute, _schedul
             project, 
             group, 
             permission_options= {
-                'admin':admin, 'read':read, 'write':write, 'execute':_execute, 'schedule': _schedule
+                'admin': admin,
+                'read': read,
+                'write': write,
+                'execute': _execute,
+                'schedule': _schedule
             }
         )
     except AddPermissionError as e:
@@ -257,7 +261,11 @@ def __change_permission(ctx, project, group, admin, read, write, _execute, _sche
             project, 
             group, 
             permission_options= {
-                'admin':admin, 'read':read, 'write':write, 'execute':_execute, 'schedule': _schedule
+                'admin': admin,
+                'read': read,
+                'write': write,
+                'execute': _execute,
+                'schedule': _schedule
             }
         )
     except ChangePermissionError as e:

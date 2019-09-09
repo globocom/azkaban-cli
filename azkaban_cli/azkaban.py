@@ -519,21 +519,24 @@ class Azkaban(object):
         logging.info('Group [%s] AAA received new permissions [%s] in the Project [%s] successfully' % (group, permission_options, project))
 
     def __check_group_permissions(self, permission_options):
-        
-        options = ["admin", "write", "read", "execute", "schedule"]
-        empty_permission_options = {option: False for option in options}
+        __options = ["admin", "write", "read", "execute", "schedule"]
+        filled_permission_options = {
+            option: permission_options[option] if option in permission_options else False for option in __options
+        }
 
-        filled_permission_options = {**empty_permission_options, **permission_options}
-
-        have_declared_options = filled_permission_options['admin'] and filled_permission_options['read'] and filled_permission_options['write'] \
-        and filled_permission_options['execute'] and filled_permission_options['schedule']
+        have_declared_options = \
+            filled_permission_options['admin'] and \
+            filled_permission_options['read'] and \
+            filled_permission_options['write'] and \
+            filled_permission_options['execute'] and \
+            filled_permission_options['schedule']
 
         #if we have the admin opt, then all be true
         if filled_permission_options['admin']:
-            filled_permission_options = {key: True for key in filled_permission_options}
+            filled_permission_options = {option: True for option in filled_permission_options}
 
         #if we don`t have declared options, then we have to set the read option as default, like in the Azkaban web-ui
         elif not have_declared_options:
             filled_permission_options['read'] = True
-        
+
         return filled_permission_options
