@@ -52,19 +52,6 @@ Commands:
 azkaban login --host https://azkaban.your_company.com
 ```
 
-## Developing
-
-```sh
-### Install package in editable mode
-pip install -e .
-```
-
-```sh
-### Release package to pypi
-### Update version in version.py before running this command
-make release
-```
-
 ## Contribute
 
 For development and contributing, please follow [Contributing Guide](https://github.com/globocom/azkaban-cli/blob/master/CONTRIBUTING.md) and ALWAYS respect the [Code of Conduct](https://github.com/globocom/azkaban-cli/blob/master/CODE_OF_CONDUCT.md)
