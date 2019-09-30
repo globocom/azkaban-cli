@@ -1,8 +1,7 @@
 # Azkaban CLI
+[![Build Status](https://travis-ci.com/globocom/azkaban-cli.svg?branch=master)](https://travis-ci.com/globocom/azkaban-cli)
 
 CLI for Azkaban 3 API access and flow upload.
-
-[![Build Status](https://travis-ci.com/globocom/azkaban-cli.svg?branch=master)](https://travis-ci.com/globocom/azkaban-cli)
 
 ## Install
 
@@ -65,3 +64,7 @@ pip install -e .
 ### Update version in version.py before running this command
 make release
 ```
+
+## Contribute
+
+For development and contributing, please follow [Contributing Guide](https://github.com/globocom/azkaban-cli/blob/master/CONTRIBUTING.md) and ALWAYS respect the [Code of Conduct](https://github.com/globocom/azkaban-cli/blob/master/CODE_OF_CONDUCT.md)
