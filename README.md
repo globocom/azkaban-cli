@@ -36,6 +36,7 @@ Commands:
   delete             Delete a project
   execute            Execute a flow from a project
   fetch_projects     Fetch all project from a user
+  fetch_sla          Fetch SLA from a schedule
   login              Login to an Azkaban server
   logout             Logout from Azkaban session
   remove_permission  Remove a group permission from a project
