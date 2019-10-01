@@ -17,6 +17,7 @@ from azkaban_cli.exceptions import (
     ScheduleError,
     FetchFlowsError,
     FetchScheduleError,
+    FetchSLAError,
     UnscheduleError,
     ExecuteError,
     CreateError,
@@ -225,6 +226,15 @@ def __fetch_projects(ctx, user):
         logging.error(str(e))
 
 @login_required
+def __fetch_sla(ctx, schedule):
+    azkaban = ctx.obj[u'azkaban']
+
+    try:
+        data = azkaban.fetch_sla(schedule)
+    except FetchSLAError as e:
+        logging.error(str(e))
+
+@login_required
 def __add_permission(ctx, project, group, admin, read, write, _execute, _schedule):
     azkaban = ctx.obj[u'azkaban']
     try:
@@ -366,6 +376,13 @@ def fetch_projects(ctx, user):
     """Fetch all project from a user"""
     __fetch_projects(ctx, user)
 
+@click.command(u'fetch_sla')
+@click.pass_context
+@click.argument(u'schedule', type=click.STRING)
+def fetch_sla(ctx, schedule):
+    """Fetch the SLA from a schedule"""
+    __fetch_sla(ctx, schedule)
+
 @click.command(u'add_permission')
 @click.pass_context
 @click.argument(u'project', type=click.STRING)
@@ -409,6 +426,7 @@ cli.add_command(execute)
 cli.add_command(create)
 cli.add_command(delete)
 cli.add_command(fetch_projects)
+cli.add_command(fetch_sla)
 cli.add_command(add_permission)
 cli.add_command(remove_permission)
 cli.add_command(change_permission)

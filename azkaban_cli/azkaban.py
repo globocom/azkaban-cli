@@ -9,6 +9,7 @@ from azkaban_cli.exceptions import (
     ScheduleError,
     FetchFlowsError,
     FetchScheduleError,
+    FetchSLAError,
     UnscheduleError,
     ExecuteError,
     CreateError,
@@ -517,6 +518,27 @@ class Azkaban(object):
         self.__catch_response_error(response, ChangePermissionError, True)
         
         logging.info('Group [%s] AAA received new permissions [%s] in the Project [%s] successfully' % (group, permission_options, project))
+    
+    def fetch_sla(self, schedule_id):
+        """Fetch SLA command, intended to make the request to Azkaban and treat the response properly.
+
+        This method makes the fetch SLA request to fetch and evaluates the response.
+        """
+
+        self.__check_if_logged()
+
+        response = api.fetch_sla_request(
+            self.__session,
+            self.__host,
+            self.__session_id,
+            schedule_id
+        )
+
+        self.__catch_response_error(response, FetchSLAError)
+
+        response_json = response.json()
+        return response_json
+        
 
     def __check_group_permissions(self, permission_options):
         __options = ["admin", "write", "read", "execute", "schedule"]
