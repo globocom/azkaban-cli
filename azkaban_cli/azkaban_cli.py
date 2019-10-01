@@ -16,6 +16,7 @@ from azkaban_cli.exceptions import (
     UploadError,
     ScheduleError,
     FetchFlowsError,
+    FetchJobsOfAFlowError,
     FetchScheduleError,
     UnscheduleError,
     ExecuteError,
@@ -271,6 +272,32 @@ def __change_permission(ctx, project, group, admin, read, write, _execute, _sche
     except ChangePermissionError as e:
         logging.error(str(e))
 
+def __parse_jobs(json):
+    logging.info("Project: %s" % (json.get('project')))
+    logging.info("Project Id: %s" % (json.get('projectId')))
+    logging.info("Flow: %s" % (json.get('flow')))
+    nodes = json.get('nodes', [])
+    for node in nodes:
+        logging.info('Node')
+        logging.info('\tId: %s' % (node.get('id')))
+        logging.info('\tType: %s' % (node.get('type')))
+        _in = node.get('in')
+        if _in:
+            logging.info('\tIn')
+            for i in _in:
+                logging.info('\t- %s' % (i))
+
+@login_required
+def __fetch_jobs_from_flow(ctx, project, flow):
+    azkaban = ctx.obj[u'azkaban']
+
+    try:
+        json = azkaban.fetch_jobs_from_flow(project, flow)
+        logging.info(json)
+        __parse_jobs(json)
+    except FetchJobsOfAFlowError as e:
+        logging.error(str(e))
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
 # ----------------------------------------------------------------------------------------------------------------------
@@ -386,7 +413,7 @@ def add_permission(ctx, project, group, _admin, _read, _write, _execute, _schedu
 def remove_permission(ctx, project, group):
     """Remove group permission from a project"""
     __remove_permission(ctx, project, group) 
-       
+
 @click.command(u'change_permission')
 @click.pass_context
 @click.argument(u'project', type=click.STRING)
@@ -398,7 +425,15 @@ def remove_permission(ctx, project, group):
 @click.option('--schedule', '-s', '_schedule', required=False, help=u'The group can schedule on the project', is_flag=True)
 def change_permission(ctx, project, group, _admin, _read, _write, _execute, _schedule):
     """Change a group permission in a project"""
-    __change_permission(ctx, project, group, _admin, _read, _write, _execute, _schedule) 
+    __change_permission(ctx, project, group, _admin, _read, _write, _execute, _schedule)
+
+@click.command(u'fetch_jobs_from_flow')
+@click.pass_context
+@click.argument(u'project', type=click.STRING)
+@click.argument(u'flow', type=click.STRING)
+def fetch_jobs_from_flow(ctx, project, flow):
+    """Fetch jobs of a flow"""
+    __fetch_jobs_from_flow(ctx, project, flow)
 
 cli.add_command(login)
 cli.add_command(logout)
@@ -412,6 +447,7 @@ cli.add_command(fetch_projects)
 cli.add_command(add_permission)
 cli.add_command(remove_permission)
 cli.add_command(change_permission)
+cli.add_command(fetch_jobs_from_flow)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
