@@ -130,6 +130,34 @@ def fetch_flows_request(session, host, session_id, project):
 
     return response
 
+def fetch_jobs_from_flow_request(session, host, session_id, project, flow):
+    """Fetch jobs of a flow of a project request for the Azkaban API
+
+    :param session: A session for creating the request
+    :type session: requests.Session
+    :param str host: Hostname where the request should go
+    :param str session_id: An id that the user should have when is logged in
+    :param str project: Project name whose flow's jobs will be fetched on Azkaban
+    :param str project: Flow id whose jobs will be fetched on Azkaban
+    :return: The response from the request made
+    :rtype: requests.Response
+    :raises requests.exceptions.ConnectionError: if cannot connect to host
+    """
+
+    response = session.get(
+        host + '/manager',
+        params={
+            u'session.id': session_id,
+            u'ajax': 'fetchflowgraph',
+            u'project': project,
+            u'flow': flow
+        }
+    )
+
+    logging.debug("Response: \n%s", response.text)
+
+    return response
+
 def fetch_schedule_request(session, host, session_id, project_id, flow):
     """Fetch flow of a project request for the Azkaban API
 
