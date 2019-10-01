@@ -569,5 +569,3 @@ class Azkaban(object):
         self.__catch_response_error(response, FetchFlowExecutionError)
 
         return response.json()
-        # response_json = response.json()
-        # logging.info('Execution details: %s' % (response_json))
