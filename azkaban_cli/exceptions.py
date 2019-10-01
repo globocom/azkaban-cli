@@ -41,3 +41,6 @@ class RemovePermissionError(Exception):
 
 class ChangePermissionError(Exception):
     pass
+
+class FetchFlowExecutionError(Exception):
+    pass

@@ -23,7 +23,8 @@ from azkaban_cli.exceptions import (
     FetchProjectsError,
     ChangePermissionError,
     AddPermissionError,
-    RemovePermissionError
+    RemovePermissionError,
+    FetchFlowExecutionError
 )
 from azkaban_cli.__version__ import __version__
 
@@ -271,6 +272,50 @@ def __change_permission(ctx, project, group, admin, read, write, _execute, _sche
     except ChangePermissionError as e:
         logging.error(str(e))
 
+def __parse_flow_execution(json):
+    logging.info('Execution Id: %s' % (json.get('execid')))
+    logging.info('Id: %s' % (json.get('id')))
+    logging.info('Nested Id: %s' % (json.get('nestedId')))
+    logging.info('Project: %s' % (json.get('project')))
+    logging.info('Project Id: %s' % (json.get('projectId')))
+    logging.info('Flow Id: %s' % (json.get('flowId')))
+    logging.info('Flow: %s' % (json.get('flow')))
+    logging.info('Type: %s' % (json.get('type')))
+    logging.info('Update time: %s' % (json.get('updateTime')))
+    logging.info('Submit user: %s' % (json.get('submitUser')))
+    logging.info('Attempt: %s' % (json.get('attempt')))
+    logging.info('Submit time: %s' % (json.get('submitTime')))
+    logging.info('Start time: %s' % (json.get('startTime')))
+    logging.info('End time: %s' % (json.get('endTime')))
+    logging.info('Status: %s' % (json.get('status')))
+    nodes = json.get('nodes', [])
+    for node in nodes:
+        logging.info('Node')
+        logging.info('\tId: %s' % (node.get('id')))
+        logging.info('\tNested Id: %s' % (node.get('nestedId')))
+        logging.info('\tType: %s' % (node.get('type')))
+        logging.info('\tAttempt: %s' % (node.get('attempt')))
+        _in = node.get('in', [])
+        if _in:
+            logging.info('\tIn')
+            for i in _in:
+                logging.info('\t- %s' % (i))
+        logging.info('\tUpdate time: %s' % (node.get('updateTime')))
+        logging.info('\tStart time: %s' % (node.get('startTime')))
+        logging.info('\tEnd time: %s' % (node.get('endTime')))
+        logging.info('\tStatus: %s' % (node.get('status')))
+
+
+@login_required
+def __fetch_flow_execution(ctx, execution_id):
+    azkaban = ctx.obj[u'azkaban']
+
+    try:
+        json = azkaban.fetch_flow_execution(execution_id)
+        __parse_flow_execution(json)
+    except FetchFlowExecutionError as e:
+        logging.error(str(e))
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
 # ----------------------------------------------------------------------------------------------------------------------
@@ -386,7 +431,7 @@ def add_permission(ctx, project, group, _admin, _read, _write, _execute, _schedu
 def remove_permission(ctx, project, group):
     """Remove group permission from a project"""
     __remove_permission(ctx, project, group) 
-       
+
 @click.command(u'change_permission')
 @click.pass_context
 @click.argument(u'project', type=click.STRING)
@@ -398,7 +443,14 @@ def remove_permission(ctx, project, group):
 @click.option('--schedule', '-s', '_schedule', required=False, help=u'The group can schedule on the project', is_flag=True)
 def change_permission(ctx, project, group, _admin, _read, _write, _execute, _schedule):
     """Change a group permission in a project"""
-    __change_permission(ctx, project, group, _admin, _read, _write, _execute, _schedule) 
+    __change_permission(ctx, project, group, _admin, _read, _write, _execute, _schedule)
+
+@click.command(u'fetch_flow_execution')
+@click.pass_context
+@click.argument(u'execution_id', type=click.STRING)
+def fetch_flow_execution(ctx, execution_id):
+    """Fetch a flow execution"""
+    __fetch_flow_execution(ctx, execution_id)
 
 cli.add_command(login)
 cli.add_command(logout)
@@ -412,6 +464,7 @@ cli.add_command(fetch_projects)
 cli.add_command(add_permission)
 cli.add_command(remove_permission)
 cli.add_command(change_permission)
+cli.add_command(fetch_flow_execution)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
