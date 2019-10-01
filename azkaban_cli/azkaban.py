@@ -274,8 +274,7 @@ class Azkaban(object):
         This method receives the project name and flow id, makes the fetch jobs of a flow request
         to fetch the jobs of a flow and evaluates the response.
 
-        If project, flow id is wrong or there is no session_id, it returns false.
-        If everything is fine, returns True.
+        Returns the json response from the request.
 
         :param project: project name on Azkaban
         :type project: str
