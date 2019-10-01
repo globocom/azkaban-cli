@@ -549,8 +549,7 @@ class Azkaban(object):
         This method receives the execution id, makes the fetch a flow execution request
         to fetch the flow execution details and evaluates the response.
 
-        If execution_id is wrong or if there is no session_id, it returns false.
-        If everything is fine, returns True.
+        Returns the json response from the request.
 
         :param execution_id: Execution id on Azkaban
         :type execution_id: str
