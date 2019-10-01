@@ -8,7 +8,7 @@ from azkaban_cli.exceptions import (
     UploadError,
     ScheduleError,
     FetchFlowsError,
-    FetchJobsOfAFlowError,
+    FetchJobsFromFlowError,
     FetchScheduleError,
     UnscheduleError,
     ExecuteError,
@@ -281,7 +281,7 @@ class Azkaban(object):
         :type project: str
         :param flow: flow id on Azkaban
         :type project: str
-        :raises FetchJobsOfAFlowError: when Azkaban api returns error in response
+        :raises FetchJobsFromFlowError: when Azkaban api returns error in response
         """
 
         self.__check_if_logged()
@@ -294,7 +294,7 @@ class Azkaban(object):
             flow
         )
 
-        self.__catch_response_error(response, FetchJobsOfAFlowError)
+        self.__catch_response_error(response, FetchJobsFromFlowError)
 
         return response.json()
 

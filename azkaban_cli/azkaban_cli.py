@@ -16,7 +16,7 @@ from azkaban_cli.exceptions import (
     UploadError,
     ScheduleError,
     FetchFlowsError,
-    FetchJobsOfAFlowError,
+    FetchJobsFromFlowError,
     FetchScheduleError,
     UnscheduleError,
     ExecuteError,
@@ -293,9 +293,8 @@ def __fetch_jobs_from_flow(ctx, project, flow):
 
     try:
         json = azkaban.fetch_jobs_from_flow(project, flow)
-        logging.info(json)
         __parse_jobs(json)
-    except FetchJobsOfAFlowError as e:
+    except FetchJobsFromFlowError as e:
         logging.error(str(e))
 
 # ----------------------------------------------------------------------------------------------------------------------
