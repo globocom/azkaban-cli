@@ -272,7 +272,7 @@ def __change_permission(ctx, project, group, admin, read, write, _execute, _sche
     except ChangePermissionError as e:
         logging.error(str(e))
 
-def __parse_flow_execution(json):
+def __log_flow_execution(json):
     logging.info('Execution Id: %s' % (json.get('execid')))
     logging.info('Id: %s' % (json.get('id')))
     logging.info('Nested Id: %s' % (json.get('nestedId')))
@@ -312,7 +312,7 @@ def __fetch_flow_execution(ctx, execution_id):
 
     try:
         json = azkaban.fetch_flow_execution(execution_id)
-        __parse_flow_execution(json)
+        __log_flow_execution(json)
     except FetchFlowExecutionError as e:
         logging.error(str(e))
 
