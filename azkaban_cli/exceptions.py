@@ -44,3 +44,6 @@ class RemovePermissionError(Exception):
 
 class ChangePermissionError(Exception):
     pass
+
+class FetchJobsFromFlowError(Exception):
+    pass
