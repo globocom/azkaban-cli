@@ -225,12 +225,30 @@ def __fetch_projects(ctx, user):
     except FetchProjectsError as e:
         logging.error(str(e))
 
+def __log_sla(json):
+    for settings in json.get('settings', []):
+        logging.info('Settings')
+        logging.info('\tId: %s' % (settings.get('id')))
+        logging.info('\tDuration: %s' % (settings.get('duration')))
+        logging.info('\tRule: %s' % (settings.get('rule')))
+        logging.info('\tActions:')
+        for action in settings.get('actions', []):
+            logging.info('\t\t%s' % action)
+    logging.info('Emails:')
+    for email in json.get('slaEmails', []):
+        logging.info('\t%s' % email)
+    logging.info('Job Names:')
+    for job_name in json.get('allJobNames', []):
+        logging.info('\t%s' % job_name)
+    
+
 @login_required
 def __fetch_sla(ctx, schedule):
     azkaban = ctx.obj[u'azkaban']
 
     try:
-        data = azkaban.fetch_sla(schedule)
+        json = azkaban.fetch_sla(schedule)
+        __log_sla(json)
     except FetchSLAError as e:
         logging.error(str(e))
 
