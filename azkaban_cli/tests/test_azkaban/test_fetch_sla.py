@@ -23,9 +23,6 @@ class AzkabanFetchSLATest(TestCase):
 
         self.schedule_id = 123
 
-    def tearDown(self):
-        pass
-
     @responses.activate
     def test_fetch_sla(self):
         """

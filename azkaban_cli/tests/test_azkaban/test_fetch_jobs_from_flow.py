@@ -24,9 +24,6 @@ class AzkabanFetchJobsFromFlowTest(TestCase):
         self.project = 'ProjectTest'
         self.flow = 'testFlowName'
 
-    def tearDown(self):
-        pass
-
     @responses.activate
     def test_fetch_jobs_from_flow(self):
         """

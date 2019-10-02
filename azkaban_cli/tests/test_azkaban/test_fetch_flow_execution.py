@@ -23,9 +23,6 @@ class AzkabanFetchFlowExecutionTest(TestCase):
 
         self.exec_id = '1234'
 
-    def tearDown(self):
-        pass
-
     @responses.activate
     def test_fetch_flow_execution(self):
         """

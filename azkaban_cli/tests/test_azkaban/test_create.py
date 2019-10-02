@@ -26,9 +26,6 @@ class AzkabanCreateTest(TestCase):
         self.project = 'ProjectTest'
         self.description = 'DescriptionTest'
 
-    def tearDown(self):
-        pass
-
     @responses.activate
     def test_create(self):
         """

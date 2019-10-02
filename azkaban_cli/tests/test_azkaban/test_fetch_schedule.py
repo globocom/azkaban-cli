@@ -24,9 +24,6 @@ class AzkabanFetchScheduleTest(TestCase):
         self.project_id = 123
         self.flow = 'FlowTest'
 
-    def tearDown(self):
-        pass
-
     @responses.activate
     def test_fetch_schedule(self):
         """
