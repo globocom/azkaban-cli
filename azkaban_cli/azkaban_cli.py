@@ -16,6 +16,7 @@ from azkaban_cli.exceptions import (
     UploadError,
     ScheduleError,
     FetchFlowsError,
+    FetchJobsFromFlowError,
     FetchScheduleError,
     UnscheduleError,
     ExecuteError,
@@ -272,6 +273,31 @@ def __change_permission(ctx, project, group, admin, read, write, _execute, _sche
     except ChangePermissionError as e:
         logging.error(str(e))
 
+def __log_jobs(json):
+    logging.info("Project: %s" % (json.get('project')))
+    logging.info("Project Id: %s" % (json.get('projectId')))
+    logging.info("Flow: %s" % (json.get('flow')))
+    nodes = json.get('nodes', [])
+    for node in nodes:
+        logging.info('Node')
+        logging.info('\tId: %s' % (node.get('id')))
+        logging.info('\tType: %s' % (node.get('type')))
+        _in = node.get('in')
+        if _in:
+            logging.info('\tIn')
+            for i in _in:
+                logging.info('\t- %s' % (i))
+
+@login_required
+def __fetch_jobs_from_flow(ctx, project, flow):
+    azkaban = ctx.obj[u'azkaban']
+
+    try:
+        json = azkaban.fetch_jobs_from_flow(project, flow)
+        __parse_jobs(json)
+    except FetchJobsFromFlowError as e:
+        logging.error(str(e))
+
 def __log_flow_execution(json):
     logging.info('Execution Id: %s' % (json.get('execid')))
     logging.info('Id: %s' % (json.get('id')))
@@ -337,7 +363,6 @@ def cli():
         azkaban.set_logged_session(**logged_session)
 
     ctx.obj['azkaban'] = azkaban
-
 
 @click.command(u'login')
 @click.pass_context
@@ -445,6 +470,14 @@ def change_permission(ctx, project, group, _admin, _read, _write, _execute, _sch
     """Change a group permission in a project"""
     __change_permission(ctx, project, group, _admin, _read, _write, _execute, _schedule)
 
+@click.command(u'fetch_jobs_from_flow')
+@click.pass_context
+@click.argument(u'project', type=click.STRING)
+@click.argument(u'flow', type=click.STRING)
+def fetch_jobs_from_flow(ctx, project, flow):
+    """Fetch jobs of a flow"""
+    __fetch_jobs_from_flow(ctx, project, flow)
+
 @click.command(u'fetch_flow_execution')
 @click.pass_context
 @click.argument(u'execution_id', type=click.STRING)
@@ -464,6 +497,7 @@ cli.add_command(fetch_projects)
 cli.add_command(add_permission)
 cli.add_command(remove_permission)
 cli.add_command(change_permission)
+cli.add_command(fetch_jobs_from_flow)
 cli.add_command(fetch_flow_execution)
 
 # ----------------------------------------------------------------------------------------------------------------------

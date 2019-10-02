@@ -44,3 +44,6 @@ class ChangePermissionError(Exception):
 
 class FetchFlowExecutionError(Exception):
     pass
+
+class FetchJobsFromFlowError(Exception):
+    pass

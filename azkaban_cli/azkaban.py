@@ -8,6 +8,7 @@ from azkaban_cli.exceptions import (
     UploadError,
     ScheduleError,
     FetchFlowsError,
+    FetchJobsFromFlowError,
     FetchScheduleError,
     UnscheduleError,
     ExecuteError,
@@ -266,6 +267,36 @@ class Azkaban(object):
         response_json = response.json()
         logging.info('Project ID: %s' % (response_json[u'projectId']))
         return response_json
+
+    def fetch_jobs_from_flow(self, project, flow):
+        """Fetch jobs of a flow command, intended to make the request to Azkaban and return
+        the response.
+
+        This method receives the project name and flow id, makes the fetch jobs of a flow request
+        to fetch the jobs of a flow and evaluates the response.
+
+        Returns the json response from the request.
+
+        :param project: project name on Azkaban
+        :type project: str
+        :param flow: flow id on Azkaban
+        :type project: str
+        :raises FetchJobsFromFlowError: when Azkaban api returns error in response
+        """
+
+        self.__check_if_logged()
+
+        response = api.fetch_jobs_from_flow_request(
+            self.__session,
+            self.__host,
+            self.__session_id,
+            project,
+            flow
+        )
+
+        self.__catch_response_error(response, FetchJobsFromFlowError)
+
+        return response.json()
 
     def fetch_schedule(self, project_id, flow):
         """Fetch schedule command, intended to make the request to Azkaban and treat the response properly.
