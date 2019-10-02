@@ -384,6 +384,33 @@ def change_permission_request(session, host, session_id, project, group, permiss
 
     return response
 
+
+def fetch_sla_request(session, host, session_id, schedule_id):
+    """Fetch flow of a SLA request for the Azkaban API
+
+    :param session: A session for creating the request
+    :type session: requests.Session
+    :param str host: Hostname where the request should go
+    :param str session_id: An id that the user should have when is logged in
+    :param str schedule_id: The id of the shchedule. 
+    :return: The response from the request made
+    :rtype: requests.Response
+    :raises requests.exceptions.ConnectionError: if cannot connect to host
+    """
+
+    response = session.get(
+        host + '/schedule',
+        params={
+            u'session.id': session_id,
+            u'ajax': 'slaInfo',
+            u'scheduleId': schedule_id,
+        }
+    )
+
+    logging.debug("Response: \n%s", response.text)
+
+    return response
+
 def __call_permission_api(session, host, session_id, operation, project, group, permission_options ):
     """
     This function is a utility to call permission API in Azkaban.

@@ -24,6 +24,9 @@ class FetchFlowsError(Exception):
 class FetchScheduleError(Exception):
     pass
 
+class FetchSLAError(Exception):
+    pass
+
 class UnscheduleError(Exception):
     pass
 

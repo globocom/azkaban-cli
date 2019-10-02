@@ -18,6 +18,7 @@ from azkaban_cli.exceptions import (
     FetchFlowsError,
     FetchJobsFromFlowError,
     FetchScheduleError,
+    FetchSLAError,
     UnscheduleError,
     ExecuteError,
     CreateError,
@@ -225,6 +226,33 @@ def __fetch_projects(ctx, user):
     except FetchProjectsError as e:
         logging.error(str(e))
 
+def __log_sla(json):
+    for settings in json.get('settings', []):
+        logging.info('Settings')
+        logging.info('\tId: %s' % (settings.get('id')))
+        logging.info('\tDuration: %s' % (settings.get('duration')))
+        logging.info('\tRule: %s' % (settings.get('rule')))
+        logging.info('\tActions:')
+        for action in settings.get('actions', []):
+            logging.info('\t\t%s' % action)
+    logging.info('Emails:')
+    for email in json.get('slaEmails', []):
+        logging.info('\t%s' % email)
+    logging.info('Job Names:')
+    for job_name in json.get('allJobNames', []):
+        logging.info('\t%s' % job_name)
+    
+
+@login_required
+def __fetch_sla(ctx, schedule):
+    azkaban = ctx.obj[u'azkaban']
+
+    try:
+        json = azkaban.fetch_sla(schedule)
+        __log_sla(json)
+    except FetchSLAError as e:
+        logging.error(str(e))
+
 @login_required
 def __add_permission(ctx, project, group, admin, read, write, _execute, _schedule):
     azkaban = ctx.obj[u'azkaban']
@@ -392,6 +420,13 @@ def fetch_projects(ctx, user):
     """Fetch all project from a user"""
     __fetch_projects(ctx, user)
 
+@click.command(u'fetch_sla')
+@click.pass_context
+@click.argument(u'schedule', type=click.STRING)
+def fetch_sla(ctx, schedule):
+    """Fetch the SLA from a schedule"""
+    __fetch_sla(ctx, schedule)
+
 @click.command(u'add_permission')
 @click.pass_context
 @click.argument(u'project', type=click.STRING)
@@ -443,6 +478,7 @@ cli.add_command(execute)
 cli.add_command(create)
 cli.add_command(delete)
 cli.add_command(fetch_projects)
+cli.add_command(fetch_sla)
 cli.add_command(add_permission)
 cli.add_command(remove_permission)
 cli.add_command(change_permission)
