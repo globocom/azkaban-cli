@@ -16,7 +16,8 @@ from azkaban_cli.exceptions import (
     CreateError,
     AddPermissionError,
     RemovePermissionError,
-    ChangePermissionError
+    ChangePermissionError,
+    FetchFlowExecutionError
 )
 from shutil import make_archive
 from urllib3.exceptions import InsecureRequestWarning
@@ -593,3 +594,30 @@ class Azkaban(object):
             filled_permission_options['read'] = True
 
         return filled_permission_options
+
+    def fetch_flow_execution(self, execution_id):
+        """Fetch a flow execution command, intended to make the request to Azkaban
+        and treat the response properly.
+
+        This method receives the execution id, makes the fetch a flow execution request
+        to fetch the flow execution details and evaluates the response.
+
+        Returns the json response from the request.
+
+        :param execution_id: Execution id on Azkaban
+        :type execution_id: str
+        :raises FetchFlowExecutionError: when Azkaban api returns error in response
+        """
+
+        self.__check_if_logged()
+
+        response = api.fetch_flow_execution_request(
+            self.__session,
+            self.__host,
+            self.__session_id,
+            execution_id
+        )
+
+        self.__catch_response_error(response, FetchFlowExecutionError)
+
+        return response.json()

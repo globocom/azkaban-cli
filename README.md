@@ -35,6 +35,7 @@ Commands:
   create                Create a new project
   delete                Delete a project
   execute               Execute a flow from a project
+  fetch_flow_execution  Fetch a flow execution
   fetch_jobs_from_flow  Fetch jobs of a flow
   fetch_projects        Fetch all project from a user
   fetch_sla             Fetch SLA from a schedule
