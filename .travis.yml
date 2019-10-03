@@ -17,9 +17,8 @@ before_deploy: sed -i "s/__version__ = \".*\"/__version__ = \"$TRAVIS_TAG\"/g" a
 
 deploy:
   provider: pypi
-  user: "Your username"
-  password:
-    secure: "Your encrypted password"
+  user: $PYPI_USER
+  password: $PYPI_PASSWORD
   distributions: dist
   on:
     branch: master
