@@ -20,9 +20,9 @@ deploy:
   user: $PYPI_USER
   password: $PYPI_PASSWORD
   distributions: dist
+  skip_cleanup: true
+  skip_existing: true
   on:
     branch: master
     tags: true
     condition: $TRAVIS_PYTHON_VERSION = "3.6"
-    skip_cleanup: true
-    skip_existing: true
