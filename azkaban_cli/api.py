@@ -187,7 +187,7 @@ def fetch_schedule_request(session, host, session_id, project_id, flow):
     return response
 
 def unschedule_request(session, host, session_id, schedule_id):
-    r"""Unschedule request for the Azkaban API
+    """Unschedule request for the Azkaban API
 
     :param session: A session for creating the request
     :type session: requests.Session
@@ -244,6 +244,33 @@ def execute_request(session, host, session_id, project, flow):
     logging.debug("Response: \n%s", response.text)
 
     return response
+
+def cancel_request(session, host, session_id, exec_id):
+     """Cancel an running flow for the Azkaban API
+
+    :param session: A session for creating the request
+    :type session: requests.Session
+    :param str host: Hostname where the request should go
+    :param str session_id: An id that the user should have when is logged in
+    :param str exec_id: Execution id to be canceled
+    :return: The response from the request made
+    :rtype: requests.Response
+    :raises requests.exceptions.ConnectionError: if cannot connect to host
+    """
+
+    response = session.get(
+        host + '/executor',
+        params={
+            u'session.id': session_id,
+            u'ajax': 'cancelFlow',
+            u'execid': exec_id
+        }
+    )
+
+    logging.debug("Response: \n%s", response.text)
+
+    return response
+
 
 def create_request(session, host, session_id, project, description):
     """Create a Project request for the Azkaban API
