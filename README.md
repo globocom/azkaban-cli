@@ -19,7 +19,7 @@ pip install azkaban_cli
 
 ## Usage
 
-Actvate your virtualenv and call ```azkaban```
+Activate your virtualenv and call ```azkaban```
 
 ```sh
 $ azkaban --help
