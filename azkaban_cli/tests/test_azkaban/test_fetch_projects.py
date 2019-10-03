@@ -22,9 +22,6 @@ class AzkabanFetchProjectsTest(TestCase):
 
         self.azk.set_logged_session(self.host, self.user, self.session_id)
 
-    def tearDown(self):
-        pass
-
     @responses.activate
     def test_fetch_projects(self):
         """

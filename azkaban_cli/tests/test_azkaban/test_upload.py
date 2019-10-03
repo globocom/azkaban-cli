@@ -21,9 +21,6 @@ class AzkabanUploadTest(TestCase):
 
         self.azk.set_logged_session(self.host, self.user, self.session_id)
 
-    def tearDown(self):
-        pass
-
     @responses.activate
     @patch('azkaban_cli.azkaban.os.remove')
     @patch('azkaban_cli.azkaban.make_archive')

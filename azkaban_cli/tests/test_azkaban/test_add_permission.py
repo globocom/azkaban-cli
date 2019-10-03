@@ -26,9 +26,6 @@ class AzkabanAddPermissionTest(TestCase):
             'admin': False, 'read': True, 'write': False, 'execute': False, 'schedule': False
         }
 
-    def tearDown(self):
-        pass
-
     @responses.activate
     def test_add_permission(self):
         """

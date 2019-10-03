@@ -23,9 +23,6 @@ class AzkabanRemovePermissionTest(TestCase):
         self.project = 'ProjectTest'
         self.group   = 'GroupTest'
 
-    def tearDown(self):
-        pass
-
     @responses.activate
     def test_remove_permission(self):
         """

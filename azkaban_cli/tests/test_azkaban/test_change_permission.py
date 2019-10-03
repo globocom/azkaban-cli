@@ -24,9 +24,6 @@ class AzkabanChangePermissionTest(TestCase):
         self.group   = 'GroupTest'
         self.permission_options = {'admin': False, 'read': True, 'write': True, 'execute': False, 'schedule': False}
 
-    def tearDown(self):
-        pass
-
     @responses.activate
     def test_change_permission(self):
         """

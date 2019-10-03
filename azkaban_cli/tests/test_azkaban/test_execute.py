@@ -24,9 +24,6 @@ class AzkabanExecuteTest(TestCase):
         self.project = 'ProjectTest'
         self.flow    = 'FlowTest'
 
-    def tearDown(self):
-        pass
-
     @responses.activate
     def test_execute(self):
         """
