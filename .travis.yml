@@ -12,3 +12,17 @@ install:
 # command to run tests
 script:
   - make test
+
+before_deploy: sed -i "s/__version__ = \".*\"/__version__ = \"$TRAVIS_TAG\"/g" azkaban_cli/__version__.py
+
+deploy:
+  provider: pypi
+  user: $PYPI_USER
+  password: $PYPI_PASSWORD
+  distributions: dist
+  on:
+    branch: master
+    tags: true
+    condition: $TRAVIS_PYTHON_VERSION = "3.6"
+    skip_cleanup: true
+    skip_existing: true
