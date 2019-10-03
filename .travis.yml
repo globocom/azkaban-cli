@@ -19,7 +19,6 @@ deploy:
   provider: pypi
   user: $PYPI_USER
   password: $PYPI_PASSWORD
-  distributions: dist
   skip_cleanup: true
   skip_existing: true
   on:
