@@ -11,14 +11,15 @@ install:
   - pip install -r requirements_dev.txt
 # command to run tests
 script:
-- make test
+  - make test
 
 before_deploy: sed -i "s/__version__ = \".*\"/__version__ = \"$TRAVIS_TAG\"/g" azkaban_cli/__version__.py
 
 deploy:
   provider: pypi
-  user: $PYPI_USER
-  password: $PYPI_PASSWORD
+  user: "Your username"
+  password:
+    secure: "Your encrypted password"
   distributions: dist
   on:
     branch: master
