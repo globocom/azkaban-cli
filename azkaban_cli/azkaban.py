@@ -389,9 +389,9 @@ class Azkaban(object):
 
         response_json = response.json()
         logging.info('%s' % (response_json[u'message']))
-
+    
     def cancel(self, execution_id):
-            """Execute command, intended to make the request to Azkaban and treat the response properly.
+        """Execute command, intended to make the request to Azkaban and treat the response properly.
 
         This method receives the flow execution id, make the cancel request to cancel the flow execution and 
         evaluate the response.

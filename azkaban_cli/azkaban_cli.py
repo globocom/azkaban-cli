@@ -457,7 +457,7 @@ def execute(ctx, project, flow):
 @click.argument(u'execution_id', type=click.STRING)
 def cancel(ctx, execution_id):
     """Cancel a flow execution"""
-     __cancel(ctx, execution_id)
+    __cancel(ctx, execution_id)
 
 @click.command(u'create')
 @click.pass_context

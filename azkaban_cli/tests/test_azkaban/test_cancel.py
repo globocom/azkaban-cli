@@ -25,7 +25,7 @@ class AzkabanCancelTest(TestCase):
 
     @responses.activate
     def test_cancel(self):
-       """
+        """
         Test cancel execution method from Azkaban class
         """
         responses.add(

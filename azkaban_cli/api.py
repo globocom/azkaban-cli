@@ -246,7 +246,7 @@ def execute_request(session, host, session_id, project, flow):
     return response
 
 def cancel_request(session, host, session_id, exec_id):
-     """Cancel an running flow for the Azkaban API
+    """Cancel an running flow for the Azkaban API
 
     :param session: A session for creating the request
     :type session: requests.Session
