@@ -10,6 +10,7 @@ install:
 # command to run tests
 script:
   - make test
+  - make check-sec
 
 before_deploy: sed -i "s/__version__ = \".*\"/__version__ = \"$TRAVIS_TAG\"/g" azkaban_cli/__version__.py
 

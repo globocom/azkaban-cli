@@ -25,7 +25,7 @@ class AzkabanLoginTest(TestCase):
         host       = 'https://testhost:testport/'
         valid_host = 'https://testhost:testport'
         user       = 'user'
-        password   = 'password'
+        password   = 'password'    # nosec
 
         self.azk.login(host, user, password)
 
