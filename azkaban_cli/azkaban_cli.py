@@ -26,7 +26,8 @@ from azkaban_cli.exceptions import (
     ChangePermissionError,
     AddPermissionError,
     RemovePermissionError,
-    FetchFlowExecutionError
+    FetchFlowExecutionError,
+    FetchFlowExecutionUpdatesError
 )
 from azkaban_cli.__version__ import __version__
 
@@ -370,6 +371,32 @@ def __fetch_flow_execution(ctx, execution_id):
     except FetchFlowExecutionError as e:
         logging.error(str(e))
 
+def __log_flow_execution_updates(json):
+    logging.info('Id: %s' % (json.get('id')))
+    logging.info('Start Time: %s' % (json.get('startTime')))
+    logging.info('Attempt: %s' % (json.get('attempt')))
+    logging.info('Status: %s' % (json.get('status')))
+    logging.info('Update Time: %s' % (json.get('updateTime')))
+    nodes = json.get('nodes', [])
+    for node in nodes:
+        logging.info('Node')
+        logging.info('\tAttempt: %s' % (node.get('attempt')))
+        logging.info('\tStart Time: %s' % (node.get('startTime')))
+        logging.info('\tId: %s' % (node.get('id')))
+        logging.info('\tUpdate Time: %s' % (node.get('updateTime')))
+        logging.info('\tStatus: %s' % (node.get('status')))
+        logging.info('\tEnd Time: %s' % (node.get('endTime')))
+
+@login_required
+def __fetch_flow_execution_updates(ctx, execution_id, last_update_time):
+    azkaban = ctx.obj[u'azkaban']
+
+    try:
+        json = azkaban.fetch_flow_execution_updates(execution_id, last_update_time)
+        __log_flow_execution_updates(json)
+    except FetchFlowExecutionUpdatesError as e:
+        logging.error(str(e))
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
 # ----------------------------------------------------------------------------------------------------------------------
@@ -520,6 +547,14 @@ def fetch_flow_execution(ctx, execution_id):
     """Fetch a flow execution"""
     __fetch_flow_execution(ctx, execution_id)
 
+@click.command(u'fetch_flow_execution_updates')
+@click.pass_context
+@click.argument(u'execution_id', type=click.STRING)
+@click.argument(u'last_update_time', type=click.STRING)
+def fetch_flow_execution_updates(ctx, execution_id, last_update_time):
+    """Fetch flow execution updates"""
+    __fetch_flow_execution_updates(ctx, execution_id, last_update_time)
+
 cli.add_command(login)
 cli.add_command(logout)
 cli.add_command(upload)
@@ -535,6 +570,7 @@ cli.add_command(remove_permission)
 cli.add_command(change_permission)
 cli.add_command(fetch_jobs_from_flow)
 cli.add_command(fetch_flow_execution)
+cli.add_command(fetch_flow_execution_updates)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
