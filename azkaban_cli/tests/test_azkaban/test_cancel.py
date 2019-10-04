@@ -69,7 +69,7 @@ class AzkabanCancelTest(TestCase):
     @patch('azkaban_cli.azkaban.api.cancel_request')
     def test_cancel_request_called(self, mock_cancel_request):
         """
-        Test if cancel method from Azkaban class is calling create request with expected arguments
+        Test if cancel method from Azkaban class is calling cancel request with expected arguments
         """
 
         self.azk.cancel(self.exec_id)
@@ -92,8 +92,8 @@ class AzkabanCancelTest(TestCase):
             status=200
         )
 
-        with self.assertRaises(FetchFlowExecutionError):
-            self.azk.fetch_flow_execution(self.exec_id)
+        with self.assertRaises(CancelError):
+            self.azk.cancel(self.exec_id)
 
     @responses.activate
     def test_error_session_expired_cancel(self):

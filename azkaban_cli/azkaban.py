@@ -414,9 +414,6 @@ class Azkaban(object):
 
         self.__catch_response_error(response, CancelError)
 
-        response_json = response.json()
-        logging.info('%s' % (response_json[u'message']))
-
 
     def create(self, project, description):
         """Create command, intended to make the request to Azkaban and treat the response properly.
