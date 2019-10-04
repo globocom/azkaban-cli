@@ -642,7 +642,7 @@ class Azkaban(object):
 
         self.__check_if_logged()
 
-        response = api.fetch_flow_execution_updates(
+        response = api.fetch_flow_execution_updates_request(
             self.__session,
             self.__host,
             self.__session_id,

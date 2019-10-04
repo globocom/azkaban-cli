@@ -473,7 +473,7 @@ def fetch_flow_execution_request(session, host, session_id, exec_id):
 
     return response
 
-def fetch_flow_execution_updates(session, host, session_id, exec_id, last_update_time):
+def fetch_flow_execution_updates_request(session, host, session_id, exec_id, last_update_time):
     """Fetch a flow execution updates request for the Azkaban API
 
     :param session: A session for creating the request
