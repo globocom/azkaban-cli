@@ -8,7 +8,7 @@ from azkaban_cli.exceptions import CancelError, SessionError
 
 
 class AzkabanCancelTest(TestCase):
-   def setUp(self):
+    def setUp(self):
         """
         Creates an Azkaban instance and set a logged session for all upload tests
         """

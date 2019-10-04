@@ -406,10 +406,10 @@ class Azkaban(object):
         self.__check_if_logged()
 
         response  = api.cancel_request(
-                self.__session,
-                self.__host,
-                self.__session_id,
-                execution_id
+            self.__session,
+            self.__host,
+            self.__session_id,
+            execution_id,
         )
 
         self.__catch_response_error(response, CancelError)
