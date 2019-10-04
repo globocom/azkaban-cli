@@ -19,7 +19,7 @@ pip install azkaban_cli
 
 ## Usage
 
-Actvate your virtualenv and call ```azkaban```
+Activate your virtualenv and call ```azkaban```
 
 ```sh
 $ azkaban --help
@@ -35,6 +35,7 @@ Commands:
   create                        Create a new project
   delete                        Delete a project
   execute                       Execute a flow from a project
+  cancel                        Cancel a flow execution
   fetch_flow_execution          Fetch a flow execution
   fetch_flow_execution_updates  Fetch flow execution updates
   fetch_jobs_from_flow          Fetch jobs of a flow
