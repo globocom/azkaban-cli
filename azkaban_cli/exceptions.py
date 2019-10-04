@@ -15,6 +15,9 @@ class UploadError(Exception):
 class ExecuteError(Exception):
     pass
 
+class CancelError(Exception):
+    pass
+
 class ScheduleError(Exception):
     pass
 
