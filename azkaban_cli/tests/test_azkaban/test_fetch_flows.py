@@ -23,9 +23,6 @@ class AzkabanFetchFlowsTest(TestCase):
 
         self.project = 'ProjectTest'
 
-    def tearDown(self):
-        pass
-
     @responses.activate
     def test_fetch_flows(self):
         """

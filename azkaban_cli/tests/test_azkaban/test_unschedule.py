@@ -27,9 +27,6 @@ class AzkabanUnscheduleTest(TestCase):
         self.project_id = 123
         self.schedule_id = '456'
 
-    def tearDown(self):
-        pass
-
     @responses.activate
     def test_unschedule(self):
         """

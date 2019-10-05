@@ -4,10 +4,10 @@ from unittest.mock import patch, ANY
 import responses
 
 import azkaban_cli.azkaban
-from azkaban_cli.exceptions import FetchFlowExecutionError, SessionError
+from azkaban_cli.exceptions import CancelError, SessionError
 
 
-class AzkabanFetchFlowExecutionTest(TestCase):
+class AzkabanCancelTest(TestCase):
     def setUp(self):
         """
         Creates an Azkaban instance and set a logged session for all upload tests
@@ -21,14 +21,13 @@ class AzkabanFetchFlowExecutionTest(TestCase):
 
         self.azk.set_logged_session(self.host, self.user, self.session_id)
 
-        self.exec_id = '1234'
+        self.exec_id = 300
 
     @responses.activate
-    def test_fetch_flow_execution(self):
+    def test_cancel(self):
         """
-        Test fetch flow execution method from Azkaban class
+        Test cancel execution method from Azkaban class
         """
-
         responses.add(
             responses.GET,
             self.host + "/executor",
@@ -65,48 +64,45 @@ class AzkabanFetchFlowExecutionTest(TestCase):
             status=200
         )
 
-        self.azk.fetch_flow_execution(self.exec_id)
+        self.azk.cancel(self.exec_id)
 
-    @patch('azkaban_cli.azkaban.api.fetch_flow_execution_request')
-    def test_fetch_flow_execution_request_called(self, mock_fetch_flow_execution_request):
+    @patch('azkaban_cli.azkaban.api.cancel_request')
+    def test_cancel_request_called(self, mock_cancel_request):
         """
-        Test if fetch flow execution method from Azkaban class is calling fetch flow execution
-        request with expected arguments
+        Test if cancel method from Azkaban class is calling cancel request with expected arguments
         """
 
-        self.azk.fetch_flow_execution(self.exec_id)
+        self.azk.cancel(self.exec_id)
 
-        mock_fetch_flow_execution_request.assert_called_with(
-            ANY, self.host, self.session_id, self.exec_id)
-
+        mock_cancel_request.assert_called_with(ANY, self.host, self.session_id, self.exec_id)
 
     @responses.activate
-    def test_execution_cannot_be_found_fetch_flow_execution(self):
+    def test_flow_is_not_running_cancel(self):
         """
-        Test if fetch flow execution method from Azkaban class raises FetchFlowExecutionError
-        if request returns error caused by execution not be found
+        Test if cancel method from Azkaban class raises CancelError
+        if request returns error caused by flow is not executing
         """
 
         responses.add(
             responses.GET,
             self.host + "/executor",
             json={
-                'error': "Cannot find execution '0'"
+                'error': "Execution 300 of flow test isn't running."
             },
             status=200
         )
 
-        with self.assertRaises(FetchFlowExecutionError):
-            self.azk.fetch_flow_execution(self.exec_id)
+        with self.assertRaises(CancelError):
+            self.azk.cancel(self.exec_id)
 
     @responses.activate
-    def test_error_session_expired_fetch_flow_execution(self):
+    def test_error_session_expired_cancel(self):
         """
-        Test if fetch flow execution method from Azkaban class raises SessionError if request
+        Test if cancel  method from Azkaban class raises SessionError if request
         returns error caused by session expired
         """
 
         responses.add(responses.GET, self.host + "/executor", json={"error": "session"}, status=200)
 
         with self.assertRaises(SessionError):
-            self.azk.fetch_flow_execution(self.exec_id)
+            self.azk.cancel(self.exec_id)

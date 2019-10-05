@@ -25,9 +25,6 @@ class AzkabanDeleteTest(TestCase):
 
         self.project = 'ProjectTest'
 
-    def tearDown(self):
-        pass
-
     @responses.activate
     def test_delete(self):
         """

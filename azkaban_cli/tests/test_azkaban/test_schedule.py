@@ -26,9 +26,6 @@ class AzkabanScheduleTest(TestCase):
         self.flow    = 'FlowTest'
         self.cron    = '0 0 23 ? * *'
 
-    def tearDown(self):
-        pass
-
     @responses.activate
     @patch('azkaban_cli.azkaban.api.schedule_request')
     def test_schedule(self, mock_schedule_request):

@@ -16,9 +16,6 @@ class AzkabanLoginTest(TestCase):
 
         self.azk = azkaban_cli.azkaban.Azkaban()
 
-    def tearDown(self):
-        pass
-
     @patch('azkaban_cli.azkaban.api.login_request')
     def test_validate_login_request_parameters(self, mock_login_request):
         """
@@ -28,7 +25,7 @@ class AzkabanLoginTest(TestCase):
         host       = 'https://testhost:testport/'
         valid_host = 'https://testhost:testport'
         user       = 'user'
-        password   = 'password'
+        password   = 'password'    # nosec
 
         self.azk.login(host, user, password)
 

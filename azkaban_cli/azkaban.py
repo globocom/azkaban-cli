@@ -13,6 +13,7 @@ from azkaban_cli.exceptions import (
     FetchSLAError,
     UnscheduleError,
     ExecuteError,
+    CancelError,
     CreateError,
     AddPermissionError,
     RemovePermissionError,
@@ -389,6 +390,31 @@ class Azkaban(object):
 
         response_json = response.json()
         logging.info('%s' % (response_json[u'message']))
+    
+    def cancel(self, execution_id):
+        """Execute command, intended to make the request to Azkaban and treat the response properly.
+
+        This method receives the flow execution id, make the cancel request to cancel the flow execution and 
+        evaluate the response.
+
+        If the flow is not running, it will return an error message.
+
+        :param execution_id: Execution id on Azkaban
+        :type execution_id: str
+        :raises CancelError: when Azkaban api returns error in response
+        """
+
+        self.__check_if_logged()
+
+        response  = api.cancel_request(
+            self.__session,
+            self.__host,
+            self.__session_id,
+            execution_id,
+        )
+
+        self.__catch_response_error(response, CancelError)
+
 
     def create(self, project, description):
         """Create command, intended to make the request to Azkaban and treat the response properly.

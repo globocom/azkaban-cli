@@ -21,6 +21,7 @@ from azkaban_cli.exceptions import (
     FetchSLAError,
     UnscheduleError,
     ExecuteError,
+    CancelError,
     CreateError,
     FetchProjectsError,
     ChangePermissionError,
@@ -146,6 +147,15 @@ def __execute(ctx, project, flow):
     try:
         azkaban.execute(project, flow)
     except ExecuteError as e:
+        logging.error(str(e))
+
+@login_required
+def __cancel(ctx, execution_id):
+    azkaban = ctx.obj[u'azkaban']
+
+    try:
+        azkaban.cancel(execution_id)
+    except CancelError as e:
         logging.error(str(e))
 
 @login_required
@@ -469,6 +479,13 @@ def execute(ctx, project, flow):
     """Execute a flow from a project"""
     __execute(ctx, project, flow)
 
+@click.command(u'cancel')
+@click.pass_context
+@click.argument(u'execution_id', type=click.STRING)
+def cancel(ctx, execution_id):
+    """Cancel a flow execution"""
+    __cancel(ctx, execution_id)
+
 @click.command(u'create')
 @click.pass_context
 @click.argument(u'project', type=click.STRING) 
@@ -561,6 +578,7 @@ cli.add_command(upload)
 cli.add_command(schedule)
 cli.add_command(unschedule)
 cli.add_command(execute)
+cli.add_command(cancel)
 cli.add_command(create)
 cli.add_command(delete)
 cli.add_command(fetch_projects)
