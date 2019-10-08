@@ -30,22 +30,23 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  add_permission        Add a group with permission in a project
-  change_permission     Change a group permission in a project
-  create                Create a new project
-  delete                Delete a project
-  execute               Execute a flow from a project
-  cancel               Cancel a flow execution
-  fetch_flow_execution  Fetch a flow execution
-  fetch_jobs_from_flow  Fetch jobs of a flow
-  fetch_projects        Fetch all project from a user
-  fetch_sla             Fetch the SLA from a schedule
-  login                 Login to an Azkaban server
-  logout                Logout from Azkaban session
-  remove_permission     Remove group permission from a project
-  schedule              Schedule a flow from a project with specified cron...
-  unschedule            Unschedule a flow from a project
-  upload                Generates a zip of path passed as argument and...
+  add_permission                Add a group with permission in a project
+  change_permission             Change a group permission in a project
+  create                        Create a new project
+  delete                        Delete a project
+  execute                       Execute a flow from a project
+  cancel                        Cancel a flow execution
+  fetch_flow_execution          Fetch a flow execution
+  fetch_flow_execution_updates  Fetch flow execution updates
+  fetch_jobs_from_flow          Fetch jobs of a flow
+  fetch_projects                Fetch all project from a user
+  fetch_sla                     Fetch the SLA from a schedule
+  login                         Login to an Azkaban server
+  logout                        Logout from Azkaban session
+  remove_permission             Remove group permission from a project
+  schedule                      Schedule a flow from a project with specified cron...
+  unschedule                    Unschedule a flow from a project
+  upload                        Generates a zip of path passed as argument and...
 ```
 
 ## Examples

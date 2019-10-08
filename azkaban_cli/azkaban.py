@@ -18,7 +18,8 @@ from azkaban_cli.exceptions import (
     AddPermissionError,
     RemovePermissionError,
     ChangePermissionError,
-    FetchFlowExecutionError
+    FetchFlowExecutionError,
+    FetchFlowExecutionUpdatesError
 )
 from shutil import make_archive
 from urllib3.exceptions import InsecureRequestWarning
@@ -645,5 +646,37 @@ class Azkaban(object):
         )
 
         self.__catch_response_error(response, FetchFlowExecutionError)
+
+        return response.json()
+
+    def fetch_flow_execution_updates(self, execution_id, last_update_time):
+        """Fetch a flow execution updates command, intended to make the request to Azkaban
+        and treat the response properly.
+
+        This method receives the execution id and the last_update_time , makes the fetch a 
+        flow execution request to fetch the flow execution update details and evaluates the response.
+
+        Returns the json response from the request.
+
+        :param execution_id: Execution id on Azkaban
+        :type execution_id: str
+        :raises FetchFlowExecutionError: when Azkaban api returns error in response
+        :param last_update_time: The criteria to filter by last update time. Set the 
+         value to be -1 if all job information are needed. Use -lt="value" to
+         subscribe the default value, defaults to -1
+        :type last_update_time: str, optional
+        """
+
+        self.__check_if_logged()
+
+        response = api.fetch_flow_execution_updates_request(
+            self.__session,
+            self.__host,
+            self.__session_id,
+            execution_id,
+            last_update_time
+        )
+
+        self.__catch_response_error(response, FetchFlowExecutionUpdatesError)
 
         return response.json()
