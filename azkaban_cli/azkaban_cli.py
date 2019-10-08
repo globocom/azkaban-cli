@@ -383,19 +383,21 @@ def __fetch_flow_execution(ctx, execution_id):
 
 def __log_flow_execution_updates(json):
     logging.info('Id: %s' % (json.get('id')))
-    logging.info('Start Time: %s' % (json.get('startTime')))
+    logging.info('Start time: %s' % (json.get('startTime')))
     logging.info('Attempt: %s' % (json.get('attempt')))
     logging.info('Status: %s' % (json.get('status')))
-    logging.info('Update Time: %s' % (json.get('updateTime')))
+    logging.info('Update time: %s' % (json.get('updateTime')))
     nodes = json.get('nodes', [])
     for node in nodes:
         logging.info('Node')
         logging.info('\tAttempt: %s' % (node.get('attempt')))
-        logging.info('\tStart Time: %s' % (node.get('startTime')))
+        logging.info('\tStart time: %s' % (node.get('startTime')))
         logging.info('\tId: %s' % (node.get('id')))
-        logging.info('\tUpdate Time: %s' % (node.get('updateTime')))
+        logging.info('\tUpdate time: %s' % (node.get('updateTime')))
         logging.info('\tStatus: %s' % (node.get('status')))
-        logging.info('\tEnd Time: %s' % (node.get('endTime')))
+        logging.info('\tEnd time: %s' % (node.get('endTime')))
+    logging.info('Flow: %s' % (json.get('flow')))
+    logging.info('Flow end time: %s' % (json.get('endTime')))
 
 @login_required
 def __fetch_flow_execution_updates(ctx, execution_id, last_update_time):
@@ -567,7 +569,7 @@ def fetch_flow_execution(ctx, execution_id):
 @click.command(u'fetch_flow_execution_updates')
 @click.pass_context
 @click.argument(u'execution_id', type=click.STRING)
-@click.argument(u'last_update_time', type=click.STRING)
+@click.option('-lt', 'last_update_time', type=click.STRING, default=u"-1", help=u'The criteria to filter by last update time', show_default=True)
 def fetch_flow_execution_updates(ctx, execution_id, last_update_time):
     """Fetch flow execution updates"""
     __fetch_flow_execution_updates(ctx, execution_id, last_update_time)

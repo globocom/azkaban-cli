@@ -509,6 +509,10 @@ def fetch_flow_execution_updates_request(session, host, session_id, exec_id, las
     :param str session_id: An id that the user should have when is logged in
     :param str exec_id: Execution id to be fetched
     :return: The response from the request made
+    :param last_update_time: The criteria to filter by last update time. Set the 
+     value to be -1 if all job information are needed. Use -lt="value" to
+     subscribe the default value, defaults to -1
+    :type last_update_time: str, optional
     :rtype: requests.Response
     :raises requests.exceptions.ConnectionError: if cannot connect to host
     """

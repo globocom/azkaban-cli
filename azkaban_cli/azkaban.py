@@ -662,8 +662,9 @@ class Azkaban(object):
         :type execution_id: str
         :raises FetchFlowExecutionError: when Azkaban api returns error in response
         :param last_update_time: The criteria to filter by last update time. Set the 
-         value to be -1 if all job information are needed.
-        :type last_update_time: str
+         value to be -1 if all job information are needed. Use -lt="value" to
+         subscribe the default value, defaults to -1
+        :type last_update_time: str, optional
         """
 
         self.__check_if_logged()
