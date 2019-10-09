@@ -23,8 +23,10 @@ make test
 
 ### Publish to Pypi
 
+Make a tag and push it to Travis
 ```
-make release
+git tag 0.2.0
+git push --tags
 ```
 
 ## Pull Request Process
