@@ -15,6 +15,9 @@ class UploadError(Exception):
 class ExecuteError(Exception):
     pass
 
+class CancelError(Exception):
+    pass
+
 class ScheduleError(Exception):
     pass
 
@@ -49,4 +52,7 @@ class FetchFlowExecutionError(Exception):
     pass
 
 class FetchJobsFromFlowError(Exception):
+    pass
+
+class FetchFlowExecutionUpdatesError(Exception):
     pass

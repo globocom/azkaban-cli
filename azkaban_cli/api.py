@@ -187,7 +187,7 @@ def fetch_schedule_request(session, host, session_id, project_id, flow):
     return response
 
 def unschedule_request(session, host, session_id, schedule_id):
-    r"""Unschedule request for the Azkaban API
+    """Unschedule request for the Azkaban API
 
     :param session: A session for creating the request
     :type session: requests.Session
@@ -244,6 +244,33 @@ def execute_request(session, host, session_id, project, flow):
     logging.debug("Response: \n%s", response.text)
 
     return response
+
+def cancel_request(session, host, session_id, exec_id):
+    """Cancel an running flow for the Azkaban API
+
+    :param session: A session for creating the request
+    :type session: requests.Session
+    :param str host: Hostname where the request should go
+    :param str session_id: An id that the user should have when is logged in
+    :param str exec_id: Execution id to be canceled
+    :return: The response from the request made
+    :rtype: requests.Response
+    :raises requests.exceptions.ConnectionError: if cannot connect to host
+    """
+
+    response = session.get(
+        host + '/executor',
+        params={
+            u'session.id': session_id,
+            u'ajax': 'cancelFlow',
+            u'execid': exec_id
+        }
+    )
+
+    logging.debug("Response: \n%s", response.text)
+
+    return response
+
 
 def create_request(session, host, session_id, project, description):
     """Create a Project request for the Azkaban API
@@ -466,6 +493,37 @@ def fetch_flow_execution_request(session, host, session_id, exec_id):
             u'session.id': session_id,
             u'ajax': 'fetchexecflow',
             u'execid': exec_id
+        }
+    )
+
+    logging.debug("Response: \n%s", response.text)
+
+    return response
+
+def fetch_flow_execution_updates_request(session, host, session_id, exec_id, last_update_time):
+    """Fetch a flow execution updates request for the Azkaban API
+
+    :param session: A session for creating the request
+    :type session: requests.Session
+    :param str host: Hostname where the request should go
+    :param str session_id: An id that the user should have when is logged in
+    :param str exec_id: Execution id to be fetched
+    :return: The response from the request made
+    :param last_update_time: The criteria to filter by last update time. Set the 
+     value to be -1 if all job information are needed. Use -lt="value" to
+     subscribe the default value, defaults to -1
+    :type last_update_time: str, optional
+    :rtype: requests.Response
+    :raises requests.exceptions.ConnectionError: if cannot connect to host
+    """
+
+    response = session.get(
+        host + '/executor',
+        params={
+            u'session.id': session_id,
+            u'ajax': 'fetchexecflowupdate',
+            u'execid': exec_id,
+            u'lastUpdateTime': last_update_time
         }
     )
 

@@ -9,3 +9,9 @@ clean:
 
 test:
 	@python -m unittest
+
+check-sec:
+	@echo "Installing Bandit..."
+	@pip install bandit
+	@echo "Running Bandit..."
+	@bandit -r .
