@@ -56,3 +56,6 @@ class FetchJobsFromFlowError(Exception):
 
 class FetchFlowExecutionUpdatesError(Exception):
     pass
+
+class FetchExecutionsOfAFlowError(Exception):
+    pass

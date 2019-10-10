@@ -38,6 +38,7 @@ Commands:
   cancel                        Cancel a flow execution
   fetch_flow_execution          Fetch a flow execution
   fetch_flow_execution_updates  Fetch flow execution updates
+  fetch_execution_of_a_flow     Fetch all execution of a given flow
   fetch_jobs_from_flow          Fetch jobs of a flow
   fetch_projects                Fetch all project from a user
   fetch_sla                     Fetch the SLA from a schedule
