@@ -1,5 +1,5 @@
 # Azkaban CLI
-[![Build Status](https://travis-ci.com/globocom/azkaban-cli.svg?branch=master)](https://travis-ci.com/globocom/azkaban-cli)
+[![Build Status](https://img.shields.io/travis/com/globocom/azkaban-cli?style=flat-square&labelColor=black&logo=travis&logoColor=white?branch=master)](https://travis-ci.com/globocom/azkaban-cli)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 CLI for Azkaban 3 API access and flow upload.
