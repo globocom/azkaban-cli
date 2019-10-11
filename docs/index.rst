@@ -17,7 +17,7 @@ Azkaban CLI
 CLI for Azkaban 3 API access and flow upload.
 
 Installation
--------
+------------
 
 Please virtualenv or conda env on this, example as follows
 
@@ -64,7 +64,7 @@ Activate your virtualenv and call ``azkaban``
      upload                Generates a zip of path passed as argument and...
 
 Examples
----------
+--------
 
 Making Login
 ^^^^^^^^^^^^
@@ -79,3 +79,74 @@ Contribute
 ----------
 
 For development and contributing, please follow `Contributing Guide <https://github.com/globocom/azkaban-cli/blob/master/CONTRIBUTING.md>`_ and ALWAYS respect the `Code of Conduct <https://github.com/globocom/azkaban-cli/blob/master/CODE_OF_CONDUCT.md>`_
+
+
+API Methods
+===========
+
+login
+-----
+.. autoclass:: azkaban_cli.azkaban.Azkaban.login
+
+
+logout
+------
+.. autoclass:: azkaban_cli.azkaban.Azkaban.logout
+
+
+upload
+------
+.. autoclass:: azkaban_cli.azkaban.Azkaban.upload
+
+
+create
+------
+.. autoclass:: azkaban_cli.azkaban.Azkaban.create
+
+
+delete
+------
+.. autoclass:: azkaban_cli.azkaban.Azkaban.delete
+
+add_permission
+--------------
+.. autoclass:: azkaban_cli.azkaban.Azkaban.add_permission
+
+change_permission
+-----------------
+.. autoclass:: azkaban_cli.azkaban.Azkaban.change_permission
+
+remove_permission
+-----------------
+.. autoclass:: azkaban_cli.azkaban.Azkaban.remove_permission
+
+execute
+-------
+.. autoclass:: azkaban_cli.azkaban.Azkaban.execute
+
+fetch_projects
+--------------
+.. autoclass:: azkaban_cli.azkaban.Azkaban.fetch_projects
+
+fetch_sla
+---------
+.. autoclass:: azkaban_cli.azkaban.Azkaban.fetch_sla
+
+fetch_flow_execution
+--------------------
+.. autoclass:: azkaban_cli.azkaban.Azkaban.fetch_flow_execution
+
+fetch_jobs_from_flow
+--------------------
+.. autoclass:: azkaban_cli.azkaban.Azkaban.fetch_jobs_from_flow
+
+schedule
+--------
+.. autoclass:: azkaban_cli.azkaban.Azkaban.schedule
+
+unschedule
+----------
+.. autoclass:: azkaban_cli.azkaban.Azkaban.unschedule
+
+
+
