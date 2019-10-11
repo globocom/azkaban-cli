@@ -21,11 +21,10 @@ pip install azkaban_cli
 
 Activate your virtualenv and call ```azkaban```
 
-```sh
+```
 $ azkaban --help
 Usage: azkaban [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
-```
-```
+
 Options:
   --version  Show the version and exit.
   --help     Show this message and exit.
