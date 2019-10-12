@@ -600,8 +600,8 @@ def fetch_flow_execution(ctx, execution_id):
 @click.pass_context
 @click.argument(u'project', type=click.STRING)
 @click.argument(u'flow', type=click.STRING)
-@click.argument(u'start', type=click.INTEGER)
-@click.argument(u'length', type=click.INTEGER)
+@click.argument(u'start', type=click.INTEGER, default=0, show_default=True)
+@click.argument(u'length', type=click.INTEGER, default=3, show_default=True)
 def fetch_executions_of_a_flow(ctx, project, flow, start, length):
     """Fetch executions of a flow"""
     __fetch_executions_of_a_flow(ctx, project, flow, start, length)
