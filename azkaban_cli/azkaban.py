@@ -19,7 +19,8 @@ from azkaban_cli.exceptions import (
     RemovePermissionError,
     ChangePermissionError,
     FetchFlowExecutionError,
-    FetchFlowExecutionUpdatesError
+    FetchFlowExecutionUpdatesError,
+    FetchExecutionsOfAFlowError
 )
 from shutil import make_archive
 from urllib3.exceptions import InsecureRequestWarning
@@ -78,28 +79,28 @@ class Azkaban(object):
     def __catch_login_text(self, response):
         if response.text == "Login error. Need username and password":
             raise SessionError(response.text)
-    
+
     def __catch_login(self, response):
         self.__catch_login_text(response)
         self.__catch_login_html(response)
 
     def __catch_response_error(self, response, exception, ignore_empty_responses=False):
         self.__catch_login(response)
-        
+
         #some ajax api operations don`t have return body making response.json() raise a ValueError exception
         #The try block enable the __catch_empty_response raise the correct exception
         try:
             response_json = response.json()
         except Exception:
             response_json = {}
-        
+
         self.__catch_response_error_msg(exception, response_json)
         self.__catch_response_status_error(exception, response_json)
 
         #don't raise a exception with we know the request has a empty body
         if not ignore_empty_responses:
             self.__catch_empty_response(exception, response_json)
-   
+
 
     def get_logged_session(self):
         """Method for return the host and session id of the logged session saved on the class
@@ -390,11 +391,11 @@ class Azkaban(object):
 
         response_json = response.json()
         logging.info('%s' % (response_json[u'message']))
-    
+
     def cancel(self, execution_id):
         """Execute command, intended to make the request to Azkaban and treat the response properly.
 
-        This method receives the flow execution id, make the cancel request to cancel the flow execution and 
+        This method receives the flow execution id, make the cancel request to cancel the flow execution and
         evaluate the response.
 
         If the flow is not running, it will return an error message.
@@ -427,7 +428,7 @@ class Azkaban(object):
         :param description: Description for the project
         :type: str
         """
-        
+
         self.__check_if_logged()
 
         response = api.create_request(
@@ -486,7 +487,7 @@ class Azkaban(object):
     def add_permission(self, project, group, permission_options):
         """Add permission command, intended to make the request to Azkaban and treat the response properly.
 
-        This method receives the project name, the group name, and the permission options and execute 
+        This method receives the project name, the group name, and the permission options and execute
         request to add a group permission to the project and evaluate the response.
 
         :param project: Project name on Azkaban
@@ -508,18 +509,18 @@ class Azkaban(object):
             self.__host,
             self.__session_id,
             project,
-            group, 
+            group,
             permission_options
         )
 
         self.__catch_response_error(response, AddPermissionError, True)
-        
+
         logging.info('Group [%s] add with permission [%s] in the Project [%s] successfully' % (group,  permission_options, project))
 
     def remove_permission(self, project, group):
         """Remove permission command, intended to make the request to Azkaban and treat the response properly.
 
-        This method receives the project name and the group name and execute 
+        This method receives the project name and the group name and execute
         request to remove a group permission from the project and evaluate the response.
 
         :param project: Project name on Azkaban
@@ -537,18 +538,18 @@ class Azkaban(object):
             self.__host,
             self.__session_id,
             project,
-            group 
+            group
         )
 
         self.__catch_response_error(response, RemovePermissionError, True)
-        
+
         logging.info('Group [%s] permission removed from the Project [%s] successfully' % (group, project))
 
 
     def change_permission(self, project, group, permission_options):
         """Change permission command, intended to make the request to Azkaban and treat the response properly.
 
-        This method receives the project name, the group name, and the permission options and execute 
+        This method receives the project name, the group name, and the permission options and execute
         request to change a existing group permission in a project and evaluate the response.
 
         :param project: Project name on Azkaban
@@ -570,14 +571,14 @@ class Azkaban(object):
             self.__host,
             self.__session_id,
             project,
-            group, 
+            group,
             permission_options
         )
 
         self.__catch_response_error(response, ChangePermissionError, True)
-        
+
         logging.info('Group [%s] AAA received new permissions [%s] in the Project [%s] successfully' % (group, permission_options, project))
-    
+
     def fetch_sla(self, schedule_id):
         """Fetch SLA command, intended to make the request to Azkaban and treat the response properly.
 
@@ -597,7 +598,7 @@ class Azkaban(object):
 
         response_json = response.json()
         return response_json
-        
+
 
     def __check_group_permissions(self, permission_options):
         __options = ["admin", "write", "read", "execute", "schedule"]
@@ -653,7 +654,7 @@ class Azkaban(object):
         """Fetch a flow execution updates command, intended to make the request to Azkaban
         and treat the response properly.
 
-        This method receives the execution id and the last_update_time , makes the fetch a 
+        This method receives the execution id and the last_update_time , makes the fetch a
         flow execution request to fetch the flow execution update details and evaluates the response.
 
         Returns the json response from the request.
@@ -661,7 +662,7 @@ class Azkaban(object):
         :param execution_id: Execution id on Azkaban
         :type execution_id: str
         :raises FetchFlowExecutionError: when Azkaban api returns error in response
-        :param last_update_time: The criteria to filter by last update time. Set the 
+        :param last_update_time: The criteria to filter by last update time. Set the
          value to be -1 if all job information are needed. Use -lt="value" to
          subscribe the default value, defaults to -1
         :type last_update_time: str, optional
@@ -678,5 +679,39 @@ class Azkaban(object):
         )
 
         self.__catch_response_error(response, FetchFlowExecutionUpdatesError)
+
+        return response.json()
+
+    def fetch_executions_of_a_flow(self, project, flow, start, length):
+        """Fetch executions of a flow command, intended to make the request to Azkaban
+        and treat the response properly.
+
+        This method receives the project name, the flow id, the start index of the returned list and the length of the returned list, it makes the fetch and evaluates the response.
+
+        Returns the json response from the request.
+
+        :param project: Project name on Azkaban
+        :type project: str
+        :param flow: Flow id on Azkaban
+        :type flow: str
+        :param start: Start index of the returned list
+        :type start: int
+        :param length: Length of the returned list
+        :type project: int
+        :raises FetchExecutionsOfAFlowError: when Azkaban api returns error in response
+        """
+
+        self.__check_if_logged()
+
+        response = api.fetch_executions_of_a_flow_request(
+            self.__session,
+            self.__session_id,
+            project,
+            flow,
+            start,
+            length
+        )
+
+        self.__catch_response_error(response, FetchExecutionsOfAFlowError)
 
         return response.json()

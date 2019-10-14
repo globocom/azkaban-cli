@@ -28,7 +28,8 @@ from azkaban_cli.exceptions import (
     AddPermissionError,
     RemovePermissionError,
     FetchFlowExecutionError,
-    FetchFlowExecutionUpdatesError
+    FetchFlowExecutionUpdatesError,
+    FetchExecutionsOfAFlowError,
 )
 from azkaban_cli.__version__ import __version__
 
@@ -253,7 +254,7 @@ def __log_sla(json):
     logging.info('Job Names:')
     for job_name in json.get('allJobNames', []):
         logging.info('\t%s' % job_name)
-    
+
 
 @login_required
 def __fetch_sla(ctx, schedule):
@@ -270,8 +271,8 @@ def __add_permission(ctx, project, group, admin, read, write, _execute, _schedul
     azkaban = ctx.obj[u'azkaban']
     try:
         azkaban.add_permission(
-            project, 
-            group, 
+            project,
+            group,
             permission_options= {
                 'admin': admin,
                 'read': read,
@@ -288,7 +289,7 @@ def __remove_permission(ctx, project, group):
     azkaban = ctx.obj[u'azkaban']
     try:
         azkaban.remove_permission(
-            project, 
+            project,
             group
         )
     except RemovePermissionError as e:
@@ -299,8 +300,8 @@ def __change_permission(ctx, project, group, admin, read, write, _execute, _sche
     azkaban = ctx.obj[u'azkaban']
     try:
         azkaban.change_permission(
-            project, 
-            group, 
+            project,
+            group,
             permission_options= {
                 'admin': admin,
                 'read': read,
@@ -409,6 +410,35 @@ def __fetch_flow_execution_updates(ctx, execution_id, last_update_time):
     except FetchFlowExecutionUpdatesError as e:
         logging.error(str(e))
 
+def __log_executions_of_a_flow(json):
+    logging.info('Total: %s' % (json.get('total')))
+    logging.info('Project: %s' % (json.get('project')))
+    logging.info('Length: %s' % (json.get('length')))
+    logging.info('From: %s' % (json.get('from')))
+    logging.info('Flow: %s' % (json.get('flow')))
+    logging.info('ProjectId: %s' % (json.get('projectId')))
+    executions = json.get('executions', [])
+    for execution in executions:
+        logging.info('StartTime: %s' % (json.get('startTime')))
+        logging.info('SubmitUser: %s' % (json.get('submitUser')))
+        logging.info('Status: %s' % (json.get('status')))
+        logging.info('SubmitTime: %s' % (json.get('submitTime')))
+        logging.info('Execution Id: %s' % (json.get('execId')))
+        logging.info('Project Id: %s' % (json.get('projectId')))
+        logging.info('End time: %s' % (json.get('endTime')))
+        logging.info('Flow Id: %s' % (json.get('flowId')))
+
+@login_required
+def __fetch_executions_of_a_flow(ctz, project, flow, start, length):
+    azkaban = ctx.obj[u'azkaban']
+
+    try:
+        json = azkaban.fetch_executions_of_a_flow(project, flow, start, length)
+        __log_executions_of_a_flow(json)
+    except FetchExecutionsOfAFlowError as e:
+        logging.error(str(e))
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
 # ----------------------------------------------------------------------------------------------------------------------
@@ -490,8 +520,8 @@ def cancel(ctx, execution_id):
 
 @click.command(u'create')
 @click.pass_context
-@click.argument(u'project', type=click.STRING) 
-@click.argument(u'description', type=click.STRING) 
+@click.argument(u'project', type=click.STRING)
+@click.argument(u'description', type=click.STRING)
 def create(ctx, project, description):
     """Create a new project"""
     __create(ctx, project, description)
@@ -528,7 +558,7 @@ def fetch_sla(ctx, schedule):
 @click.option('--schedule', '-s', '_schedule', required=False, help=u'The group can schedule on the project', is_flag=True)
 def add_permission(ctx, project, group, _admin, _read, _write, _execute, _schedule):
     """Add a group with permission in a project"""
-    __add_permission(ctx, project, group, _admin, _read, _write, _execute, _schedule) 
+    __add_permission(ctx, project, group, _admin, _read, _write, _execute, _schedule)
 
 @click.command(u'remove_permission')
 @click.pass_context
@@ -536,7 +566,7 @@ def add_permission(ctx, project, group, _admin, _read, _write, _execute, _schedu
 @click.argument(u'group', type=click.STRING)
 def remove_permission(ctx, project, group):
     """Remove group permission from a project"""
-    __remove_permission(ctx, project, group) 
+    __remove_permission(ctx, project, group)
 
 @click.command(u'change_permission')
 @click.pass_context
@@ -566,6 +596,16 @@ def fetch_flow_execution(ctx, execution_id):
     """Fetch a flow execution"""
     __fetch_flow_execution(ctx, execution_id)
 
+@click.command(u'fetch_executions_of_a_flow')
+@click.pass_context
+@click.argument(u'project', type=click.STRING)
+@click.argument(u'flow', type=click.STRING)
+@click.argument(u'start', type=click.INTEGER, default=0, show_default=True)
+@click.argument(u'length', type=click.INTEGER, default=3, show_default=True)
+def fetch_executions_of_a_flow(ctx, project, flow, start, length):
+    """Fetch executions of a flow"""
+    __fetch_executions_of_a_flow(ctx, project, flow, start, length)
+
 @click.command(u'fetch_flow_execution_updates')
 @click.pass_context
 @click.argument(u'execution_id', type=click.STRING)
@@ -591,6 +631,7 @@ cli.add_command(change_permission)
 cli.add_command(fetch_jobs_from_flow)
 cli.add_command(fetch_flow_execution)
 cli.add_command(fetch_flow_execution_updates)
+cli.add_command(fetch_executions_of_a_flow)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface

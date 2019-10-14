@@ -130,6 +130,37 @@ def fetch_flows_request(session, host, session_id, project):
 
     return response
 
+def fetch_executions_of_a_flow_request(session, session_id, project, flow, start, length):
+    """fetch executions of a flow on a given project
+
+    :param session: A session for creating the request
+    :type session: requests.Session
+    :param str session_id: An id that the user should have when is logged in
+    :param str project: Project name whose flows will be fetched on Azkaban
+    :param str flow: Flow name whose schedule will be fetched on Azkaban
+    :param int start: The start index of the returned list (inclusive)
+    :param int length: The length of the returned list
+    :return: The response from the request made
+    :rtype: requests.Response
+    :raises requests.exceptions.ConnectionError: if cannot connect to host
+    """
+
+    response = session.get(
+        host + '/manager',
+        params={
+            u'session.id': session_id,
+            u'ajax':'fetchFlowExecutions',
+            u'project': project,
+            u'flow': flow,
+            u'start': start,
+            u'length': length,
+        }
+    )
+
+    logging.debug("Response: \n%s", response.text)
+
+    return response
+
 def fetch_jobs_from_flow_request(session, host, session_id, project, flow):
     """Fetch jobs of a flow of a project request for the Azkaban API
 
@@ -360,7 +391,7 @@ def add_permission_request(session, host, session_id, project, group, permission
     :rtype: requests.Response
     :raises requests.exceptions.ConnectionError: if cannot connect to host
     """
-   
+
     response = __call_permission_api(session, host, session_id, 'addPermission', project, group, permission_options)
 
     logging.debug("Response: \n%s", response.text)
@@ -380,7 +411,7 @@ def remove_permission_request(session, host, session_id, project, group):
     :rtype: requests.Response
     :raises requests.exceptions.ConnectionError: if cannot connect to host
     """
-   
+
     #to remove a group permission, we have to pass all permissions as False
     permission_options = {'admin': False, 'read': False, 'write': False, 'execute': False, 'schedule': False}
 
@@ -404,7 +435,7 @@ def change_permission_request(session, host, session_id, project, group, permiss
     :rtype: requests.Response
     :raises requests.exceptions.ConnectionError: if cannot connect to host
     """
-   
+
     response = __call_permission_api(session, host, session_id, 'changePermission', project, group, permission_options)
 
     logging.debug("Response: \n%s", response.text)
@@ -419,7 +450,7 @@ def fetch_sla_request(session, host, session_id, schedule_id):
     :type session: requests.Session
     :param str host: Hostname where the request should go
     :param str session_id: An id that the user should have when is logged in
-    :param str schedule_id: The id of the shchedule. 
+    :param str schedule_id: The id of the shchedule.
     :return: The response from the request made
     :rtype: requests.Response
     :raises requests.exceptions.ConnectionError: if cannot connect to host
@@ -509,7 +540,7 @@ def fetch_flow_execution_updates_request(session, host, session_id, exec_id, las
     :param str session_id: An id that the user should have when is logged in
     :param str exec_id: Execution id to be fetched
     :return: The response from the request made
-    :param last_update_time: The criteria to filter by last update time. Set the 
+    :param last_update_time: The criteria to filter by last update time. Set the
      value to be -1 if all job information are needed. Use -lt="value" to
      subscribe the default value, defaults to -1
     :type last_update_time: str, optional
