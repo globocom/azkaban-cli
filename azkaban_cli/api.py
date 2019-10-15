@@ -576,8 +576,8 @@ def fetch_execution_job_log_request(session, host, session_id, exec_id, jobid, o
     :type jobid: str
     :param offset: The offset for the log data.
     :type offset: str
-    :param length: The length of the log data. For example, if the offset set is 
-     10 and the length is 1000, the returned log will starts from the 10th character 
+    :param length: The length of the log data. For example, if the offset set is
+     10 and the length is 1000, the returned log will starts from the 10th character
      and has a length of 1000 (less if the remaining log is less than 1000 long)
     :type length: str
     :raises FetchExecutionJobsLogError: when Azkaban api returns error in response
@@ -607,17 +607,43 @@ def resume_flow_execution(session, host, session_id, exec_id):
     :param str host: Hostname where the request should go
     :param str session_id: An id that the user should have when is logged in
     :param str exec_id: Execution id to be fetched
+    :param str session_id: An id that the user should have when is logged in
+    :param str project: Project name that will receive the newly updated group permissions on Azkaban
+    :param str project: Flow id whose executions will be fetched on Azkaban
     :return: The response from the request made
     :rtype: requests.Response
     :raises requests.exceptions.ConnectionError: if cannot connect to host
     """
-    
     response = session.get(
-        host + '/executor',
-        params={
             u'session.id': session_id,
             u'ajax': 'resumeFlow',
             u'execid': exec_id
+            u'ajax': 'getRunning',
+            u'project': project,
+            u'flow': flow
+        }
+    )
+
+    logging.debug("Response: \n%s", response.text)
+
+    return response
+
+    def fetch_running_executions_of_a_flow_request(session_id, project, flow):
+    """Fetch running executions of a flow
+
+    :param str session_id: An id that the user should have when is logged in
+    :param str project: Project name that will receive the newly updated group permissions on Azkaban
+    :param str project: Flow id whose executions will be fetched on Azkaban
+    :return: The response from the request made
+    :rtype: requests.Response
+    :raises requests.exceptions.ConnectionError: if cannot connect to host
+    """
+
+    response = session.get(
+            u'session.id': session_id,
+            u'ajax': 'getRunning',
+            u'project': project,
+            u'flow': flow
         }
     )
 

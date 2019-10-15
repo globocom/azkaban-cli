@@ -31,7 +31,8 @@ from azkaban_cli.exceptions import (
     FetchFlowExecutionUpdatesError,
     FetchExecutionsOfAFlowError,
     FetchExecutionJobsLogError,
-    ResumeFlowExecutionError
+    ResumeFlowExecutionError,
+    FetchRunningExecutionsOfAFlowError
 )
 from azkaban_cli.__version__ import __version__
 
@@ -462,6 +463,18 @@ def __resume_flow_execution(ctx, execution_id):
         json = azkaban.resume_flow_execution(execution_id)
         logging.info('Flow successfully resumed')
     except ResumeFlowExecutionError as e:
+
+def __log_running_executions_of_a_flow(json):
+    logging.info('ExecIds: %s' % (json.get('execIds')))
+
+@login_requred
+def _fetch_running_executions_of_a_flow(ctx, project, flow):
+    azkaban = ctx.obj[u'azkaban']
+
+    try:
+        json = azkaban.fetch_running_executions_of_a_flow(ctx, project, flow)
+        __log_running_executions_of_a_flow(json)
+    except FetchRunningExecutionsOfAFlowError as e:
         logging.error(str(e))
 
 
@@ -650,6 +663,15 @@ def fetch_execution_job_log(ctx, execution_id, jobid, offset, length):
     """Fetch flow execution job logs"""
     __fetch_execution_job_log(ctx, execution_id, jobid, offset, length)
 
+@click.command(u'fetch_running_executions_of_a_flow')
+@click.pass_context
+@click.argument(u'project', type=click.STRING)
+@click.argument(u'flow', type=click.STRING)
+def fetch_running_executions_of_a_flow(ctx, project, flow):
+    """ Fetch running executions of a flow"""
+    _fetch_running_executions_of_a_flow(ctz, project, flow)
+
+
 cli.add_command(login)
 cli.add_command(logout)
 cli.add_command(upload)
@@ -669,8 +691,8 @@ cli.add_command(fetch_flow_execution)
 cli.add_command(fetch_flow_execution_updates)
 cli.add_command(fetch_executions_of_a_flow)
 cli.add_command(fetch_execution_job_log)
+cli.add_command(fetch_running_executions_of_a_flow)
 
-# ----------------------------------------------------------------------------------------------------------------------
 # Interface
 # ----------------------------------------------------------------------------------------------------------------------
 
