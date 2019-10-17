@@ -429,7 +429,7 @@ def __log_executions_of_a_flow(json):
         logging.info('Flow Id: %s' % (json.get('flowId')))
 
 @login_required
-def __fetch_executions_of_a_flow(ctz, project, flow, start, length):
+def __fetch_executions_of_a_flow(ctx, project, flow, start, length):
     azkaban = ctx.obj[u'azkaban']
 
     try:
@@ -600,8 +600,8 @@ def fetch_flow_execution(ctx, execution_id):
 @click.pass_context
 @click.argument(u'project', type=click.STRING)
 @click.argument(u'flow', type=click.STRING)
-@click.argument(u'start', type=click.INTEGER, default=0, show_default=True)
-@click.argument(u'length', type=click.INTEGER, default=3, show_default=True)
+@click.argument(u'start', type=click.INT, default=0)
+@click.argument(u'length', type=click.INT, default=3)
 def fetch_executions_of_a_flow(ctx, project, flow, start, length):
     """Fetch executions of a flow"""
     __fetch_executions_of_a_flow(ctx, project, flow, start, length)
