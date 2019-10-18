@@ -44,6 +44,12 @@ class Azkaban(object):
         self.__session_id = None
 
     def __validate_host(self, host):
+        """
+        Receives a host and when the host ends with '/', will we return a host without the '/'.
+        :param host:
+        :return: host:
+        :rtype: str:
+        """
         valid_host = host
 
         while valid_host.endswith(u'/'):
