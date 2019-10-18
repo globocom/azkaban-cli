@@ -58,6 +58,10 @@ class Azkaban(object):
         return valid_host
 
     def __check_if_logged(self):
+        """
+        Checks if the instance created has a valid session.
+        :raise: NotLoggedOnError when __session_id not exists._
+        """
         if not self.__session_id:
             raise NotLoggedOnError()
 
