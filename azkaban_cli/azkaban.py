@@ -20,7 +20,8 @@ from azkaban_cli.exceptions import (
     ChangePermissionError,
     FetchFlowExecutionError,
     FetchFlowExecutionUpdatesError,
-    FetchExecutionsOfAFlowError
+    FetchExecutionsOfAFlowError,
+    ResumeFlowExecutionError
 )
 from shutil import make_archive
 from urllib3.exceptions import InsecureRequestWarning
@@ -713,5 +714,26 @@ class Azkaban(object):
         )
 
         self.__catch_response_error(response, FetchExecutionsOfAFlowError)
+
+        return response.json()
+
+    def resume_flow_execution(self, execution_id):
+        """Resume a flow execution for the Azkaban API
+
+        :param str execution_id: Execution id to be resumed
+        :return: The response from the request made
+        :rtype: requests.Response
+        :raises ResumeFlowExecutionError: when Azkaban api returns error in response
+        """
+        self.__check_if_logged()
+
+        response = api.resume_flow_execution(
+            self.__session,
+            self.__host,
+            self.__session_id,
+            execution_id
+        )
+
+        self.__catch_response_error(response, ResumeFlowExecutionError)
 
         return response.json()
