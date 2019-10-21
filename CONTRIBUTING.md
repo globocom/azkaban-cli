@@ -69,6 +69,11 @@ Before you submit your pull request consider the following guidelines:
 
 * Create your patch, **including appropriate test cases**.
 * Follow our [Code Style](https://www.pylint.org/) with Pylint and [PEP8](https://www.python.org/dev/peps/pep-0008/).
+* Configure pre-commit using the below command.
+
+    ```
+    pre-commit install
+    ```
 * Run the full test suite, including `make test`,
   and ensure that all tests pass.
 * Commit your changes using a descriptive commit message
