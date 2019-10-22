@@ -445,7 +445,7 @@ def __resume_flow_execution(ctx, execution_id):
 
     try:
         json = azkaban.resume_flow_execution(execution_id)
-        __log_flow_execution_updates('Flow succesfully resumed')
+        logging.info('Flow successfully resumed')
     except ResumeFlowExecutionError as e:
         logging.error(str(e))
 
