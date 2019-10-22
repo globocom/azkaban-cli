@@ -37,7 +37,7 @@ Commands:
   delete                              Delete a project
   execute                             Execute a flow from a project
   cancel                              Cancel a flow execution
-  fetch_running_executions_of_a_flow  Fetch the current running executions of a flow
+  fetch_running_executions_of_a_flow  Fetch the running executions of a flow
   fetch_flow_execution                Fetch a flow execution
   fetch_flow_execution_updates        Fetch flow execution updates
   fetch_execution_of_a_flow           Fetch all execution of a given flow
