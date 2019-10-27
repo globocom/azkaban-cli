@@ -824,6 +824,8 @@ class Azkaban(object):
         self.__check_if_logged()
 
         response = api.fetch_running_executions_of_a_flow_request(
+            self.__session,
+            self.__host,
             self.__session_id,
             project,
             flow,

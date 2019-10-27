@@ -628,7 +628,8 @@ def resume_flow_execution(session, host, session_id, exec_id):
 
     return response
 
-    def fetch_running_executions_of_a_flow_request(session_id, project, flow):
+def fetch_running_executions_of_a_flow_request(session, host, session_id, project, flow):
+
     """Fetch running executions of a flow
 
     :param str session_id: An id that the user should have when is logged in
