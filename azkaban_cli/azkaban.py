@@ -60,22 +60,31 @@ class Azkaban(object):
     def __check_if_logged(self):
         """
         Checks if the instance created has a valid session.
-        :raise: NotLoggedOnError when __session_id not exists._
+        :raise: NotLoggedOnError when __session_id not exists.
         """
         if not self.__session_id:
             raise NotLoggedOnError()
 
     def __catch_login_html(self, response):
-        if "  <script type=\"text/javascript\" src=\"/js/azkaban/view/login.js\"></script>" in response.text.splitlines():
+        if "  <script type=\"text/javascript\" src=\"/js/azkaban/view/login.js\"></script>" in \
+                response.text.splitlines():
             raise SessionError(response.text)
 
     def __catch_response_status_error(self, exception, response_json):
+        """
+        Verify error in response, catch response status.
+        :raise: exception(error_msg), when error exists and status equals a error, with the 'error_msg'.
+        """
         response_status = response_json.get('status')
         if response_status == u'error':
             error_msg = response_json[u'message']
             raise exception(error_msg)
 
     def __catch_response_error_msg(self, exception, response_json):
+        """
+        Catches the error message when 'error' exists in the response keys.
+        :raise: SessionError, when error_msg equals a 'sessions', or exception(error_msg).
+        """
         if u'error' in response_json.keys():
             error_msg = response_json[u'error']
             if error_msg == "session":
@@ -83,14 +92,25 @@ class Azkaban(object):
             raise exception(error_msg)
 
     def __catch_empty_response(self, exception, response_json):
+        """
+        Does not allow an empty response.
+        :raise: exception
+        """
         if response_json == {}:
             raise exception('Empty response')
 
     def __catch_login_text(self, response):
+        """
+        Do not allow an empty login attempt.
+        :raise: SessionError("Login error. Need username and password")
+        """
         if response.text == "Login error. Need username and password":
             raise SessionError(response.text)
 
     def __catch_login(self, response):
+        """
+        Method to call login_text and login_html.
+        """
         self.__catch_login_text(response)
         self.__catch_login_html(response)
 
