@@ -31,6 +31,7 @@ import os
 import requests
 import urllib3
 
+
 class Azkaban(object):
     def __init__(self):
         # Session ignoring SSL verify requests
@@ -44,7 +45,7 @@ class Azkaban(object):
         self.__session_id = None
 
     def __validate_host(self, host):
-        """
+        """ PRIVATE
         Receives a host and when the host ends with '/', will we return a host without the '/'.
         :param host:
         :return: host:
@@ -58,7 +59,7 @@ class Azkaban(object):
         return valid_host
 
     def __check_if_logged(self):
-        """
+        """ PRIVATE
         Checks if the instance created has a valid session.
         :raise: NotLoggedOnError when __session_id not exists.
         """
@@ -71,7 +72,7 @@ class Azkaban(object):
             raise SessionError(response.text)
 
     def __catch_response_status_error(self, exception, response_json):
-        """
+        """ PRIVATE
         Verify error in response, catch response status.
         :raise: exception(error_msg), when error exists and status equals a error, with the 'error_msg'.
         """
@@ -81,7 +82,7 @@ class Azkaban(object):
             raise exception(error_msg)
 
     def __catch_response_error_msg(self, exception, response_json):
-        """
+        """ PRIVATE
         Catches the error message when 'error' exists in the response keys.
         :raise: SessionError, when error_msg equals a 'sessions', or exception(error_msg).
         """
@@ -92,7 +93,7 @@ class Azkaban(object):
             raise exception(error_msg)
 
     def __catch_empty_response(self, exception, response_json):
-        """
+        """ PRIVATE
         Does not allow an empty response.
         :raise: exception
         """
@@ -100,7 +101,7 @@ class Azkaban(object):
             raise exception('Empty response')
 
     def __catch_login_text(self, response):
-        """
+        """ PRIVATE
         Do not allow an empty login attempt.
         :raise: SessionError("Login error. Need username and password")
         """
@@ -108,17 +109,21 @@ class Azkaban(object):
             raise SessionError(response.text)
 
     def __catch_login(self, response):
-        """
-        Method to call login_text and login_html.
+        """ PRIVATE
+        Private method to call login_text and login_html.
         """
         self.__catch_login_text(response)
         self.__catch_login_html(response)
 
     def __catch_response_error(self, response, exception, ignore_empty_responses=False):
+        """ PRIVATE
+        Try json response, and raise Exception if the return body is empty. Don't raise a Exception when
+        we know has a empty response.
+        """
         self.__catch_login(response)
 
-        #some ajax api operations don`t have return body making response.json() raise a ValueError exception
-        #The try block enable the __catch_empty_response raise the correct exception
+        # Some ajax api operations don`t have return body making response.json() raise a ValueError exception
+        # The try block enable the __catch_empty_response raise the correct exception
         try:
             response_json = response.json()
         except Exception:
@@ -127,7 +132,7 @@ class Azkaban(object):
         self.__catch_response_error_msg(exception, response_json)
         self.__catch_response_status_error(exception, response_json)
 
-        #don't raise a exception with we know the request has a empty body
+        # Don't raise a exception with we know the request has a empty body
         if not ignore_empty_responses:
             self.__catch_empty_response(exception, response_json)
 
