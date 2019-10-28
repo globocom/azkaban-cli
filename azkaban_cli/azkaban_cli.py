@@ -30,6 +30,7 @@ from azkaban_cli.exceptions import (
     FetchFlowExecutionError,
     FetchFlowExecutionUpdatesError,
     FetchExecutionsOfAFlowError,
+    FetchExecutionJobsLogError
 )
 from azkaban_cli.__version__ import __version__
 
@@ -438,6 +439,20 @@ def __fetch_executions_of_a_flow(ctx, project, flow, start, length):
     except FetchExecutionsOfAFlowError as e:
         logging.error(str(e))
 
+def __log_execution_job_log(json):
+    logging.info('Data: %s' % (json.get('data')))
+    logging.info('Offset: %s' % (json.get('offset')))
+    logging.info('Length: %s' % (json.get('length')))
+
+@login_required
+def __fetch_execution_job_log(ctx, execution_id, jobid, offset, length):
+    azkaban = ctx.obj[u'azkaban']
+    try:
+        json = azkaban.fetch_execution_job_log(execution_id, jobid, offset, length)
+        __log_execution_job_log(json)
+    except FetchExecutionJobsLogError as e:
+        logging.error(str(e))
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
@@ -614,6 +629,16 @@ def fetch_flow_execution_updates(ctx, execution_id, last_update_time):
     """Fetch flow execution updates"""
     __fetch_flow_execution_updates(ctx, execution_id, last_update_time)
 
+@click.command(u'fetch_execution_job_log')
+@click.pass_context
+@click.argument(u'execution_id', type=click.STRING)
+@click.argument(u'jobid', type=click.STRING)
+@click.argument(u'offset', type=click.STRING)
+@click.argument(u'length', type=click.STRING)
+def fetch_execution_job_log(ctx, execution_id, jobid, offset, length):
+    """Fetch flow execution job logs"""
+    __fetch_execution_job_log(ctx, execution_id, jobid, offset, length)
+
 cli.add_command(login)
 cli.add_command(logout)
 cli.add_command(upload)
@@ -632,6 +657,7 @@ cli.add_command(fetch_jobs_from_flow)
 cli.add_command(fetch_flow_execution)
 cli.add_command(fetch_flow_execution_updates)
 cli.add_command(fetch_executions_of_a_flow)
+cli.add_command(fetch_execution_job_log)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Interface
