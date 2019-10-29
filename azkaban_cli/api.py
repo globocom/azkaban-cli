@@ -562,6 +562,42 @@ def fetch_flow_execution_updates_request(session, host, session_id, exec_id, las
 
     return response
 
+def fetch_execution_job_log_request(session, host, session_id, exec_id, jobid, offset, length):
+    """Fetches the correponding job logs.
+
+    This method receives the execution id, jobid, offset and lenght, makes a fetch
+    request to get the correponding job logs and evaluates the response.
+
+    Returns the json response from the request.
+
+    :param execution_id: Execution id on Azkaban
+    :type execution_id: str
+    :param jobid: The unique id for the job to be fetched.
+    :type jobid: str
+    :param offset: The offset for the log data.
+    :type offset: str
+    :param length: The length of the log data. For example, if the offset set is 
+     10 and the length is 1000, the returned log will starts from the 10th character 
+     and has a length of 1000 (less if the remaining log is less than 1000 long)
+    :type length: str
+    :raises FetchExecutionJobsLogError: when Azkaban api returns error in response
+    """
+
+    response = session.get(
+        host + '/executor',
+        params={
+            u'session.id': session_id,
+            u'ajax': 'fetchExecJobLogs',
+            u'execid': exec_id,
+            u'jobId': jobid,
+            u'offset': offset,
+            u'length': length
+        }
+    )
+
+    logging.debug("Response: \n%s", response.text)
+
+    return response
 
 def resume_flow_execution(session, host, session_id, exec_id):
     """Resume a flow execution request for the Azkaban API
@@ -575,7 +611,7 @@ def resume_flow_execution(session, host, session_id, exec_id):
     :rtype: requests.Response
     :raises requests.exceptions.ConnectionError: if cannot connect to host
     """
-
+    
     response = session.get(
         host + '/executor',
         params={
