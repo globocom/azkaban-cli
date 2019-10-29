@@ -22,10 +22,10 @@ class AzkabanFetchJobLog(TestCase):
         self.azk.set_logged_session(self.host, self.user, self.session_id)
 
         self.exec_id = '1234'
-        self.job_id = 'test-job-1'
-        self.offset = '10' 
-        self.length = '100'
-
+        self.jobid = 'test-job-1'
+        self.offset = '0' 
+        self.length = '10'
+        
     def tearDown(self):
         pass
 
@@ -79,19 +79,19 @@ class AzkabanFetchJobLog(TestCase):
             status=200
         )
 
-        self.azk.fetch_execution_job_log(self.exec_id, self.job_id, self.offset, self.length)
+        self.azk.fetch_execution_job_log(self.exec_id, self.jobid, self.offset, self.length)
 
-    @patch('azkaban_cli.azkaban.api.fetch_flow_execution_updates_request')
-    def test_fetch_execution_job_log(self, mock_test_execution_job_log_updates):
+    @patch('azkaban_cli.azkaban.api.fetch_execution_job_log_request')
+    def test_fetch_execution_job_log(self, mock_fetch_execution_job_log_request):
         """
         Test if fetch execution job log method from Azkaban class is calling execution job log
          with expected arguments
         """
 
-        self.azk.fetch_execution_job_log(self.exec_id, self.job_id, self.offset, self.length)
+        self.azk.fetch_execution_job_log(self.exec_id, self.jobid, self.offset, self.length)
 
-        mock_test_execution_job_log_updates.assert_called_with(
-            ANY, self.host, self.session_id, self.exec_id, self.job_id, self.offset, self.length)
+        mock_fetch_execution_job_log_request.assert_called_with(
+            ANY, self.host, self.session_id, self.exec_id, self.jobid, self.offset, self.length)
 
     @responses.activate
     def test_execution_cannot_be_found_fetch_execution_job_log(self):
@@ -110,7 +110,7 @@ class AzkabanFetchJobLog(TestCase):
         )
 
         with self.assertRaises(FetchExecutionJobsLogError):
-            self.azk.fetch_execution_job_log(self.exec_id, self.job_id, self.offset, self.length)
+            self.azk.fetch_execution_job_log(self.exec_id, self.jobid, self.offset, self.length)
 
     @responses.activate
     def test_error_session_expired_fetch_flow_execution_updates(self):
@@ -122,4 +122,4 @@ class AzkabanFetchJobLog(TestCase):
         responses.add(responses.GET, self.host + "/executor", json={"error": "session"}, status=200)
 
         with self.assertRaises(SessionError):
-            self.azk.fetch_execution_job_log(self.exec_id, self.job_id, self.offset, self.length)
+            self.azk.fetch_execution_job_log(self.exec_id, self.jobid, self.offset, self.length)
