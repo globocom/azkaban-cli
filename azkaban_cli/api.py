@@ -561,3 +561,30 @@ def fetch_flow_execution_updates_request(session, host, session_id, exec_id, las
     logging.debug("Response: \n%s", response.text)
 
     return response
+
+
+def resume_flow_execution(session, host, session_id, exec_id):
+    """Resume a flow execution request for the Azkaban API
+
+    :param session: A session for creating the request
+    :type session: requests.Session
+    :param str host: Hostname where the request should go
+    :param str session_id: An id that the user should have when is logged in
+    :param str exec_id: Execution id to be fetched
+    :return: The response from the request made
+    :rtype: requests.Response
+    :raises requests.exceptions.ConnectionError: if cannot connect to host
+    """
+
+    response = session.get(
+        host + '/executor',
+        params={
+            u'session.id': session_id,
+            u'ajax': 'resumeFlow',
+            u'execid': exec_id
+        }
+    )
+
+    logging.debug("Response: \n%s", response.text)
+
+    return response

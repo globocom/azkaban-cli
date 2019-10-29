@@ -59,3 +59,6 @@ class FetchFlowExecutionUpdatesError(Exception):
 
 class FetchExecutionsOfAFlowError(Exception):
     pass
+
+class ResumeFlowExecutionError(Exception):
+    pass
