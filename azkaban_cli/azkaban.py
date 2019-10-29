@@ -1,6 +1,16 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
+
+import logging
+import os
+from shutil import make_archive
+
+import requests
+import urllib3
+from urllib3.exceptions import InsecureRequestWarning
+
+import azkaban_cli.api as api
 from azkaban_cli.exceptions import (
     NotLoggedOnError,
     SessionError,
@@ -23,14 +33,7 @@ from azkaban_cli.exceptions import (
     FetchExecutionsOfAFlowError,
     ResumeFlowExecutionError
 )
-from shutil import make_archive
-from urllib3.exceptions import InsecureRequestWarning
-import azkaban_cli.api as api
-import json
-import logging
-import os
-import requests
-import urllib3
+
 
 class Azkaban(object):
     def __init__(self):
@@ -734,6 +737,6 @@ class Azkaban(object):
             execution_id
         )
 
-        self.__catch_response_error(response, ResumeFlowExecutionError)
+        self.__catch_response_error(response, ResumeFlowExecutionError, ignore_empty_responses=True)
 
         return response.json()

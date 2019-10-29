@@ -60,7 +60,7 @@ class AzkabanResumeFlowsTest(TestCase):
         responses.add(responses.GET, self.host + "/executor", json={"error": "session"}, status=200)
 
         with self.assertRaises(SessionError):
-            self.azk.ResumeFlowExecutionError(self.exec_id)
+            self.azk.resume_flow_execution(self.exec_id)
 
     @responses.activate
     def test_execution_cannot_be_found_resume_flow_execution(self):
@@ -79,4 +79,4 @@ class AzkabanResumeFlowsTest(TestCase):
         )
 
         with self.assertRaises(ResumeFlowExecutionError):
-            self.azk.fetch_flow_execution(self.exec_id)
+            self.azk.resume_flow_execution(self.exec_id)
