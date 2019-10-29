@@ -30,7 +30,8 @@ from azkaban_cli.exceptions import (
     FetchFlowExecutionError,
     FetchFlowExecutionUpdatesError,
     FetchExecutionsOfAFlowError,
-    FetchExecutionJobsLogError
+    FetchExecutionJobsLogError,
+    ResumeFlowExecutionError
 )
 from azkaban_cli.__version__ import __version__
 
@@ -451,6 +452,16 @@ def __fetch_execution_job_log(ctx, execution_id, jobid, offset, length):
         json = azkaban.fetch_execution_job_log(execution_id, jobid, offset, length)
         __log_execution_job_log(json)
     except FetchExecutionJobsLogError as e:
+        logging.error(str(e))
+
+@login_required
+def __resume_flow_execution(ctx, execution_id):
+    azkaban = ctx.obj[u'azkaban']
+
+    try:
+        json = azkaban.resume_flow_execution(execution_id)
+        logging.info('Flow successfully resumed')
+    except ResumeFlowExecutionError as e:
         logging.error(str(e))
 
 
