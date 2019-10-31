@@ -398,7 +398,7 @@ class Azkaban(object):
         response_json = response.json()
         logging.info(response_json[u'message'])
 
-    def execute(self, project, flow):
+    def execute(self, project, flow, **execution_options):
         """
         Execute command, intended to make the request to Azkaban and treat the response properly.
 
@@ -414,12 +414,15 @@ class Azkaban(object):
 
         self.__check_if_logged()
 
+        execution_options = {k: v for (k, v) in execution_options.items() if v}
+
         response = api.execute_request(
             self.__session,
             self.__host,
             self.__session_id,
             project,
             flow,
+            **execution_options
         )
 
         self.__catch_response_error(response, ExecuteError)
