@@ -32,7 +32,8 @@ from azkaban_cli.exceptions import (
     FetchFlowExecutionUpdatesError,
     FetchExecutionsOfAFlowError,
     FetchExecutionJobsLogError,
-    ResumeFlowExecutionError
+    ResumeFlowExecutionError,
+    FetchRunningExecutionsOfAFlowError
 )
 
 
@@ -765,8 +766,8 @@ class Azkaban(object):
         :type jobid: str
         :param offset: The offset for the log data.
         :type offset: str
-        :param length: The length of the log data. For example, if the offset set is 
-         10 and the length is 1000, the returned log will starts from the 10th character 
+        :param length: The length of the log data. For example, if the offset set is
+         10 and the length is 1000, the returned log will starts from the 10th character
          and has a length of 1000 (less if the remaining log is less than 1000 long)
         :type length: str
         :raises FetchExecutionJobsLogError: when Azkaban api returns error in response
@@ -808,3 +809,31 @@ class Azkaban(object):
 
         return response.json()
 
+    def fetch_running_executions_of_a_flow(self, project, flow):
+        """Fetch running executions of a flow command, intended to make the request to Azkaban
+        and treat the response properly.
+
+        This method receives the project name and the flow id, making the fetch and evaluating the response.
+
+        Returns the json response from the request.
+
+        :param project: Project name on Azkaban
+        :type project: str
+        :param flow: Flow id on Azkaban
+        :type flow: str
+        :raises FetchRunningExecutionsOfAFlowError: when Azkaban api returns error in response
+        """
+
+        self.__check_if_logged()
+
+        response = api.fetch_running_executions_of_a_flow_request(
+            self.__session,
+            self.__host,
+            self.__session_id,
+            project,
+            flow,
+        )
+
+        self.__catch_response_error(response, FetchRunningExecutionsOfAFlowError)
+
+        return response.json()
