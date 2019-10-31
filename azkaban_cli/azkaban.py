@@ -32,7 +32,7 @@ from azkaban_cli.exceptions import (
     FetchFlowExecutionUpdatesError,
     FetchExecutionsOfAFlowError,
     FetchExecutionJobsLogError,
-    ResumeFlowExecutionError
+    ResumeFlowExecutionError,
     FetchRunningExecutionsOfAFlowError
 )
 
