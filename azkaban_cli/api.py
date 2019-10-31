@@ -247,8 +247,7 @@ def unschedule_request(session, host, session_id, schedule_id):
 
     return response
 
-#TODO: Add optional parameters
-def execute_request(session, host, session_id, project, flow):
+def execute_request(session, host, session_id, project, flow, **execution_options):
     """Execute request for the Azkaban API
 
     :param session: A session for creating the request
@@ -257,19 +256,24 @@ def execute_request(session, host, session_id, project, flow):
     :param str session_id: An id that the user should have when is logged in
     :param str project: Project name that contains the flow that will be executed on Azkaban
     :param str flow: Flow name to be executed on Azkaban
+    :param \*\*execution_options: Optional parameters to execution
     :return: The response from the request made
     :rtype: requests.Response
     :raises requests.exceptions.ConnectionError: if cannot connect to host
     """
 
+    params = {
+        u'session.id': session_id,
+        u'ajax': 'executeFlow',
+        u'project': project,
+        u'flow': flow
+    }
+
+    params.update(execution_options)
+
     response = session.get(
         host + '/executor',
-        params={
-            u'session.id': session_id,
-            u'ajax': 'executeFlow',
-            u'project': project,
-            u'flow': flow
-        }
+        params=params
     )
 
     logging.debug("Response: \n%s", response.text)
