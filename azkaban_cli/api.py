@@ -619,10 +619,7 @@ def resume_flow_execution(session, host, session_id, exec_id):
         params={
             u'session.id': session_id,
             u'ajax': 'resumeFlow',
-            u'execid': exec_id,
-            u'ajax': 'getRunning',
-            u'project': project,
-            u'flow': flow
+            u'execid': exec_id
         }
     )
 
