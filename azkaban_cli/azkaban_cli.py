@@ -669,7 +669,7 @@ def fetch_execution_job_log(ctx, execution_id, jobid, offset, length):
 @click.argument(u'flow', type=click.STRING)
 def fetch_running_executions_of_a_flow(ctx, project, flow):
     """ Fetch running executions of a flow"""
-    _fetch_running_executions_of_a_flow(ctz, project, flow)
+    _fetch_running_executions_of_a_flow(ctx, project, flow)
 
 
 cli.add_command(login)
