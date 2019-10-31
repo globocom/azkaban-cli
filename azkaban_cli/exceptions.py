@@ -65,3 +65,6 @@ class FetchExecutionJobsLogError(Exception):
 
 class ResumeFlowExecutionError(Exception):
     pass
+
+class FetchRunningExecutionsOfAFlowError(Exception):
+    pass
