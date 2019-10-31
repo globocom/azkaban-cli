@@ -615,6 +615,8 @@ def resume_flow_execution(session, host, session_id, exec_id):
     :raises requests.exceptions.ConnectionError: if cannot connect to host
     """
     response = session.get(
+        host + '/executor',
+        params={
             u'session.id': session_id,
             u'ajax': 'resumeFlow',
             u'execid': exec_id,
@@ -641,6 +643,8 @@ def fetch_running_executions_of_a_flow_request(session, host, session_id, projec
     """
 
     response = session.get(
+        host + '/executor',
+        params={
             u'session.id': session_id,
             u'ajax': 'getRunning',
             u'project': project,
