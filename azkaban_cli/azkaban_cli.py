@@ -209,9 +209,17 @@ def __delete(ctx, project):
         for flow_id in flow_ids:
             flow_name = flow_id[u"flowId"]
             logging.debug("Unscheduling flow %s" % (flow_name))
-            schedule = azkaban.fetch_schedule(project_id, flow_name)
-            schedule_id = schedule[u"schedule"][u"scheduleId"]
-            azkaban.unschedule(schedule_id)
+
+            try:
+                schedule = azkaban.fetch_schedule(project_id, flow_name)
+            except:
+                logging.debug("Schedule not found")
+                schedule = None
+
+            if schedule is not None:
+                schedule_id = schedule[u"schedule"][u"scheduleId"]
+                azkaban.unschedule(schedule_id)
+
             logging.debug("Done")
 
         azkaban.delete(project)
