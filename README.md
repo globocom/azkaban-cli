@@ -53,6 +53,11 @@ Commands:
   upload                              Generates a zip of path passed as argument and...
 ```
 
+## Environment setting
+
+User session files are saved by default in the directory "$HOME/.azkaban_cli" directory.
+This directory can be changed setting the environment variable AZKABAN_CLI_PATH .
+
 ## Examples
 
 ### Making login (this login cache information and don't need to do again)
