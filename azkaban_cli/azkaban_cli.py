@@ -38,8 +38,11 @@ from azkaban_cli.__version__ import __version__
 
 APP_NAME = "Azkaban CLI"
 
-HOME_PATH = os.path.expanduser("~")
-AZKABAN_CLI_PATH = os.path.join(HOME_PATH, ".azkaban_cli")
+AZKABAN_CLI_PATH = os.getenv("AZKABAN_CLI_PATH", "")
+if AZKABAN_CLI_PATH == "":
+    HOME_PATH = os.path.expanduser("~")
+    AZKABAN_CLI_PATH = os.path.join(HOME_PATH, ".azkaban_cli")
+
 SESSION_JSON_PATH = os.path.join(AZKABAN_CLI_PATH, "user-session.json")
 
 
