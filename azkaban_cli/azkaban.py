@@ -37,7 +37,6 @@ from azkaban_cli.exceptions import (
 )
 
 
-
 class Azkaban(object):
     def __init__(self):
         # Session ignoring SSL verify requests
@@ -73,6 +72,10 @@ class Azkaban(object):
             raise NotLoggedOnError()
 
     def __catch_login_html(self, response):
+        """ PRIVATE
+        Checks the content in the verification is in at least one line of the response.
+        :raise: SessionError when content not in response lines.
+        """
         if "  <script type=\"text/javascript\" src=\"/js/azkaban/view/login.js\"></script>" in \
                 response.text.splitlines():
             raise SessionError(response.text)
@@ -116,15 +119,15 @@ class Azkaban(object):
 
     def __catch_login(self, response):
         """ PRIVATE
-        Private method to call login_text and login_html.
+        Private method to call login_text and login_html from response.
         """
         self.__catch_login_text(response)
         self.__catch_login_html(response)
 
     def __catch_response_error(self, response, exception, ignore_empty_responses=False):
         """ PRIVATE
-        Try json response, and raise Exception if the return body is empty. Don't raise a Exception when
-        we know has a empty response.
+        Try to get the answer json. If an error occurs, define response_json as an empty json, send it
+        together with the input to the error functions.
         """
         self.__catch_login(response)
 
@@ -138,7 +141,7 @@ class Azkaban(object):
         self.__catch_response_error_msg(exception, response_json)
         self.__catch_response_status_error(exception, response_json)
 
-        # Don't raise a exception with we know the request has a empty body
+        # Don't raise a exception if we know the request has a empty body
         if not ignore_empty_responses:
             self.__catch_empty_response(exception, response_json)
 
