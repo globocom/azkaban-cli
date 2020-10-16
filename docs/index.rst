@@ -86,7 +86,20 @@ API Methods
 
 login
 -----
-.. autoclass:: azkaban_cli.azkaban.Azkaban.login
+.. code-block:: classazkaban_cli.azkaban.Azkaban.login
+Login command, intended to make the request to Azkaban and treat the response properly
+
+This method validate the host, make the request to Azkaban, and evaluate the response. If host, user or password is wrong or could not connect to host, it returns false and do not change the host and session_id attribute from the class. If everything is fine, saves the new session_id and corresponding host as attributes in the class and returns True
+
+Parameters
+host (str) – Azkaban hostname
+
+user (str) – Username to login
+
+password (str) – Password from user
+
+Raises
+LoginError – when Azkaban api returns error in response
 
 
 logout
