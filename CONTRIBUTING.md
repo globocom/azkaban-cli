@@ -9,10 +9,16 @@ Please note we have a code of conduct, please follow it in all your interactions
 
 ## Simple Process
 
-### Install
+### Install general dependencies
 
 ```bash
 pip install -e .
+```
+
+### Install test dependencies
+
+```bash
+pip install -r requirements-dev.txt
 ```
 
 ### Tests
